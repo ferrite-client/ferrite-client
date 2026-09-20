@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Ferrite.App.Services;
 using Ferrite.Core.Minecraft;
+using Microsoft.Extensions.Logging;
 
 namespace Ferrite.App.ViewModels;
 
@@ -120,6 +121,10 @@ public sealed partial class MainWindowViewModel : ObservableObject
         Accounts.Load();
         RefreshActiveAccount();
         await Library.RefreshAsync().ConfigureAwait(true);
+        _services.Logger<MainWindowViewModel>().LogInformation(
+            "Launcher ready; {Count} instance(s), {Accounts} account(s)",
+            Library.Instances.Count,
+            Accounts.Accounts.Count);
         StatusText = "Ready";
     }
 
