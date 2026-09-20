@@ -65,6 +65,37 @@ public partial class InstanceDetailView : UserControl
             .Select(path => path!)
             .ToList();
 
+    private async void OnExportModpackClick(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not InstanceDetailViewModel viewModel)
+        {
+            return;
+        }
+
+        var storage = TopLevel.GetTopLevel(this)?.StorageProvider;
+        if (storage is null)
+        {
+            return;
+        }
+
+        var file = await storage.SaveFilePickerAsync(new FilePickerSaveOptions
+        {
+            Title = "Export as Modrinth modpack",
+            SuggestedFileName = viewModel.Name + ".mrpack",
+            DefaultExtension = "mrpack",
+            FileTypeChoices =
+            [
+                new FilePickerFileType("Modrinth modpack") { Patterns = ["*.mrpack"] },
+            ],
+        });
+
+        var path = file?.TryGetLocalPath();
+        if (!string.IsNullOrEmpty(path))
+        {
+            await viewModel.ExportModpackAsync(path);
+        }
+    }
+
     /// <summary>Reads file items from a drag payload, tolerating payloads without files.</summary>
     private static IReadOnlyList<IStorageItem> TryGetFiles(IDataTransfer? transfer)
     {

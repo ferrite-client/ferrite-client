@@ -14,7 +14,7 @@ namespace Ferrite.Verify;
 /// End-to-end scenarios run against the live Mojang services. Each returns a process exit code so
 /// the harness can be scripted.
 /// </summary>
-internal static class Scenarios
+internal static partial class Scenarios
 {
     public static async Task<int> ListJavaAsync(VerifyServices services, CancellationToken cancellationToken)
     {
@@ -146,9 +146,20 @@ internal static class Scenarios
         VerifyServices services,
         string versionId,
         int seconds,
+        string? instanceName,
         CancellationToken cancellationToken)
     {
-        var instance = await GetOrCreateInstanceAsync(services, versionId, cancellationToken);
+        var instance = instanceName is { Length: > 0 }
+            ? (await services.Instances.LoadAllAsync(cancellationToken).ConfigureAwait(false))
+                .FirstOrDefault(record => string.Equals(record.Name, instanceName, StringComparison.OrdinalIgnoreCase))
+            : await GetOrCreateInstanceAsync(services, versionId, cancellationToken).ConfigureAwait(false);
+
+        if (instance is null)
+        {
+            Console.WriteLine($"No instance named '{instanceName}'.");
+            return 2;
+        }
+
         var launchVersionId = LaunchVersionId(instance);
         Console.WriteLine($"Launch version: {launchVersionId}");
         var plan = await BuildPlanAsync(services, launchVersionId, cancellationToken);

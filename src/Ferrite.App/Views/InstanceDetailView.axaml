@@ -17,6 +17,7 @@
         <Button Content="Open folder" Command="{Binding OpenFolderCommand}" />
         <Button Content="Verify" Command="{Binding VerifyCommand}" />
         <Button Content="Repair" Command="{Binding RepairCommand}" />
+        <Button Content="Export pack" Click="OnExportModpackClick" />
         <Button Classes="primary" Content="Save" Command="{Binding SaveCommand}" />
       </StackPanel>
     </Grid>

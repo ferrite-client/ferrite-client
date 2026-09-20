@@ -16,6 +16,39 @@ public sealed partial class InstanceDetailViewModel
     [RelayCommand]
     private Task RefreshLog() => RefreshLogAsync();
 
+    /// <summary>
+    /// Exports this instance as a Modrinth modpack. Called by the view after the user picks a target
+    /// file, so the view model never touches platform storage APIs.
+    /// </summary>
+    public async Task ExportModpackAsync(string outputPath)
+    {
+        if (string.IsNullOrWhiteSpace(outputPath))
+        {
+            return;
+        }
+
+        IsBusy = true;
+        try
+        {
+            _shell.BeginActivity($"Exporting {Name}...");
+            var result = await _services.ModpackExporter
+                .ExportAsync(Record, outputPath, includeSaves: false, CancellationToken.None)
+                .ConfigureAwait(true);
+
+            StatusNote = $"Exported {result.OverrideCount} file(s) to {Path.GetFileName(result.ArchivePath)}";
+            _shell.ReportStatus(StatusNote);
+        }
+        catch (Exception exception)
+        {
+            _shell.ReportError(exception.Message);
+        }
+        finally
+        {
+            IsBusy = false;
+            _shell.EndActivity();
+        }
+    }
+
     [RelayCommand]
     private void OpenFolder() => ShellOpen.Directory(GameDirectory);
 

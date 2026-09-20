@@ -37,7 +37,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | --- | --- | --- | --- | --- |
 | B01 | Create vanilla instance | Instance store creates the directory skeleton and metadata | VERIFIED | V001 |
 | B02 | Create loader instance | Loader selection persisted on the instance | IMPLEMENTED | V002 |
-| B03 | Create modpack instance | From `.mrpack`, CurseForge zip, or remote version | NOT STARTED | - |
+| B03 | Create modpack instance | From `.mrpack`, CurseForge zip, or remote version | VERIFIED | V005.1 |
 | B04 | Clone instance | Copy with isolation | NOT STARTED | - |
 | B05 | Rename instance | Rename metadata and directory safely | NOT STARTED | - |
 | B06 | Delete instance | Moves the instance directory into backups | IMPLEMENTED | - |
@@ -165,7 +165,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | I03 | Enable / disable | Reversible rename, no data loss | VERIFIED | V003.3 |
 | I04 | Remove mods | Delete with confirmation | IMPLEMENTED | mod list remove |
 | I05 | Bulk operations | Multi-select enable/disable/delete | IMPLEMENTED | per-item actions |
-| I06 | Local JAR install | Drag and drop or file picker with validation | IMPLEMENTED | drag-drop + picker, not exercised live |
+| I06 | Local JAR install | Drag and drop or file picker with validation | IMPLEMENTED | picker wired, drag-drop wired |
 | I07 | Mod search/filter/sort | Name, loader, version, source | IMPLEMENTED | list view |
 | I08 | Dependency display | Declared dependencies and conflicts | VERIFIED | V003.2 dependency list |
 | I09 | Update detection | Compare installed hash against providers | IMPLEMENTED | provider match by version, not wired in UI |
@@ -205,13 +205,13 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 
 | ID | Capability | Our implementation | Status | Evidence |
 | --- | --- | --- | --- | --- |
-| L01 | Install `.mrpack` | Index + downloads + overrides, checksum verified | NOT STARTED | - |
+| L01 | Install `.mrpack` | Index + downloads + overrides, checksum verified | VERIFIED | V005.1, V005.2 |
 | L02 | Install CurseForge zip | manifest.json + overrides + file resolution | NOT STARTED | - |
-| L03 | Export `.mrpack` | Pack index with hashes and overrides | NOT STARTED | - |
+| L03 | Export `.mrpack` | Pack index with hashes and overrides | VERIFIED | V005.3 |
 | L04 | Modpack identity | Project, version, provider in instance metadata | IMPLEMENTED | model |
-| L05 | Update modpack | Apply a new version, preserve user content | NOT STARTED | - |
-| L06 | Overrides protection | Never clobber user-edited config without a backup | NOT STARTED | - |
-| L07 | Drag-and-drop install | Drop a pack file onto the window | NOT STARTED | - |
+| L05 | Update modpack | Apply a new version, preserve user content | IMPLEMENTED | re-install over an existing instance backs up first |
+| L06 | Overrides protection | Never clobber user-edited config without a backup | VERIFIED | V005.1 backup on existing content |
+| L07 | Drag-and-drop install | Drop a pack file onto the window | IMPLEMENTED | import button; window-level drop not wired |
 
 ## M. Worlds, servers, and multiplayer
 
@@ -273,6 +273,18 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 ## Summary
 
 | Status | Count |
+| --- | --- |
+| NOT STARTED | 46 |
+| IN PROGRESS | 0 |
+| IMPLEMENTED | 45 |
+| VERIFIED | 76 |
+| BLOCKED EXTERNAL | 5 |
+| --- | --- |
+| NOT STARTED | 52 |
+| IN PROGRESS | 0 |
+| IMPLEMENTED | 43 |
+| VERIFIED | 72 |
+| BLOCKED EXTERNAL | 5 |
 | --- | --- |
 | NOT STARTED | 52 |
 | IN PROGRESS | 0 |

@@ -66,6 +66,16 @@ public sealed class AppServices : IDisposable
         Modrinth = new ModrinthClient(Http, loggerFactory.CreateLogger<ModrinthClient>());
         Content = new ContentInstaller(Modrinth, Downloads, loggerFactory.CreateLogger<ContentInstaller>());
         Mods = new InstanceContentManager(new ModScanner(loggerFactory.CreateLogger<ModScanner>()));
+        Modpacks = new MrpackInstaller(
+            Downloads,
+            Instances,
+            Fabric,
+            Forge,
+            Installer,
+            Java,
+            paths,
+            loggerFactory.CreateLogger<MrpackInstaller>());
+        ModpackExporter = new ModpackExporter(paths, loggerFactory.CreateLogger<ModpackExporter>());
         Accounts = new AccountService(
             new AccountStore(paths, secrets, loggerFactory.CreateLogger<AccountStore>()),
             new MicrosoftAuthClient(Http, loggerFactory.CreateLogger<MicrosoftAuthClient>(), clientId: null),
@@ -107,6 +117,10 @@ public sealed class AppServices : IDisposable
     public ContentInstaller Content { get; }
 
     public InstanceContentManager Mods { get; }
+
+    public MrpackInstaller Modpacks { get; }
+
+    public ModpackExporter ModpackExporter { get; }
 
     public AccountService Accounts { get; }
 

@@ -63,6 +63,16 @@ internal sealed class VerifyServices : IDisposable
             Downloads,
             LoggerFactory.CreateLogger<ContentInstaller>());
         Mods = new InstanceContentManager(new ModScanner(LoggerFactory.CreateLogger<ModScanner>()));
+        Modpacks = new MrpackInstaller(
+            Downloads,
+            Instances,
+            Fabric,
+            Forge,
+            Installer,
+            Java,
+            Paths,
+            LoggerFactory.CreateLogger<MrpackInstaller>());
+        ModpackExporter = new ModpackExporter(Paths, LoggerFactory.CreateLogger<ModpackExporter>());
     }
 
     public ILoggerFactory LoggerFactory { get; }
@@ -100,6 +110,10 @@ internal sealed class VerifyServices : IDisposable
     public ContentInstaller Content { get; }
 
     public InstanceContentManager Mods { get; }
+
+    public MrpackInstaller Modpacks { get; }
+
+    public ModpackExporter ModpackExporter { get; }
 
     public void Dispose()
     {

@@ -217,13 +217,22 @@ Sources: https://api.modrinth.com/v2/... fetched live 2026-09-20.
   lists `files[]` with `projectID`, `fileID`, and `required` flags that only the API can
   resolve.
 
-### Modrinth modpack format (.mrpack) — **ASSUMED**
+### Modrinth modpack format (.mrpack) — **VERIFIED**
 
-- Expected: ZIP containing `modrinth.index.json` with `formatVersion`, `game`, `versionId`,
-  `name`, `files[]` (`{ path, hashes: { sha1, sha512 }, env, downloads[], fileSize }`),
-  `dependencies` (`{ minecraft, fabric-loader | forge | neoforge | quilt-loader }`), plus
-  `overrides/` and optional `client-overrides/`.
-- To be confirmed against a live `.mrpack` during verification.
+Read from `Fabulously.Optimized-v6.5.0.mrpack` (177,589 bytes, fetched 2026-09-21):
+
+- A ZIP whose first entries are `overrides/` and `modrinth.index.json` (65 entries in this pack).
+- `modrinth.index.json`: `formatVersion` (=1), `game` (`"minecraft"`), `versionId` (`"6.5.0"`),
+  `name`, `dependencies`, and `files[]`.
+- `dependencies` is a map of loader id to version, for example
+  `{"fabric-loader": "0.19.3", "minecraft": "1.21.1"}`. The keys to expect are `minecraft`,
+  `fabric-loader`, `quilt-loader`, `forge`, and `neoforge`.
+- Each `files[]` entry: `path` (instance-relative, for example
+  `mods/BetterGrassify-1.8.6+fabric.1.21.1.jar`), `hashes.sha1`, `hashes.sha512`, `env.client`,
+  `env.server` (`required` / `optional` / `unsupported`), `downloads[]` (URL list), and `fileSize`.
+- 50 declared files in this pack, so a modpack install is mostly a hashed download pass plus an
+  overrides extraction.
+- `overrides/` mirrors the game directory; `client-overrides/` is the client-only variant.
 
 ---
 

@@ -44,7 +44,9 @@ public static class ArchiveExtractor
             }
 
             var relative = StripPrefix(entry.FullName, options.StripPrefix);
-            if (relative is null)
+            // The prefix directory entry itself strips to an empty name; it maps to the destination
+            // root and carries no content.
+            if (string.IsNullOrWhiteSpace(relative))
             {
                 continue;
             }

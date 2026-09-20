@@ -6,9 +6,10 @@
 
   <Grid RowDefinitions="Auto,*,Auto" Margin="24">
 
-    <Grid Grid.Row="0" ColumnDefinitions="*,Auto" ColumnSpacing="12" Margin="0,0,0,16">
+    <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12" Margin="0,0,0,16">
       <TextBox Grid.Column="0" PlaceholderText="Search instances" Text="{Binding SearchText}" />
-      <Button Grid.Column="1" Classes="primary" Content="New instance"
+      <Button Grid.Column="1" Content="Import modpack" Click="OnImportModpackClick" />
+      <Button Grid.Column="2" Classes="primary" Content="New instance"
               Command="{Binding OpenCreateCommand}" />
     </Grid>
 
@@ -50,6 +51,8 @@
     <TextBlock Grid.Row="1" Classes="muted" Margin="0,24,0,0" VerticalAlignment="Top"
                IsVisible="{Binding !HasInstances}"
                Text="No instances yet. Create one to install Minecraft, optionally with a mod loader." />
+
+    <TextBlock Grid.Row="2" Classes="muted" Text="{Binding ModpackStatus}" />
 
     <!-- Creation form -->
     <Border Grid.Row="0" Grid.RowSpan="3" Margin="-24" Padding="24"

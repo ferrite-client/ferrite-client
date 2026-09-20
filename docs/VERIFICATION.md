@@ -258,3 +258,71 @@ Screens inspected: shell (dark), shell (light), shell at the 1024x680 minimum si
 both themes. Very long instance or mod names, large mod lists, and live progress states were
 exercised only through the data model, not visually, because the environment has no populated
 library; the layouts use wrapping text and scrolling containers so they degrade predictably.
+
+---
+
+## V005 - Modpack install, launch, export, and re-import (2026-09-21)
+
+Pack used: **Fabulously Optimized 6.5.0** (`Fabulously.Optimized-v6.5.0.mrpack`, 177,589 bytes,
+fetched from the Modrinth CDN). Its index declares `fabric-loader=0.19.3` and `minecraft=1.21.1`
+with 50 files.
+
+### V005.1 Install
+
+Command: `Ferrite.Verify modpack --source <pack.mrpack>`
+
+```
+Pack: Fabulously Optimized 6.5.0 (format 1)
+Dependencies: fabric-loader=0.19.3, minecraft=1.21.1
+Declared files: 50
+Instance: Fabulously Optimized (d7242875-977f-4a20-b801-0e47acfe63c6)
+  launch version: fabric-loader-0.19.3-1.21.1
+  files:          50 downloaded, 0 skipped
+  overrides:      63
+  mod inventory:  48 mod(s)
+```
+
+Every declared file was hash-verified (SHA-1 and SHA-512 from the index) and written to the
+instance-relative path the pack specifies. The overrides tree was extracted with the prefix
+stripped, and the mod inventory was then re-read from disk.
+
+### V005.2 Launch the modpack instance
+
+Command: `Ferrite.Verify launch 1.21.1 --instance "Fabulously Optimized" --seconds 80`
+
+```
+Launch version: fabric-loader-0.19.3-1.21.1
+Loading Minecraft 1.21.1 with Fabric Loader 0.19.3
+Reloading ResourceManager: vanilla, fabric, animatica, bettergrass, ... sodium, sodium-extra,
+  iris, lithium, modmenu, ... (100+ entries)
+Signals: lwjgl=True, graphics=True, exitedEarly=False
+LaunchService: Instance ... exited with code 0 after 00:01:20.7
+```
+
+The resource-manager line lists the mods the loader actually mounted, so this is evidence of a
+working modded game rather than a started JVM. The instance ran the full observation window and
+exited cleanly.
+
+### V005.3 Export and re-import
+
+Command: `Ferrite.Verify export 1.21.1`
+
+```
+Exported Fabulously Optimized to ...\tmp\export-d7242875977f4a20b8010e47acfe63c6.mrpack
+  version id: 6.5.0, overrides: 113
+  size: 39.8 MiB
+  re-read index: Fabulously Optimized 6.5.0, 2 dependency(ies)
+Re-imported as Fabulously Optimized (imported): 113 override(s), 48 mod(s)
+```
+
+The exported archive is self-contained (content under `overrides/`, loader declared in
+`dependencies`, `files[]` empty by design — see `ModpackExporter`), and re-importing it produced the
+same 48 mods.
+
+### V005.4 Defect found and fixed
+
+The first install attempt failed with
+`ArgumentException: The value cannot be an empty string` while extracting overrides. Real packs
+contain a bare `overrides/` directory entry, which strips to an empty relative path and was being
+passed to the path validator. Fixed by treating the prefix entry as the destination root, with a
+regression test (`ExtractZip_ignores_the_prefix_directory_entry`).

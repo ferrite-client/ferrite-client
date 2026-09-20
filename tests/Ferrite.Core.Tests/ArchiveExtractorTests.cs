@@ -147,6 +147,31 @@ public sealed class ArchiveExtractorTests : IDisposable
             ArchiveExtractor.ReadEntryText(archive, "big.json", maxBytes: 1024));
     }
 
+    [Fact]
+    public async Task ExtractZip_ignores_the_prefix_directory_entry()
+    {
+        // Real modpacks contain a bare "overrides/" entry, which strips to an empty relative path.
+        var archive = Path.Combine(_workspace, "prefix-dir.zip");
+        using (var stream = File.Create(archive))
+        using (var zip = new ZipArchive(stream, ZipArchiveMode.Create))
+        {
+            zip.CreateEntry("overrides/");
+            var file = zip.CreateEntry("overrides/config/mod.toml");
+            using var writer = new StreamWriter(file.Open());
+            writer.Write("enabled = true");
+        }
+
+        var destination = Path.Combine(_workspace, "prefix-dir-out");
+        var result = await ArchiveExtractor.ExtractZipAsync(
+            archive,
+            destination,
+            new ArchiveExtractionOptions { StripPrefix = "overrides" },
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(1, result.FilesExtracted);
+        Assert.True(File.Exists(Path.Combine(destination, "config", "mod.toml")));
+    }
+
     private string CreateArchive(params (string Name, string Content)[] entries)
     {
         var path = Path.Combine(_workspace, "archive-" + Guid.NewGuid().ToString("N") + ".zip");

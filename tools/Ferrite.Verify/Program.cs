@@ -34,7 +34,12 @@ internal static class Program
                 "install" => await Scenarios.InstallAsync(services, versionId, cancellation.Token),
                 "verify" => await Scenarios.VerifyAsync(services, versionId, cancellation.Token),
                 "repair" => await Scenarios.RepairAsync(services, versionId, cancellation.Token),
-                "launch" => await Scenarios.LaunchAsync(services, versionId, seconds, cancellation.Token),
+                "launch" => await Scenarios.LaunchAsync(
+                    services,
+                    versionId,
+                    seconds,
+                    GetOption(args, "--instance"),
+                    cancellation.Token),
                 "modrinth" => await Scenarios.ModrinthSearchAsync(services, versionId, cancellation.Token),
                 "content" => await Scenarios.InstallContentAsync(
                     services,
@@ -42,6 +47,11 @@ internal static class Program
                     GetOption(args, "--slug") ?? "sodium",
                     cancellation.Token),
                 "toggle" => await Scenarios.ToggleModAsync(services, versionId, cancellation.Token),
+                "modpack" => await Scenarios.InstallModpackAsync(
+                    services,
+                    GetOption(args, "--source") ?? versionId,
+                    cancellation.Token),
+                "export" => await Scenarios.ExportModpackAsync(services, versionId, cancellation.Token),
                 "fabric" => await Scenarios.InstallLoaderAsync(
                     services,
                     LoaderKind.Fabric,
@@ -104,7 +114,7 @@ internal static class Program
             ("install", () => Scenarios.InstallAsync(services, versionId, cancellationToken)),
             ("verify", () => Scenarios.VerifyAsync(services, versionId, cancellationToken)),
             ("repair", () => Scenarios.RepairAsync(services, versionId, cancellationToken)),
-            ("launch", () => Scenarios.LaunchAsync(services, versionId, seconds, cancellationToken)),
+            ("launch", () => Scenarios.LaunchAsync(services, versionId, seconds, null, cancellationToken)),
         };
 
         var failures = 0;
