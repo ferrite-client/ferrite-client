@@ -97,3 +97,27 @@ latter shifted the main class, so the JVM launched the vanilla main class and re
 `Completely ignored arguments` for the loader main class and the memory flag. The `-D` rule
 fixes that without breaking the multi-flag case, and it also protects Windows paths containing
 spaces inside system properties.
+
+## D011 - Java selection prefers the closest supported runtime
+
+**Decision.** For a required Java major version, choose the exact match if present, otherwise the
+smallest version above it, and only then anything newer.
+
+**Why.** A "newest compatible" policy looks correct (Java is backward compatible) but breaks
+modded play in practice: launching Minecraft 1.21.1 with Fabric 0.19.5 on Java 25 produced a mixin
+classloader failure (`MixinExtrasConfigPlugin cannot be cast to IMixinConfigPlugin`) because the
+loader's mixin stack does not support that JVM's class file level. With Java 21 the same instance
+reached the main menu. Version documents state a required major version; treating it as a target
+rather than a floor matches how the ecosystem actually works.
+
+## D012 - Forge/NeoForge installer data resolution follows the installer's own semantics
+
+**Decision.** For each `data` entry: unwrap the per-side object, then treat a string starting with
+`/` as an installer entry to extract, a single-element array as a maven coordinate whose path is
+`<store>/libraries/<maven path>` (produced by the processor chain, not downloaded), a two-element
+array as `[url, sha1]` to download, and anything else as a literal. Processor arguments also
+resolve bracketed coordinates such as `[net.neoforged:neoform:...@zip]` to store paths.
+
+**Why.** These shapes were read from a real `neoforge-21.1.251` installer. Guessing produced a
+`NullPointerException` inside the official processor, which is a precise signal that the contract
+was wrong rather than the loader.

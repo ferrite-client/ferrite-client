@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Ferrite.Core.Content;
 using Ferrite.Core.Java;
 using Ferrite.Core.Loaders;
 using Ferrite.Core.Minecraft;
@@ -326,10 +327,118 @@ internal static class Scenarios
         string query,
         CancellationToken cancellationToken)
     {
-        var url = $"https://api.modrinth.com/v2/search?limit=3&query={Uri.EscapeDataString(query)}";
-        var json = await services.Http.GetStringAsync(url, 4 * 1024 * 1024, cancellationToken);
-        Console.WriteLine(json.Length > 1200 ? json[..1200] + "..." : json);
+        var result = await services.Modrinth.SearchAsync(
+            new ContentSearchQuery(query, Limit: 5),
+            cancellationToken);
+        Console.WriteLine($"Total hits: {result.TotalHits}");
+        foreach (var hit in result.Hits)
+        {
+            Console.WriteLine(
+                $"  [{hit.ProjectType}] {hit.Title} ({hit.Slug}) - {hit.Downloads:N0} downloads");
+            Console.WriteLine($"      {hit.Description}");
+        }
+
         return 0;
+    }
+
+    /// <summary>
+    /// Searches Modrinth, resolves dependencies, installs into an instance, and re-reads the
+    /// installed mod metadata from disk.
+    /// </summary>
+    public static async Task<int> InstallContentAsync(
+        VerifyServices services,
+        string minecraftVersion,
+        string slug,
+        CancellationToken cancellationToken)
+    {
+        var instance = await GetOrCreateInstanceAsync(services, minecraftVersion, cancellationToken);
+        Console.WriteLine(
+            $"Instance: {instance.Name} ({instance.Loader.ToDisplayName()} {instance.LoaderVersion ?? "vanilla"})");
+
+        var plan = await services.Content.PlanAsync(
+            instance,
+            slug,
+            versionId: null,
+            includeOptionalDependencies: false,
+            cancellationToken);
+
+        Console.WriteLine($"Plan: {plan.Items.Count} file(s)");
+        foreach (var item in plan.Items)
+        {
+            Console.WriteLine($"  {item.TargetFolder}/{item.FileName} ({ByteSize.Format(item.Size)})");
+        }
+
+        foreach (var warning in plan.Warnings)
+        {
+            Console.WriteLine($"  warn: {warning}");
+        }
+
+        if (plan.OptionalDependencies.Count > 0)
+        {
+            Console.WriteLine($"  optional dependencies offered: {plan.OptionalDependencies.Count}");
+        }
+
+        var gameDirectory = services.Paths.InstanceGameDirectory(instance.Id);
+        var result = await services.Content.InstallAsync(
+            instance,
+            plan,
+            gameDirectory,
+            new Progress<InstallProgress>(ReportProgress),
+            cancellationToken);
+
+        Console.WriteLine();
+        Console.WriteLine($"Installed {result.Installed} file(s)");
+        foreach (var file in result.Files)
+        {
+            Console.WriteLine($"  {file}");
+        }
+
+        var mods = await services.Mods.ListModsAsync(gameDirectory, cancellationToken);
+        Console.WriteLine($"Mod inventory now reports {mods.Count} mod(s):");
+        foreach (var mod in mods)
+        {
+            Console.WriteLine(
+                $"  {mod.DisplayName} [{mod.Loader}] id={mod.ModId} version={mod.Version} enabled={mod.Enabled}");
+            if (mod.Dependencies.Count > 0)
+            {
+                Console.WriteLine($"      depends on: {string.Join(", ", mod.Dependencies)}");
+            }
+        }
+
+        return result.Installed > 0 ? 0 : 3;
+    }
+
+    /// <summary>Disables and re-enables a mod to prove the round trip loses nothing.</summary>
+    public static async Task<int> ToggleModAsync(
+        VerifyServices services,
+        string minecraftVersion,
+        CancellationToken cancellationToken)
+    {
+        var instance = await GetOrCreateInstanceAsync(services, minecraftVersion, cancellationToken);
+        var gameDirectory = services.Paths.InstanceGameDirectory(instance.Id);
+        var mods = await services.Mods.ListModsAsync(gameDirectory, cancellationToken);
+        var target = mods.FirstOrDefault(mod => mod.Enabled);
+        if (target is null)
+        {
+            Console.WriteLine("No enabled mod to toggle. Run the content scenario first.");
+            return 2;
+        }
+
+        Console.WriteLine($"Toggling {target.FileName}");
+        var disabledPath = InstanceContentManager.SetEnabled(target.FilePath, enabled: false);
+        Console.WriteLine($"  disabled -> {Path.GetFileName(disabledPath)}");
+
+        var afterDisable = await services.Mods.ListModsAsync(gameDirectory, cancellationToken);
+        var disabledEntry = afterDisable.First(mod => mod.FilePath == disabledPath);
+        Console.WriteLine($"  metadata still readable while disabled: {disabledEntry.DisplayName}, enabled={disabledEntry.Enabled}");
+
+        var enabledPath = InstanceContentManager.SetEnabled(disabledPath, enabled: true);
+        Console.WriteLine($"  re-enabled -> {Path.GetFileName(enabledPath)}");
+        var afterEnable = await services.Mods.ListModsAsync(gameDirectory, cancellationToken);
+        var enabledEntry = afterEnable.First(mod => mod.FilePath == enabledPath);
+        Console.WriteLine($"  metadata after re-enable: {enabledEntry.DisplayName}, enabled={enabledEntry.Enabled}");
+
+        return enabledEntry.Enabled && enabledPath == target.FilePath ? 0 : 3;
     }
 
     private static void ReportProgress(InstallProgress progress)

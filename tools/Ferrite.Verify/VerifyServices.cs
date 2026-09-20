@@ -1,4 +1,5 @@
 using Ferrite.Core.Download;
+using Ferrite.Core.Content;
 using Ferrite.Core.Java;
 using Ferrite.Core.Loaders;
 using Ferrite.Core.Minecraft;
@@ -56,6 +57,12 @@ internal sealed class VerifyServices : IDisposable
             Paths,
             LoggerFactory.CreateLogger<ForgeLoaderService>(),
             LoggerFactory);
+        Modrinth = new ModrinthClient(Http, LoggerFactory.CreateLogger<ModrinthClient>());
+        Content = new ContentInstaller(
+            Modrinth,
+            Downloads,
+            LoggerFactory.CreateLogger<ContentInstaller>());
+        Mods = new InstanceContentManager(new ModScanner(LoggerFactory.CreateLogger<ModScanner>()));
     }
 
     public ILoggerFactory LoggerFactory { get; }
@@ -87,6 +94,12 @@ internal sealed class VerifyServices : IDisposable
     public FabricLoaderService Fabric { get; }
 
     public ForgeLoaderService Forge { get; }
+
+    public ModrinthClient Modrinth { get; }
+
+    public ContentInstaller Content { get; }
+
+    public InstanceContentManager Mods { get; }
 
     public void Dispose()
     {

@@ -131,3 +131,57 @@ quirk reported by Minecraft's own dependency (OSHI) and does not affect play.
 
 Verified in the V001.6 output: the displayed command replaced the access token, UUID, client id,
 and XUID with `***redacted***`. Verifies F10 for the launch path.
+
+---
+
+## V002 - Mod loader vertical slice (2026-09-21)
+
+Same environment and harness as V001.
+
+### V002.1 Fabric 1.21.1
+
+Commands: `Ferrite.Verify fabric 1.21.1`, then `Ferrite.Verify launch 1.21.1 --seconds 70`.
+
+- Catalogue: 253 loader versions found for 1.21.1; the newest stable (`0.19.5`) was selected.
+- Install: `3968 files, 877.6 MiB` (1.21.1 vanilla artefacts plus the Fabric loader profile
+  libraries: fabric-loader, sponge-mixin, intermediary, ASM 9.10.1).
+- Launch: the loader's own log reported
+  `Loading Minecraft 1.21.1 with Fabric Loader 0.19.5`, then `Setting user: FerriteVerify`,
+  `Backend library: LWJGL version 3.3.3-snapshot`,
+  `Reloading ResourceManager: vanilla`, `Sound engine started`. The game ran the full window and
+  was stopped cleanly; `Signals: lwjgl=True, graphics=True, exitedEarly=False`.
+
+**Two real defects were found and fixed by this run**, both recorded in `docs/DECISIONS.md`:
+
+1. `-DFabricMcEmu= net.minecraft.client.main.Main ` is a single JVM argument whose value contains
+   spaces. Splitting argument values on whitespace moved the main class, so the JVM started the
+   vanilla main class and reported `Completely ignored arguments` for the loader main class and
+   the memory flag. Fixed by never splitting `-D` values (D010).
+2. Java selection preferred the newest compatible runtime (Java 25) for a loader that requires
+   Java 21, which produced a mixin classloader `ClassCastException`. Fixed by preferring the
+   closest supported runtime (D011).
+
+### V002.2 NeoForge 21.1.251
+
+Commands: `Ferrite.Verify neoforge 1.21.1`, then `Ferrite.Verify launch 1.21.1 --seconds 75`.
+
+- Catalogue: 352 NeoForge builds found for 1.21.1 via maven metadata.
+- Installer: `neoforge-21.1.251-installer.jar` downloaded and its `install_profile.json` read.
+- Processor chain: 6 client-side processors executed in order
+  (`net.neoforged.installertools.ConsoleTool` for MCP data and Mojmaps,
+  `net.neoforged.jarsplitter.ConsoleTool`, `net.neoforged.art.Main`,
+  `net.neoforged.binarypatcher.ConsoleTool`). The two `sides: ["server"]` processors were skipped.
+- Install: `3996 files, 882.7 MiB`.
+- Launch: ModLauncher started with the NeoForge argument set, discovered
+  `neoforge-21.1.251-universal.jar`, `mixinextras-neoforge-0.5.3.jar`, and
+  `client-1.21.1-20240808.144430-srg.jar`, then
+  `Reloading ResourceManager: vanilla, mod_resources, mod/neoforge`,
+  `Backend library: LWJGL version 3.3.3+5`, `Sound engine started`. The game ran the full window
+  and was stopped cleanly.
+
+The NeoForge mod loader appearing in the resource manager output is direct evidence that a modded
+instance reaches a working game, not merely a started JVM.
+
+**Observation.** NeoForge's own ModLauncher redacted the access token in its log output
+(`--accessToken, ❄❄❄❄❄❄❄❄`), which is independent confirmation that the token was passed as an
+argument and that credential handling in third-party logging is worth not relying on.

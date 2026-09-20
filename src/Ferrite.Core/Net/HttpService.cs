@@ -112,6 +112,28 @@ public sealed class HttpService : IDisposable
         }
     }
 
+    /// <summary>Returns the raw JSON element for a URL, or null when the resource does not exist.</summary>
+    public async Task<JsonElement?> TryGetJsonElementAsync(
+        string url,
+        int maxBytes,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var bytes = await GetBytesAsync(url, maxBytes, cancellationToken).ConfigureAwait(false);
+            using var document = JsonDocument.Parse(bytes);
+            return document.RootElement.Clone();
+        }
+        catch (HttpException exception) when (exception.StatusCode is 404)
+        {
+            return null;
+        }
+        catch (JsonException exception)
+        {
+            throw new HttpException($"Malformed JSON from {url}: {exception.Message}", inner: exception);
+        }
+    }
+
     public async Task<bool> HeadExistsAsync(string url, CancellationToken cancellationToken)
     {
         var attempt = 0;

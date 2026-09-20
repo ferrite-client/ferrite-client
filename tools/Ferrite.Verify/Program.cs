@@ -36,6 +36,12 @@ internal static class Program
                 "repair" => await Scenarios.RepairAsync(services, versionId, cancellation.Token),
                 "launch" => await Scenarios.LaunchAsync(services, versionId, seconds, cancellation.Token),
                 "modrinth" => await Scenarios.ModrinthSearchAsync(services, versionId, cancellation.Token),
+                "content" => await Scenarios.InstallContentAsync(
+                    services,
+                    versionId,
+                    GetOption(args, "--slug") ?? "sodium",
+                    cancellation.Token),
+                "toggle" => await Scenarios.ToggleModAsync(services, versionId, cancellation.Token),
                 "fabric" => await Scenarios.InstallLoaderAsync(
                     services,
                     LoaderKind.Fabric,

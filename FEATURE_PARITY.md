@@ -36,7 +36,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | ID | Capability | Our implementation | Status | Evidence |
 | --- | --- | --- | --- | --- |
 | B01 | Create vanilla instance | Instance store creates the directory skeleton and metadata | VERIFIED | V001 |
-| B02 | Create loader instance | Loader selection at creation time | NOT STARTED | - |
+| B02 | Create loader instance | Loader selection persisted on the instance | IMPLEMENTED | V002 |
 | B03 | Create modpack instance | From `.mrpack`, CurseForge zip, or remote version | NOT STARTED | - |
 | B04 | Clone instance | Copy with isolation | NOT STARTED | - |
 | B05 | Rename instance | Rename metadata and directory safely | NOT STARTED | - |
@@ -127,16 +127,16 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 
 | ID | Capability | Our implementation | Status | Evidence |
 | --- | --- | --- | --- | --- |
-| G01 | Fabric version discovery | `/v2/versions/loader/{game}` catalogue | NOT STARTED | - |
-| G02 | Fabric profile install | Merge loader profile, resolve maven libraries | NOT STARTED | - |
-| G03 | Quilt version discovery | `/v3/versions/loader` catalogue | NOT STARTED | - |
-| G04 | Quilt profile install | Merge loader profile, resolve maven libraries | NOT STARTED | - |
-| G05 | NeoForge version discovery | Maven metadata per Minecraft version | NOT STARTED | - |
-| G06 | NeoForge installer run | Official installer processors with an argument list | NOT STARTED | - |
-| G07 | Forge version discovery | Promotions + maven metadata | NOT STARTED | - |
-| G08 | Forge installer run | Official installer processors with an argument list | NOT STARTED | - |
-| G09 | Loader update / reinstall / repair | Switch loader version safely | NOT STARTED | - |
-| G10 | Loader launch behaviour | Loader main class, args, library ordering | IMPLEMENTED | inheritance merge + tests |
+| G01 | Fabric version discovery | `/v2/versions/loader/{game}` catalogue | VERIFIED | V002.1 |
+| G02 | Fabric profile install | Merge loader profile, resolve maven libraries | VERIFIED | V002.1 |
+| G03 | Quilt version discovery | `/v3/versions/loader` catalogue | IMPLEMENTED | same path as Fabric |
+| G04 | Quilt profile install | Merge loader profile, resolve maven libraries | IMPLEMENTED | same path as Fabric |
+| G05 | NeoForge version discovery | Maven metadata per Minecraft version | VERIFIED | V002.2 |
+| G06 | NeoForge installer run | Official installer processors with an argument list | VERIFIED | V002.2 |
+| G07 | Forge version discovery | Maven metadata per Minecraft version | IMPLEMENTED | same path as NeoForge |
+| G08 | Forge installer run | Official installer processors with an argument list | IMPLEMENTED | same path as NeoForge |
+| G09 | Loader update / reinstall / repair | Switch loader version safely | IMPLEMENTED | reinstall by version id |
+| G10 | Loader launch behaviour | Loader main class, args, library ordering | VERIFIED | V002.1, V002.2 |
 | G11 | OptiFine install | Official installer invocation | NOT STARTED | - |
 
 ## H. Launch pipeline
