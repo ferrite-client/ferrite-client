@@ -4,17 +4,26 @@ using System.Text;
 
 namespace Ferrite.Core.Tests.Infrastructure;
 
+internal sealed record TestRequest(
+    string Method,
+    string Path,
+    string Body,
+    IReadOnlyDictionary<string, string> Headers);
+
+internal sealed record TestResponse(int Status, string Body, string ContentType = "application/json");
+
 /// <summary>
-/// Minimal HTTP/1.1 server for tests: deterministic, supports byte ranges, and can be told to
-/// fail a number of times so retry behaviour is exercised for real rather than mocked away.
+/// Minimal HTTP/1.1 server for tests: deterministic, supports byte ranges and request bodies, and
+/// can be told to fail so retry and error-mapping behaviour is exercised for real.
 /// </summary>
-internal sealed class TestHttpServer : IAsyncDisposable
+internal sealed partial class TestHttpServer : IAsyncDisposable
 {
     private readonly TcpListener _listener;
     private readonly CancellationTokenSource _cts = new();
     private readonly Task _acceptLoop;
     private readonly Dictionary<string, Route> _routes = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, int> _counts = new(StringComparer.OrdinalIgnoreCase);
+    private readonly List<TestRequest> _requests = [];
     private readonly object _gate = new();
 
     public TestHttpServer()
@@ -28,42 +37,49 @@ internal sealed class TestHttpServer : IAsyncDisposable
 
     public string BaseUrl { get; }
 
-    public void AddRoute(string path, byte[] content, string contentType = "application/octet-stream")
+    public IReadOnlyList<TestRequest> Requests
     {
-        lock (_gate)
+        get
         {
-            _routes[path] = new Route(content, contentType, FailuresRemaining: 0, IgnoreRange: false);
+            lock (_gate)
+            {
+                return _requests.ToArray();
+            }
         }
     }
 
-    public void AddTextRoute(string path, string content, string contentType = "application/json")
-    {
+    public void AddRoute(string path, byte[] content, string contentType = "application/octet-stream") =>
+        SetRoute("GET", path, new Route(content, contentType, 0, IgnoreRange: false, Handler: null));
+
+    public void AddTextRoute(string path, string content, string contentType = "application/json") =>
         AddRoute(path, Encoding.UTF8.GetBytes(content), contentType);
-    }
 
     /// <summary>Fails the first <paramref name="failures"/> requests with 500, then succeeds.</summary>
-    public void AddFlakyRoute(string path, int failures, byte[] content)
-    {
-        lock (_gate)
-        {
-            _routes[path] = new Route(content, "application/octet-stream", failures, IgnoreRange: false);
-        }
-    }
+    public void AddFlakyRoute(string path, int failures, byte[] content) =>
+        SetRoute("GET", path, new Route(content, "application/octet-stream", failures, IgnoreRange: false, null));
 
     /// <summary>Serves the whole body with 200 even when a Range header is present.</summary>
-    public void AddNoRangeRoute(string path, byte[] content)
-    {
-        lock (_gate)
-        {
-            _routes[path] = new Route(content, "application/octet-stream", FailuresRemaining: 0, IgnoreRange: true);
-        }
-    }
+    public void AddNoRangeRoute(string path, byte[] content) =>
+        SetRoute("GET", path, new Route(content, "application/octet-stream", 0, IgnoreRange: true, null));
+
+    /// <summary>Handles a request with a scripted response.</summary>
+    public void AddHandler(string method, string path, Func<TestRequest, TestResponse> handler) =>
+        SetRoute(method, path, new Route([], "application/json", 0, IgnoreRange: false, handler));
 
     public int RequestCount(string path)
     {
         lock (_gate)
         {
             return _counts.TryGetValue(path, out var count) ? count : 0;
+        }
+    }
+
+    public TestRequest? LastRequest(string path)
+    {
+        lock (_gate)
+        {
+            return _requests.LastOrDefault(request =>
+                string.Equals(request.Path, path, StringComparison.OrdinalIgnoreCase));
         }
     }
 
@@ -81,6 +97,16 @@ internal sealed class TestHttpServer : IAsyncDisposable
 
         _cts.Dispose();
     }
+
+    private void SetRoute(string method, string path, Route route)
+    {
+        lock (_gate)
+        {
+            _routes[Key(method, path)] = route;
+        }
+    }
+
+    private static string Key(string method, string path) => method.ToUpperInvariant() + " " + path;
 
     private async Task AcceptLoopAsync()
     {
@@ -107,20 +133,25 @@ internal sealed class TestHttpServer : IAsyncDisposable
             try
             {
                 await using var stream = client.GetStream();
-                var (requestLine, headers) = await ReadRequestAsync(stream);
-                if (requestLine is null)
+                var (request, contentLength) = await ReadRequestAsync(stream);
+                if (request is null)
                 {
                     return;
                 }
 
-                var parts = requestLine.Split(' ');
-                var path = parts.Length > 1 ? parts[1] : "/";
+                var body = await ReadBodyAsync(stream, contentLength);
+                var full = request with { Body = body };
 
                 Route? route;
                 lock (_gate)
                 {
-                    _counts[path] = _counts.TryGetValue(path, out var count) ? count + 1 : 1;
-                    route = _routes.TryGetValue(path, out var value) ? value : null;
+                    _requests.Add(full);
+                    _counts[request.Path] = _counts.TryGetValue(request.Path, out var count) ? count + 1 : 1;
+                    route = _routes.TryGetValue(Key(request.Method, request.Path), out var value)
+                        ? value
+                        : _routes.TryGetValue(Key("GET", request.Path), out var fallback)
+                            ? fallback
+                            : null;
                 }
 
                 if (route is null)
@@ -129,12 +160,26 @@ internal sealed class TestHttpServer : IAsyncDisposable
                     return;
                 }
 
+                if (route.Handler is { } handler)
+                {
+                    var response = handler(full);
+                    await WriteResponseAsync(
+                        stream,
+                        response.Status,
+                        response.ContentType,
+                        Encoding.UTF8.GetBytes(response.Body),
+                        null);
+                    return;
+                }
+
                 if (route.FailuresRemaining > 0)
                 {
                     lock (_gate)
                     {
-                        route = route with { FailuresRemaining = route.FailuresRemaining - 1 };
-                        _routes[path] = route;
+                        _routes[Key(request.Method, request.Path)] = route with
+                        {
+                            FailuresRemaining = route.FailuresRemaining - 1,
+                        };
                     }
 
                     await WriteResponseAsync(stream, 500, "text/plain", Encoding.UTF8.GetBytes("boom"), null);
@@ -143,7 +188,7 @@ internal sealed class TestHttpServer : IAsyncDisposable
 
                 var content = route.Content;
                 if (!route.IgnoreRange
-                    && headers.TryGetValue("range", out var range)
+                    && full.Headers.TryGetValue("range", out var range)
                     && TryParseRange(range, content.Length, out var start, out var end))
                 {
                     var slice = content[start..(end + 1)];
@@ -160,107 +205,10 @@ internal sealed class TestHttpServer : IAsyncDisposable
         }
     }
 
-    private static async Task<(string? RequestLine, Dictionary<string, string> Headers)> ReadRequestAsync(Stream stream)
-    {
-        var buffer = new byte[1];
-        var headerBytes = new List<byte>(512);
-        var matched = 0;
-        while (matched < 4)
-        {
-            var read = await stream.ReadAsync(buffer);
-            if (read == 0)
-            {
-                return (null, new Dictionary<string, string>());
-            }
-
-            headerBytes.Add(buffer[0]);
-            matched = buffer[0] switch
-            {
-                (byte)'\r' when matched % 2 == 0 => matched + 1,
-                (byte)'\n' when matched % 2 == 1 => matched + 1,
-                (byte)'\r' => 1,
-                _ => 0,
-            };
-        }
-
-        var text = Encoding.ASCII.GetString(headerBytes.ToArray());
-        var lines = text.Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
-        var headers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        for (var index = 1; index < lines.Length; index++)
-        {
-            var separator = lines[index].IndexOf(':');
-            if (separator > 0)
-            {
-                headers[lines[index][..separator].Trim()] = lines[index][(separator + 1)..].Trim();
-            }
-        }
-
-        return (lines.Length > 0 ? lines[0] : null, headers);
-    }
-
-    private static async Task WriteResponseAsync(
-        Stream stream,
-        int status,
-        string contentType,
-        byte[] body,
-        (int Start, int End, int Total)? range)
-    {
-        var header = new StringBuilder();
-        header.Append("HTTP/1.1 ").Append(status).Append(' ').Append(StatusText(status)).Append("\r\n");
-        header.Append("Content-Type: ").Append(contentType).Append("\r\n");
-        header.Append("Content-Length: ").Append(body.Length).Append("\r\n");
-        header.Append("Accept-Ranges: bytes\r\n");
-        if (range is { } value)
-        {
-            header.Append("Content-Range: bytes ")
-                .Append(value.Start).Append('-').Append(value.End).Append('/').Append(value.Total).Append("\r\n");
-        }
-
-        header.Append("Connection: close\r\n\r\n");
-        await stream.WriteAsync(Encoding.ASCII.GetBytes(header.ToString()));
-        await stream.WriteAsync(body);
-        await stream.FlushAsync();
-    }
-
-    private static string StatusText(int status) => status switch
-    {
-        200 => "OK",
-        206 => "Partial Content",
-        404 => "Not Found",
-        500 => "Internal Server Error",
-        _ => "Status",
-    };
-
-    private static bool TryParseRange(string header, int length, out int start, out int end)
-    {
-        start = 0;
-        end = length - 1;
-        if (!header.StartsWith("bytes=", StringComparison.OrdinalIgnoreCase))
-        {
-            return false;
-        }
-
-        var spec = header["bytes=".Length..];
-        var dash = spec.IndexOf('-');
-        if (dash < 0)
-        {
-            return false;
-        }
-
-        var startText = spec[..dash];
-        var endText = spec[(dash + 1)..];
-        if (!int.TryParse(startText, out start))
-        {
-            return false;
-        }
-
-        if (!string.IsNullOrEmpty(endText) && int.TryParse(endText, out var parsedEnd))
-        {
-            end = Math.Min(parsedEnd, length - 1);
-        }
-
-        return start < length && start <= end;
-    }
-
-    private sealed record Route(byte[] Content, string ContentType, int FailuresRemaining, bool IgnoreRange);
+    private sealed record Route(
+        byte[] Content,
+        string ContentType,
+        int FailuresRemaining,
+        bool IgnoreRange,
+        Func<TestRequest, TestResponse>? Handler);
 }

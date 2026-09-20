@@ -223,6 +223,137 @@ public sealed class HttpService : IDisposable
         }
     }
 
+    /// <summary>Posts a form-encoded body and returns the parsed JSON response.</summary>
+    public async Task<JsonElement> PostFormJsonAsync(
+        string url,
+        IEnumerable<KeyValuePair<string, string>> form,
+        int maxBytes,
+        CancellationToken cancellationToken)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, url)
+        {
+            Content = new FormUrlEncodedContent(form),
+        };
+
+        var bytes = await SendBufferedAsync(request, maxBytes, cancellationToken).ConfigureAwait(false);
+        return ParseElement(bytes, url);
+    }
+
+    /// <summary>Posts a JSON body and returns the parsed JSON response.</summary>
+    public async Task<JsonElement> PostJsonAsync(
+        string url,
+        string jsonBody,
+        int maxBytes,
+        CancellationToken cancellationToken)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, url)
+        {
+            Content = new StringContent(jsonBody, Encoding.UTF8, "application/json"),
+        };
+
+        var bytes = await SendBufferedAsync(request, maxBytes, cancellationToken).ConfigureAwait(false);
+        return ParseElement(bytes, url);
+    }
+
+    /// <summary>Gets a JSON document with a bearer token, used by the Minecraft services API.</summary>
+    public async Task<JsonElement> GetJsonWithBearerAsync(
+        string url,
+        string accessToken,
+        int maxBytes,
+        CancellationToken cancellationToken)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, url);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+        var bytes = await SendBufferedAsync(request, maxBytes, cancellationToken).ConfigureAwait(false);
+        return ParseElement(bytes, url);
+    }
+
+    /// <summary>Returns the status code for a bearer-authenticated GET without buffering a body.</summary>
+    public async Task<int> GetStatusWithBearerAsync(
+        string url,
+        string accessToken,
+        CancellationToken cancellationToken)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, url);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+        using var response = await SendStreamingWithRetryAsync(request, cancellationToken).ConfigureAwait(false);
+        return (int)response.StatusCode;
+    }
+
+    private async Task<byte[]> SendBufferedAsync(
+        HttpRequestMessage template,
+        int maxBytes,
+        CancellationToken cancellationToken)
+    {
+        var attempt = 0;
+        while (true)
+        {
+            attempt++;
+            using var request = await CloneAsync(template, cancellationToken).ConfigureAwait(false);
+            using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            timeout.CancelAfter(_options.MetadataTimeout);
+
+            try
+            {
+                using var response = await _client
+                    .SendAsync(request, HttpCompletionOption.ResponseHeadersRead, timeout.Token)
+                    .ConfigureAwait(false);
+
+                if (IsTransient(response.StatusCode) && attempt < _options.MaxAttempts)
+                {
+                    var retryAfter = response.Headers.RetryAfter?.Delta;
+                    response.Dispose();
+                    await DelayAsync(attempt, retryAfter, cancellationToken).ConfigureAwait(false);
+                    continue;
+                }
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var status = (int)response.StatusCode;
+                    var body = await ReadBoundedAsync(
+                            await response.Content.ReadAsStreamAsync(timeout.Token).ConfigureAwait(false),
+                            Math.Min(maxBytes, 64 * 1024),
+                            timeout.Token)
+                        .ConfigureAwait(false);
+                    response.Dispose();
+                    throw new HttpException(
+                        $"HTTP {status} for {template.RequestUri}: {Encoding.UTF8.GetString(body)}",
+                        status);
+                }
+
+                await using var stream = await response.Content.ReadAsStreamAsync(timeout.Token).ConfigureAwait(false);
+                return await ReadBoundedAsync(stream, maxBytes, timeout.Token).ConfigureAwait(false);
+            }
+            catch (HttpRequestException exception) when (attempt < _options.MaxAttempts)
+            {
+                _logger.LogDebug(exception, "Transport failure for {Url} on attempt {Attempt}", template.RequestUri, attempt);
+                await DelayAsync(attempt, retryAfter: null, cancellationToken).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+            {
+                if (attempt >= _options.MaxAttempts)
+                {
+                    throw new HttpException($"Timed out calling {template.RequestUri}");
+                }
+
+                await DelayAsync(attempt, retryAfter: null, cancellationToken).ConfigureAwait(false);
+            }
+        }
+    }
+
+    private static JsonElement ParseElement(byte[] bytes, string url)
+    {
+        try
+        {
+            using var document = JsonDocument.Parse(bytes);
+            return document.RootElement.Clone();
+        }
+        catch (JsonException exception)
+        {
+            throw new HttpException($"Malformed JSON from {url}: {exception.Message}", inner: exception);
+        }
+    }
+
     public void Dispose()
     {
         if (_ownsClient)
