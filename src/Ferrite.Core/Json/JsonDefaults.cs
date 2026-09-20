@@ -5,6 +5,8 @@ namespace Ferrite.Core.Json;
 
 public static class JsonDefaults
 {
+    private static readonly FlexibleDateTimeOffsetConverter DateConverter = new();
+
     /// <summary>Options for launcher-owned documents: pretty, camelCase, tolerant of comments.</summary>
     public static JsonSerializerOptions Document { get; } = new()
     {
@@ -15,6 +17,7 @@ public static class JsonDefaults
         WriteIndented = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         NumberHandling = JsonNumberHandling.AllowReadingFromString,
+        Converters = { DateConverter },
     };
 
     /// <summary>Options for remote payloads: tolerant, never pretty, case-insensitive.</summary>
@@ -25,5 +28,6 @@ public static class JsonDefaults
         AllowTrailingCommas = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         NumberHandling = JsonNumberHandling.AllowReadingFromString,
+        Converters = { DateConverter },
     };
 }

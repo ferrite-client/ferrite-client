@@ -84,12 +84,20 @@ public static class VersionArgumentReader
     /// <summary>
     /// Metadata sometimes packs several arguments into one value (for example
     /// <c>--width ${resolution_width} --height ${resolution_height}</c>).
+    /// A <c>-D</c> value is never split: loader profiles use it to pass a single JVM property
+    /// whose value legitimately contains spaces, such as Fabric's
+    /// <c>-DFabricMcEmu= net.minecraft.client.main.Main </c>.
     /// </summary>
     public static IEnumerable<string> SplitValue(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
         {
             return [];
+        }
+
+        if (value.StartsWith("-D", StringComparison.Ordinal))
+        {
+            return [value];
         }
 
         return value.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);

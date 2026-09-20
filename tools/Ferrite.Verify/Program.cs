@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Ferrite.Core.Minecraft;
 
 namespace Ferrite.Verify;
 
@@ -35,6 +36,30 @@ internal static class Program
                 "repair" => await Scenarios.RepairAsync(services, versionId, cancellation.Token),
                 "launch" => await Scenarios.LaunchAsync(services, versionId, seconds, cancellation.Token),
                 "modrinth" => await Scenarios.ModrinthSearchAsync(services, versionId, cancellation.Token),
+                "fabric" => await Scenarios.InstallLoaderAsync(
+                    services,
+                    LoaderKind.Fabric,
+                    versionId,
+                    GetOption(args, "--loader"),
+                    cancellation.Token),
+                "quilt" => await Scenarios.InstallLoaderAsync(
+                    services,
+                    LoaderKind.Quilt,
+                    versionId,
+                    GetOption(args, "--loader"),
+                    cancellation.Token),
+                "neoforge" => await Scenarios.InstallLoaderAsync(
+                    services,
+                    LoaderKind.NeoForge,
+                    versionId,
+                    GetOption(args, "--loader"),
+                    cancellation.Token),
+                "forge" => await Scenarios.InstallLoaderAsync(
+                    services,
+                    LoaderKind.Forge,
+                    versionId,
+                    GetOption(args, "--loader"),
+                    cancellation.Token),
                 "all" => await RunAllAsync(services, versionId, seconds, cancellation.Token),
                 _ => Fail($"Unknown command '{command}'."),
             };
@@ -47,6 +72,15 @@ internal static class Program
         catch (Exception exception)
         {
             Console.WriteLine($"FAILED: {exception.GetType().Name}: {exception.Message}");
+            var inner = exception.InnerException;
+            var depth = 0;
+            while (inner is not null && depth < 4)
+            {
+                Console.WriteLine($"  caused by {inner.GetType().Name}: {inner.Message}");
+                inner = inner.InnerException;
+                depth++;
+            }
+
             return 1;
         }
     }

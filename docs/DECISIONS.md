@@ -83,3 +83,17 @@ working directory inside the managed store.
 **Why.** Faking loader installation by writing metadata would produce instances that do not
 launch. Running the official installer locally is how the ecosystem works, and using argument
 lists removes any shell-interpretation risk.
+
+## D010 - Argument values are split on spaces except for `-D` properties
+
+**Decision.** A rule-filtered argument value is split into tokens on whitespace, except when the
+expanded value starts with `-D`, which is always passed as one argument.
+
+**Why.** Two real metadata shapes conflict. Mojang packs two flags into one value
+(`"--width ${resolution_width} --height ${resolution_height}"`), which must become four tokens.
+Fabric publishes a single JVM property whose value contains spaces
+(`"-DFabricMcEmu= net.minecraft.client.main.Main "`), which must stay one argument. Splitting the
+latter shifted the main class, so the JVM launched the vanilla main class and reported
+`Completely ignored arguments` for the loader main class and the memory flag. The `-D` rule
+fixes that without breaking the multi-flag case, and it also protects Windows paths containing
+spaces inside system properties.

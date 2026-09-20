@@ -160,6 +160,26 @@ Source: https://maven.neoforged.net/releases/net/neoforged/neoforge/maven-metada
   running the installer's `install_profile.json` processor chain with a working JVM inside
   the installer's own working directory.
 
+**VERIFIED** against `neoforge-21.1.251-installer.jar` (7.0 MB, fetched 2026-09-21):
+
+- `install_profile.json` keys: `spec`, `profile`, `version`, `icon`, `minecraft`, `json`, `logo`,
+  `welcome`, `mirrorList`, `hideExtract`, `data`, `processors`, `libraries`, `serverJarPath`.
+- **Correction to the initial assumption:** `json` holds a *jar-relative path* to the version
+  document (`/version.json`), not inline JSON, and `path` is empty in this generation. A resolver
+  must detect the shape: a value starting with `{` is inline, anything else is an entry name.
+- `data` keys for a 1.21.1 client install: `MAPPINGS`, `MOJMAPS`, `MERGED_MAPPINGS`, `BINPATCH`,
+  `MC_UNPACKED`, `MC_SLIM`, `MC_EXTRA`, `MC_SRG`, `PATCHED`, `MCP_VERSION`. Each value is either a
+  two-element `[url, sha1]` array to download or a literal string; a string beginning with `/` is
+  an entry inside the installer jar.
+- 10 processors are declared. Each has `jar`, `classpath[]`, `args[]`, optional `sides[]`, and
+  optional `outputs`. A processor declaring `sides: ["server"]` is skipped for a client install.
+  Arguments use `{INSTALLER}`, `{ROOT}`, `{SIDE}`, `{MINECRAFT_JAR}` and data keys such as
+  `{MC_SRG}`, `{PATCHED}`, `{BINPATCH}`.
+- `{ROOT}` must be the directory whose `libraries` child is the library store, because a processor
+  writes `--to {ROOT}/libraries/net/neoforged/neoforge/<version>/win_args.txt`. Ferrite therefore
+  passes its shared store directory as `{ROOT}` so artefacts land where the launcher looks for them.
+- The processor main class comes from the processor jar's `META-INF/MANIFEST.MF` `Main-Class`.
+
 **Implications.** Fabric and Quilt are pure metadata merges and can be verified end to end
 locally. Forge and NeoForge depend on running the official installer processors. That is
 legitimate, but it must be invoked with an argument list, never a shell string, and its

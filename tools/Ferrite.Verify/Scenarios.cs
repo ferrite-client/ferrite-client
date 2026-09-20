@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Ferrite.Core.Java;
+using Ferrite.Core.Loaders;
 using Ferrite.Core.Minecraft;
 using Ferrite.Core.Platform;
 using Ferrite.Core.Rules;
@@ -101,7 +102,9 @@ internal static class Scenarios
         CancellationToken cancellationToken)
     {
         var instance = await GetOrCreateInstanceAsync(services, versionId, cancellationToken);
-        var plan = await BuildPlanAsync(services, versionId, cancellationToken);
+        var launchVersionId = LaunchVersionId(instance);
+        Console.WriteLine($"Launch version: {launchVersionId}");
+        var plan = await BuildPlanAsync(services, launchVersionId, cancellationToken);
 
         var victim = plan.Libraries.FirstOrDefault(library => !library.IsNative)?.TargetPath;
         if (victim is null || !File.Exists(victim))
@@ -145,7 +148,9 @@ internal static class Scenarios
         CancellationToken cancellationToken)
     {
         var instance = await GetOrCreateInstanceAsync(services, versionId, cancellationToken);
-        var plan = await BuildPlanAsync(services, versionId, cancellationToken);
+        var launchVersionId = LaunchVersionId(instance);
+        Console.WriteLine($"Launch version: {launchVersionId}");
+        var plan = await BuildPlanAsync(services, launchVersionId, cancellationToken);
         var java = await SelectJavaAsync(services, plan, cancellationToken);
         if (java is null)
         {
@@ -163,7 +168,7 @@ internal static class Scenarios
             Account = SyntheticAccount(),
             Java = java,
             GameDirectory = services.Paths.InstanceGameDirectory(instance.Id),
-            NativesDirectory = services.Paths.InstanceNativesDirectory(instance.Id, versionId),
+            NativesDirectory = services.Paths.InstanceNativesDirectory(instance.Id, launchVersionId),
             AssetsRoot = services.Paths.AssetsDirectory,
             LibrariesDirectory = services.Paths.LibrariesDirectory,
             LegacyAssetsDirectory = services.Paths.LegacyVirtualAssetsDirectory,
@@ -232,6 +237,90 @@ internal static class Scenarios
         return exitedEarly ? 4 : 0;
     }
 
+    /// <summary>
+    /// Installs a loader into a dedicated instance: loader metadata, the vanilla artefacts, and
+    /// (for Forge/NeoForge) the official installer processor chain.
+    /// </summary>
+    public static async Task<int> InstallLoaderAsync(
+        VerifyServices services,
+        LoaderKind kind,
+        string minecraftVersion,
+        string? loaderVersion,
+        CancellationToken cancellationToken)
+    {
+        var java = await SelectJavaForMinecraftAsync(services, minecraftVersion, cancellationToken);
+        if (java is null)
+        {
+            Console.WriteLine("No compatible Java runtime is available for the loader installer.");
+            return 2;
+        }
+
+        Console.WriteLine($"Java for installer: {java.DisplayName}");
+
+        var resolvedVersion = loaderVersion;
+        if (string.IsNullOrEmpty(resolvedVersion))
+        {
+            var available = kind switch
+            {
+                LoaderKind.Fabric => await services.Fabric.ListFabricLoadersAsync(minecraftVersion, cancellationToken),
+                LoaderKind.Quilt => await services.Fabric.ListQuiltLoadersAsync(minecraftVersion, cancellationToken),
+                LoaderKind.NeoForge => await services.Forge.ListNeoForgeAsync(minecraftVersion, cancellationToken),
+                LoaderKind.Forge => await services.Forge.ListForgeAsync(minecraftVersion, cancellationToken),
+                _ => [],
+            };
+
+            if (available.Count == 0)
+            {
+                Console.WriteLine($"No {kind.ToDisplayName()} versions are available for {minecraftVersion}.");
+                return 2;
+            }
+
+            var stable = available.Where(version => version.Stable).ToList();
+            resolvedVersion = (stable.Count > 0 ? stable[^1] : available[^1]).Version;
+            Console.WriteLine($"{kind.ToDisplayName()}: {available.Count} version(s) available; using {resolvedVersion}");
+        }
+
+        var stopwatch = Stopwatch.StartNew();
+        switch (kind)
+        {
+            case LoaderKind.Fabric:
+            case LoaderKind.Quilt:
+                await services.Fabric.InstallAsync(kind, minecraftVersion, resolvedVersion, cancellationToken);
+                break;
+            default:
+                await services.Forge.InstallAsync(
+                    kind,
+                    minecraftVersion,
+                    resolvedVersion,
+                    java,
+                    new Progress<InstallProgress>(ReportProgress),
+                    cancellationToken);
+                break;
+        }
+
+        stopwatch.Stop();
+        Console.WriteLine($"Loader install finished in {stopwatch.Elapsed.TotalSeconds:F1}s");
+
+        var instance = await GetOrCreateInstanceAsync(services, minecraftVersion, cancellationToken);
+        instance.Loader = kind;
+        instance.LoaderVersion = resolvedVersion;
+        await services.Instances.SaveAsync(instance, cancellationToken);
+
+        var versionId = new LoaderVersionInfo(kind, resolvedVersion, minecraftVersion, true, null).VersionId;
+        Console.WriteLine($"Launchable version id: {versionId}");
+
+        var install = await services.Installer.InstallAsync(
+            instance.Id,
+            versionId,
+            RuleContext.ForHost(),
+            new Progress<InstallProgress>(ReportProgress),
+            cancellationToken);
+        Console.WriteLine();
+        Console.WriteLine(
+            $"Instance install complete: {install.Manifest.FileCount} files, {ByteSize.Format(install.Manifest.TotalBytes)}");
+        return 0;
+    }
+
     public static async Task<int> ModrinthSearchAsync(
         VerifyServices services,
         string query,
@@ -268,8 +357,29 @@ internal static class Scenarios
     {
         var required = JavaCompatibility.RequiredMajorFor(plan.Document, plan.VersionId);
         var runtimes = await services.Java.DetectAsync(cancellationToken);
-        return runtimes.FirstOrDefault(runtime => JavaCompatibility.Evaluate(runtime, required).IsCompatible);
+        return JavaSelection.SelectBest(runtimes, required);
     }
+
+    private static async Task<JavaRuntime?> SelectJavaForMinecraftAsync(
+        VerifyServices services,
+        string minecraftVersion,
+        CancellationToken cancellationToken)
+    {
+        var required = JavaCompatibility.RequiredMajorFor(minecraftVersion);
+        var runtimes = await services.Java.DetectAsync(cancellationToken);
+        return JavaSelection.SelectBest(runtimes, required);
+    }
+
+    /// <summary>The version id an instance actually launches: the loader version, or vanilla.</summary>
+    private static string LaunchVersionId(InstanceRecord instance) =>
+        instance.Loader == LoaderKind.Vanilla || string.IsNullOrEmpty(instance.LoaderVersion)
+            ? instance.MinecraftVersion
+            : new LoaderVersionInfo(
+                instance.Loader,
+                instance.LoaderVersion,
+                instance.MinecraftVersion,
+                true,
+                null).VersionId;
 
     private static async Task<InstanceRecord> GetOrCreateInstanceAsync(
         VerifyServices services,

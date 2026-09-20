@@ -1,5 +1,6 @@
 using Ferrite.Core.Download;
 using Ferrite.Core.Java;
+using Ferrite.Core.Loaders;
 using Ferrite.Core.Minecraft;
 using Ferrite.Core.Net;
 using Ferrite.Core.Platform;
@@ -44,6 +45,17 @@ internal sealed class VerifyServices : IDisposable
         Launcher = new LaunchService(LoggerFactory.CreateLogger<LaunchService>());
         Instances = new InstanceStore(Paths, LoggerFactory.CreateLogger<InstanceStore>());
         Settings = new SettingsStore(Paths, LoggerFactory.CreateLogger<SettingsStore>());
+        Fabric = new FabricLoaderService(
+            Http,
+            Manifest,
+            LoggerFactory.CreateLogger<FabricLoaderService>());
+        Forge = new ForgeLoaderService(
+            Http,
+            Downloads,
+            Manifest,
+            Paths,
+            LoggerFactory.CreateLogger<ForgeLoaderService>(),
+            LoggerFactory);
     }
 
     public ILoggerFactory LoggerFactory { get; }
@@ -71,6 +83,10 @@ internal sealed class VerifyServices : IDisposable
     public InstanceStore Instances { get; }
 
     public SettingsStore Settings { get; }
+
+    public FabricLoaderService Fabric { get; }
+
+    public ForgeLoaderService Forge { get; }
 
     public void Dispose()
     {
