@@ -1,0 +1,21 @@
+<Project>
+
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <!-- Version information surfaced in the UI and diagnostics. -->
+  <PropertyGroup>
+    <FerriteVersion Condition="'$(FerriteVersion)' == ''">0.1.0</FerriteVersion>
+    <Version>$(FerriteVersion)</Version>
+    <Product>Ferrite</Product>
+    <Company>Ferrite</Company>
+    <Authors>Ferrite</Authors>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Ferrite.App/Ferrite.App.csproj" />
+    <Project Path="src/Ferrite.Core/Ferrite.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Ferrite.Core.Tests/Ferrite.Core.Tests.csproj" />
+  </Folder>
+</Solution>

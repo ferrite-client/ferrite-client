@@ -1,0 +1,52 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+*.user
+*.suo
+.vs/
+.idea/
+*.binlog
+
+# Test / coverage
+[Tt]est[Rr]esults/
+coverage*.xml
+coverage*.json
+*.trx
+
+# Publish output
+publish/
+artifacts/
+out/
+
+# Launcher runtime data that must never be committed.
+# Ferrite keeps its data outside the repo, but guard anyway.
+data/
+instances/
+caches/
+cache/
+downloads/
+logs/
+accounts.json
+*.token
+*.tokens.json
+credentials.json
+secrets.json
+appsettings.Local.json
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+*.pfx
+*.snk
+
+# OS noise
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Local tooling
+.dotnet/
+*.nupkg

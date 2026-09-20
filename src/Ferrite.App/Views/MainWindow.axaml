@@ -1,0 +1,9 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Ferrite.App.Views.MainWindow"
+        Title="Ferrite"
+        Width="1280" Height="800"
+        MinWidth="960" MinHeight="640"
+        Background="#121316">
+  <TextBlock Text="Ferrite" Foreground="#E0A458" FontSize="28" Margin="24" />
+</Window>
