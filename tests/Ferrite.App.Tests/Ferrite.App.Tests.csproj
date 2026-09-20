@@ -3,23 +3,20 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
-    <RootNamespace>Ferrite.Core.Tests</RootNamespace>
+    <RootNamespace>Ferrite.App.Tests</RootNamespace>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
-    <!--
-      xUnit1051 asks every token-accepting call to thread the test cancellation token. In these
-      tests the calls are short local file operations, so the rule adds noise without changing
-      behaviour.
-    -->
     <NoWarn>$(NoWarn);xUnit1051</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Avalonia.Headless.XUnit" Version="12.1.2" />
     <PackageReference Include="xunit.v3" Version="3.2.2" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Ferrite.App\Ferrite.App.csproj" />
     <ProjectReference Include="..\..\src\Ferrite.Core\Ferrite.Core.csproj" />
   </ItemGroup>
 

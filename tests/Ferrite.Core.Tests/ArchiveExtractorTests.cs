@@ -34,7 +34,7 @@ public sealed class ArchiveExtractorTests : IDisposable
             archive,
             destination,
             new ArchiveExtractionOptions(),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         Assert.Equal(2, result.FilesExtracted);
         Assert.Equal("enabled = true", await File.ReadAllTextAsync(Path.Combine(destination, "config", "mod.toml")));
@@ -55,7 +55,7 @@ public sealed class ArchiveExtractorTests : IDisposable
             archive,
             destination,
             new ArchiveExtractionOptions(),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         Assert.Equal(1, result.FilesExtracted);
         Assert.Contains(result.SkippedEntries, entry => entry.Replace('\\', '/').Contains("escaped", StringComparison.Ordinal)
@@ -86,7 +86,7 @@ public sealed class ArchiveExtractorTests : IDisposable
             archive,
             destination,
             new ArchiveExtractionOptions(),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         Assert.Equal(0, result.FilesExtracted);
         Assert.Contains("link", result.SkippedEntries);
@@ -107,7 +107,7 @@ public sealed class ArchiveExtractorTests : IDisposable
                 StripPrefix = "overrides",
                 Include = path => path.StartsWith("mods", StringComparison.Ordinal),
             },
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         Assert.Equal(1, result.FilesExtracted);
         Assert.True(File.Exists(Path.Combine(destination, "mods", "b.jar")));
@@ -124,7 +124,7 @@ public sealed class ArchiveExtractorTests : IDisposable
             archive,
             destination,
             new ArchiveExtractionOptions { MaxEntries = 2 },
-            CancellationToken.None));
+            TestContext.Current.CancellationToken));
     }
 
     [Fact]

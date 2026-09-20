@@ -1,0 +1,189 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Ferrite.App.ViewModels"
+             x:Class="Ferrite.App.Views.InstanceDetailView"
+             x:DataType="vm:InstanceDetailViewModel">
+
+  <Grid RowDefinitions="Auto,*,Auto" Margin="24">
+
+    <Grid Grid.Row="0" ColumnDefinitions="*,Auto" ColumnSpacing="16" Margin="0,0,0,16">
+      <StackPanel Grid.Column="0" Spacing="4">
+        <TextBlock Classes="h2" Text="{Binding Name}" />
+        <TextBlock Classes="muted" Text="{Binding VersionId}" />
+        <TextBlock Classes="faint" Text="{Binding LoaderText}" />
+      </StackPanel>
+      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+        <Button Content="Back" Command="{Binding BackCommand}" />
+        <Button Content="Open folder" Command="{Binding OpenFolderCommand}" />
+        <Button Content="Verify" Command="{Binding VerifyCommand}" />
+        <Button Content="Repair" Command="{Binding RepairCommand}" />
+        <Button Classes="primary" Content="Save" Command="{Binding SaveCommand}" />
+      </StackPanel>
+    </Grid>
+
+    <TabControl Grid.Row="1">
+
+      <TabItem Header="Settings">
+        <ScrollViewer>
+          <StackPanel Spacing="16" Margin="0,16,0,0" MaxWidth="720" HorizontalAlignment="Left">
+            <StackPanel Spacing="4">
+              <TextBlock Classes="label" Text="JAVA RUNTIME" />
+              <ComboBox ItemsSource="{Binding JavaRuntimes}" SelectedItem="{Binding SelectedJava}"
+                        HorizontalAlignment="Stretch">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate>
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                      <TextBlock Text="{Binding DisplayName}" />
+                      <TextBlock Classes="faint" Text="{Binding Source}" />
+                    </StackPanel>
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+            </StackPanel>
+
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+              <StackPanel Grid.Column="0" Spacing="4">
+                <TextBlock Classes="label" Text="MAX MEMORY (MB)" />
+                <NumericUpDown Value="{Binding MemoryMb}" Minimum="0" Maximum="65536" Increment="512" />
+              </StackPanel>
+              <StackPanel Grid.Column="1" Spacing="4">
+                <TextBlock Classes="label" Text="MIN MEMORY (MB)" />
+                <NumericUpDown Value="{Binding MinMemoryMb}" Minimum="0" Maximum="65536" Increment="512" />
+              </StackPanel>
+              <StackPanel Grid.Column="2" Spacing="4">
+                <TextBlock Classes="label" Text="WINDOW SIZE" />
+                <Grid ColumnDefinitions="*,12,*" ColumnSpacing="0">
+                  <NumericUpDown Grid.Column="0" Value="{Binding WindowWidth}" Minimum="0" Maximum="16384"
+                                 Increment="10" ShowButtonSpinner="False" />
+                  <NumericUpDown Grid.Column="2" Value="{Binding WindowHeight}" Minimum="0" Maximum="16384"
+                                 Increment="10" ShowButtonSpinner="False" />
+                </Grid>
+                <TextBlock Classes="faint" Text="width x height, blank for the default" />
+              </StackPanel>
+            </Grid>
+
+            <StackPanel Spacing="4">
+              <TextBlock Classes="label" Text="DEFAULT SERVER (used when joining from the library)" />
+              <TextBox Text="{Binding ServerAddress}" PlaceholderText="play.example.net" />
+            </StackPanel>
+
+            <CheckBox Content="Launch in demo mode" IsChecked="{Binding DemoMode}" />
+
+            <StackPanel Spacing="4">
+              <TextBlock Classes="label" Text="EXTRA JVM ARGUMENTS (one per line)" />
+              <TextBox Text="{Binding JvmArgumentsText}" AcceptsReturn="True" Height="88" Classes="mono" />
+            </StackPanel>
+
+            <StackPanel Spacing="4">
+              <TextBlock Classes="label" Text="EXTRA GAME ARGUMENTS (one per line)" />
+              <TextBox Text="{Binding GameArgumentsText}" AcceptsReturn="True" Height="72" Classes="mono" />
+            </StackPanel>
+
+            <TextBlock Classes="muted" Text="{Binding StatusNote}" />
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <TabItem Header="Mods">
+        <Grid RowDefinitions="Auto,*" Margin="0,16,0,0">
+          <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,12">
+            <TextBlock Grid.Column="0" Classes="muted"
+                       Text="Drop mod files here, or use Add mods." VerticalAlignment="Center" />
+            <Button Grid.Column="1" Content="Add mods" Click="OnAddModsClick" />
+          </Grid>
+
+          <ScrollViewer Grid.Row="1">
+            <ItemsControl ItemsSource="{Binding Mods}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="vm:ModItemViewModel">
+                  <Border Classes="card" Margin="0,0,0,8">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                      <StackPanel Grid.Column="0" Spacing="2">
+                        <TextBlock Classes="h2" Text="{Binding DisplayName}" />
+                        <TextBlock Classes="muted" Text="{Binding VersionText}" />
+                        <TextBlock Classes="faint" Text="{Binding Description}" IsVisible="{Binding HasDescription}" />
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                          <TextBlock Classes="faint" Text="{Binding Loader}" />
+                          <TextBlock Classes="faint" Text="{Binding SizeText}" />
+                          <TextBlock Classes="faint" Text="{Binding DependencyText}" IsVisible="{Binding HasDependencies}" />
+                        </StackPanel>
+                        <TextBlock Classes="faint" Text="{Binding Note}" />
+                      </StackPanel>
+                      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <Button Content="Disable" IsVisible="{Binding IsEnabled}" Command="{Binding ToggleCommand}" />
+                        <Button Content="Enable" IsVisible="{Binding !IsEnabled}" Command="{Binding ToggleCommand}" />
+                        <Button Content="Folder" Command="{Binding OpenFolderCommand}" />
+                        <Button Classes="danger" Content="Remove" Command="{Binding DeleteCommand}" />
+                      </StackPanel>
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+
+          <TextBlock Grid.Row="1" Classes="muted" IsVisible="{Binding !HasMods}"
+                     Text="No mods installed in this instance." />
+        </Grid>
+      </TabItem>
+
+      <TabItem Header="Content">
+        <ScrollViewer>
+          <StackPanel Spacing="18" Margin="0,16,0,0">
+            <StackPanel Spacing="6">
+              <TextBlock Classes="label" Text="RESOURCE PACKS" />
+              <ItemsControl ItemsSource="{Binding ResourcePacks}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <TextBlock Text="{Binding FileName}" />
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <TextBlock Classes="faint" Text="No resource packs." IsVisible="{Binding !HasResourcePacks}" />
+            </StackPanel>
+
+            <StackPanel Spacing="6">
+              <TextBlock Classes="label" Text="SHADER PACKS" />
+              <ItemsControl ItemsSource="{Binding ShaderPacks}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <TextBlock Text="{Binding FileName}" />
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <TextBlock Classes="faint" Text="No shader packs." IsVisible="{Binding !HasShaderPacks}" />
+            </StackPanel>
+
+            <StackPanel Spacing="6">
+              <TextBlock Classes="label" Text="SCREENSHOTS" />
+              <ItemsControl ItemsSource="{Binding Screenshots}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <TextBlock Text="{Binding FileName}" />
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <TextBlock Classes="faint" Text="No screenshots." IsVisible="{Binding !HasScreenshots}" />
+            </StackPanel>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <TabItem Header="Logs">
+        <Grid RowDefinitions="Auto,*" Margin="0,16,0,0">
+          <Button Grid.Row="0" Content="Refresh" Command="{Binding RefreshLogCommand}" HorizontalAlignment="Left" />
+          <Border Grid.Row="1" Classes="card" Margin="0,12,0,0">
+            <ScrollViewer>
+              <SelectableTextBlock Classes="mono" Text="{Binding LogText}" />
+            </ScrollViewer>
+          </Border>
+        </Grid>
+      </TabItem>
+
+    </TabControl>
+
+    <TextBlock Grid.Row="2" Classes="muted" Margin="0,12,0,0" Text="{Binding StatusNote}" />
+
+  </Grid>
+
+</UserControl>

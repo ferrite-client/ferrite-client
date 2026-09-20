@@ -18,14 +18,14 @@ public sealed class DownloadEngineTests : IAsyncLifetime
         Directory.CreateDirectory(_workspace);
     }
 
-    public Task InitializeAsync()
+    public ValueTask InitializeAsync()
     {
         _server = new TestHttpServer();
         _http = new HttpService(new HttpServiceOptions(), NullLogger<HttpService>.Instance);
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         _http.Dispose();
         await _server.DisposeAsync();
@@ -59,7 +59,7 @@ public sealed class DownloadEngineTests : IAsyncLifetime
                 },
             ],
             summaries,
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         Assert.True(summary.Success);
         Assert.Equal(1, summary.DownloadedFiles);
@@ -88,7 +88,7 @@ public sealed class DownloadEngineTests : IAsyncLifetime
                 },
             ],
             progress: null,
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         Assert.True(summary.Success);
         Assert.Equal(1, summary.SkippedFiles);
@@ -115,7 +115,7 @@ public sealed class DownloadEngineTests : IAsyncLifetime
                 },
             ],
             progress: null,
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         Assert.True(summary.Success);
         Assert.Equal(payload, await File.ReadAllBytesAsync(target));
@@ -139,7 +139,7 @@ public sealed class DownloadEngineTests : IAsyncLifetime
                 },
             ],
             progress: null,
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         Assert.False(summary.Success);
         Assert.Single(summary.Failures);
@@ -165,7 +165,7 @@ public sealed class DownloadEngineTests : IAsyncLifetime
                 },
             ],
             progress: null,
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         Assert.True(summary.Success);
         Assert.Equal(payload, await File.ReadAllBytesAsync(target));
@@ -194,7 +194,7 @@ public sealed class DownloadEngineTests : IAsyncLifetime
                 },
             ],
             progress: null,
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         Assert.True(summary.Success);
         Assert.Equal(payload, await File.ReadAllBytesAsync(target));
@@ -220,7 +220,7 @@ public sealed class DownloadEngineTests : IAsyncLifetime
                 },
             ],
             progress: null,
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         Assert.True(summary.Success);
         Assert.Equal(payload, await File.ReadAllBytesAsync(target));
@@ -245,7 +245,7 @@ public sealed class DownloadEngineTests : IAsyncLifetime
                 },
             ],
             progress: null,
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         Assert.True(summary.Success);
         Assert.Equal(payload, await File.ReadAllBytesAsync(target));
@@ -270,7 +270,7 @@ public sealed class DownloadEngineTests : IAsyncLifetime
             });
         }
 
-        var summary = await CreateEngine(maxConcurrency: 4).DownloadAsync(requests, progress: null, CancellationToken.None);
+        var summary = await CreateEngine(maxConcurrency: 4).DownloadAsync(requests, progress: null, TestContext.Current.CancellationToken);
 
         Assert.True(summary.Success);
         Assert.Equal(fileCount, summary.DownloadedFiles);
@@ -318,7 +318,7 @@ public sealed class DownloadEngineTests : IAsyncLifetime
                 },
             ],
             progress: null,
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         Assert.False(summary.Success);
         Assert.Single(summary.Failures);

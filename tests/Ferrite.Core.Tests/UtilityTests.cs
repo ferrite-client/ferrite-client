@@ -48,15 +48,15 @@ public sealed class UtilityTests : IDisposable
         Random.Shared.NextBytes(payload);
         await File.WriteAllBytesAsync(path, payload);
 
-        Assert.Equal(Hashing.Sha1(payload), await Hashing.HashFileSha1Async(path, CancellationToken.None));
+        Assert.Equal(Hashing.Sha1(payload), await Hashing.HashFileSha1Async(path, TestContext.Current.CancellationToken));
     }
 
     [Fact]
     public async Task AtomicFile_write_replaces_and_leaves_no_temporary()
     {
         var path = Path.Combine(_workspace, "nested", "settings.json");
-        await AtomicFile.WriteAllTextAsync(path, "{\"a\":1}", CancellationToken.None);
-        await AtomicFile.WriteAllTextAsync(path, "{\"a\":2}", CancellationToken.None);
+        await AtomicFile.WriteAllTextAsync(path, "{\"a\":1}", TestContext.Current.CancellationToken);
+        await AtomicFile.WriteAllTextAsync(path, "{\"a\":2}", TestContext.Current.CancellationToken);
 
         Assert.Equal("{\"a\":2}", await File.ReadAllTextAsync(path));
         Assert.Empty(Directory.GetFiles(Path.GetDirectoryName(path)!, "*.tmp-*"));
@@ -68,12 +68,12 @@ public sealed class UtilityTests : IDisposable
         var path = Path.Combine(_workspace, "verify.bin");
         await File.WriteAllBytesAsync(path, "hello"u8.ToArray());
 
-        Assert.True(await Hashing.VerifyAsync(path, 5, Hashing.Sha1("hello"u8), CancellationToken.None));
-        Assert.False(await Hashing.VerifyAsync(path, 6, Hashing.Sha1("hello"u8), CancellationToken.None));
-        Assert.False(await Hashing.VerifyAsync(path, 5, Hashing.Sha1("other"u8), CancellationToken.None));
-        Assert.False(await Hashing.VerifyAsync(path, null, Hashing.Sha1("other"u8), CancellationToken.None));
-        Assert.True(await Hashing.VerifyAsync(path, null, null, CancellationToken.None));
-        Assert.False(await Hashing.VerifyAsync(path + ".missing", null, null, CancellationToken.None));
+        Assert.True(await Hashing.VerifyAsync(path, 5, Hashing.Sha1("hello"u8), TestContext.Current.CancellationToken));
+        Assert.False(await Hashing.VerifyAsync(path, 6, Hashing.Sha1("hello"u8), TestContext.Current.CancellationToken));
+        Assert.False(await Hashing.VerifyAsync(path, 5, Hashing.Sha1("other"u8), TestContext.Current.CancellationToken));
+        Assert.False(await Hashing.VerifyAsync(path, null, Hashing.Sha1("other"u8), TestContext.Current.CancellationToken));
+        Assert.True(await Hashing.VerifyAsync(path, null, null, TestContext.Current.CancellationToken));
+        Assert.False(await Hashing.VerifyAsync(path + ".missing", null, null, TestContext.Current.CancellationToken));
     }
 
     [Fact]

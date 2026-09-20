@@ -1,0 +1,113 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Ferrite.App.ViewModels"
+             x:Class="Ferrite.App.Views.BrowseView"
+             x:DataType="vm:BrowseViewModel">
+
+  <Grid RowDefinitions="Auto,*" Margin="24">
+
+    <StackPanel Grid.Row="0" Spacing="10" Margin="0,0,0,16">
+      <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
+        <TextBox Grid.Column="0" PlaceholderText="Search Modrinth"
+                 Text="{Binding SearchText}" />
+        <Button Grid.Column="1" Classes="primary" Content="Search" Command="{Binding SearchCommand}" />
+        <Button Grid.Column="2" Content="Refresh instances" Command="{Binding RefreshInstancesCommand}" />
+      </Grid>
+
+      <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto" ColumnSpacing="10">
+        <ComboBox Grid.Column="0" ItemsSource="{Binding ProjectTypes}" SelectedItem="{Binding SelectedProjectType}" Width="150" />
+        <ComboBox Grid.Column="1" ItemsSource="{Binding SortOptions}" SelectedItem="{Binding SelectedSort}" Width="150" />
+        <TextBox Grid.Column="2" PlaceholderText="Minecraft version" Text="{Binding GameVersionFilter}" Width="150" />
+        <TextBox Grid.Column="3" PlaceholderText="Loader" Text="{Binding LoaderFilter}" Width="120" />
+        <TextBlock Grid.Column="4" Classes="faint" VerticalAlignment="Center" Text="{Binding ResultSummary}" />
+        <TextBlock Grid.Column="5" Classes="faint" VerticalAlignment="Center" Text="{Binding StatusNote}" />
+      </Grid>
+    </StackPanel>
+
+    <Grid Grid.Row="1" ColumnDefinitions="2*,3*" ColumnSpacing="16">
+
+      <Border Grid.Column="0" Classes="card" Padding="8">
+        <Grid>
+          <ListBox ItemsSource="{Binding Results}" SelectedItem="{Binding SelectedResult}"
+                   Background="Transparent">
+            <ListBox.ItemTemplate>
+              <DataTemplate>
+                <StackPanel Spacing="2" Margin="4,6">
+                  <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                  <TextBlock Classes="faint" Text="{Binding Description}" MaxLines="2" TextTrimming="CharacterEllipsis" />
+                  <StackPanel Orientation="Horizontal" Spacing="10">
+                    <TextBlock Classes="faint" Text="{Binding Author}" />
+                    <TextBlock Classes="faint" Text="{Binding Downloads, StringFormat='{}{0:N0} downloads'}" />
+                  </StackPanel>
+                </StackPanel>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+          <TextBlock Classes="muted" Margin="12" VerticalAlignment="Top"
+                     IsVisible="{Binding !HasResults}"
+                     Text="Search Modrinth for mods, modpacks, resource packs, and shaders. Results are filtered to the selected instance's Minecraft version and loader." />
+        </Grid>
+      </Border>
+
+      <Border Grid.Column="1" Classes="card" IsVisible="{Binding HasSelection}">
+        <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="12">
+          <StackPanel Grid.Row="0" Spacing="4">
+            <TextBlock Classes="h2" Text="{Binding SelectedResult.Title}" />
+            <TextBlock Classes="muted" Text="{Binding SelectedResult.Description}" />
+            <TextBlock Classes="faint" Text="{Binding SelectedResult.ProjectType}" />
+          </StackPanel>
+
+          <StackPanel Grid.Row="1" Spacing="8">
+            <StackPanel Spacing="4">
+              <TextBlock Classes="label" Text="INSTALL INTO" />
+              <ComboBox ItemsSource="{Binding Instances}" SelectedItem="{Binding TargetInstance}"
+                        HorizontalAlignment="Stretch">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate>
+                    <TextBlock Text="{Binding Name}" />
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+            </StackPanel>
+
+            <StackPanel Spacing="4">
+              <TextBlock Classes="label" Text="VERSION" />
+              <ComboBox ItemsSource="{Binding Versions}" SelectedItem="{Binding SelectedVersion}"
+                        HorizontalAlignment="Stretch">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate>
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                      <TextBlock Text="{Binding VersionNumber}" />
+                      <TextBlock Classes="faint" Text="{Binding VersionType}" />
+                    </StackPanel>
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+            </StackPanel>
+
+            <CheckBox Content="Include optional dependencies"
+                      IsChecked="{Binding IncludeOptionalDependencies}" />
+          </StackPanel>
+
+          <ScrollViewer Grid.Row="2">
+            <TextBlock Classes="mono" Text="{Binding SelectedVersion.Changelog}" />
+          </ScrollViewer>
+
+          <StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+            <Button Content="Open project page" Command="{Binding OpenProjectPageCommand}" />
+            <Button Classes="primary" Content="Install" IsEnabled="{Binding CanInstall}"
+                    Command="{Binding InstallCommand}" />
+          </StackPanel>
+        </Grid>
+      </Border>
+
+      <Border Grid.Column="1" Classes="card" IsVisible="{Binding !HasSelection}">
+        <TextBlock Classes="muted" VerticalAlignment="Center" HorizontalAlignment="Center"
+                   Text="Select a project to see its versions and install it." />
+      </Border>
+
+    </Grid>
+
+  </Grid>
+
+</UserControl>

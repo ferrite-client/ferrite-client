@@ -1,12 +1,20 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Styling;
+using Ferrite.App.Services;
+using Ferrite.App.ViewModels;
 using Ferrite.App.Views;
+using Ferrite.Core.Platform;
+using Ferrite.Core.Storage;
+using StorageThemeVariant = Ferrite.Core.Storage.ThemeVariant;
 
 namespace Ferrite.App;
 
 public partial class App : Application
 {
+    private AppServices? _services;
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -16,9 +24,37 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = new MainWindow();
+            var paths = AppPaths.CreateDefault();
+            var loggerFactory = AppLogging.Create(paths);
+            _services = new AppServices(loggerFactory, paths);
+
+            var settings = _services.Settings.LoadAsync(CancellationToken.None).GetAwaiter().GetResult();
+            ApplyTheme(settings.Theme);
+
+            var viewModel = new MainWindowViewModel(_services);
+            var window = new MainWindow { DataContext = viewModel };
+            desktop.MainWindow = window;
+            desktop.Exit += (_, _) => _services?.Dispose();
+
+            _ = viewModel.InitializeAsync();
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    /// <summary>Applies the persisted theme, including the "follow the system" option.</summary>
+    public static void ApplyTheme(StorageThemeVariant variant)
+    {
+        if (Current is null)
+        {
+            return;
+        }
+
+        Current.RequestedThemeVariant = variant switch
+        {
+            StorageThemeVariant.Light => Avalonia.Styling.ThemeVariant.Light,
+            StorageThemeVariant.System => Avalonia.Styling.ThemeVariant.Default,
+            _ => Avalonia.Styling.ThemeVariant.Dark,
+        };
     }
 }

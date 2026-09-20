@@ -66,7 +66,7 @@ public sealed class ModScannerTests : IDisposable
     public void Reads_fabric_metadata()
     {
         var path = CreateJar("example-fabric.jar", ("fabric.mod.json", FabricJson));
-        var mod = new ModScanner(NullLogger<ModScanner>.Instance).Read(path, CancellationToken.None);
+        var mod = new ModScanner(NullLogger<ModScanner>.Instance).Read(path, TestContext.Current.CancellationToken);
 
         Assert.Equal("fabric", mod.Loader);
         Assert.Equal("examplemod", mod.ModId);
@@ -82,7 +82,7 @@ public sealed class ModScannerTests : IDisposable
     public void Reads_neoforge_toml_metadata()
     {
         var path = CreateJar("sodium-neoforge.jar", ("META-INF/neoforge.mods.toml", NeoForgeToml));
-        var mod = new ModScanner(NullLogger<ModScanner>.Instance).Read(path, CancellationToken.None);
+        var mod = new ModScanner(NullLogger<ModScanner>.Instance).Read(path, TestContext.Current.CancellationToken);
 
         Assert.Equal("neoforge", mod.Loader);
         Assert.Equal("sodium", mod.ModId);
@@ -96,7 +96,7 @@ public sealed class ModScannerTests : IDisposable
     public void Detects_disabled_mods()
     {
         var path = CreateJar("example.jar.disabled", ("fabric.mod.json", FabricJson));
-        var mod = new ModScanner(NullLogger<ModScanner>.Instance).Read(path, CancellationToken.None);
+        var mod = new ModScanner(NullLogger<ModScanner>.Instance).Read(path, TestContext.Current.CancellationToken);
 
         Assert.False(mod.Enabled);
         Assert.Equal("examplemod", mod.ModId);
@@ -108,7 +108,7 @@ public sealed class ModScannerTests : IDisposable
         var path = Path.Combine(_workspace, "broken.jar");
         File.WriteAllText(path, "this is not a zip");
 
-        var mod = new ModScanner(NullLogger<ModScanner>.Instance).Read(path, CancellationToken.None);
+        var mod = new ModScanner(NullLogger<ModScanner>.Instance).Read(path, TestContext.Current.CancellationToken);
 
         Assert.Equal("unknown", mod.Loader);
         Assert.Equal("broken.jar", mod.FileName);
@@ -121,7 +121,7 @@ public sealed class ModScannerTests : IDisposable
         CreateJar("aaa.jar", ("fabric.mod.json", FabricJson.Replace("Example Mod", "Alpha", StringComparison.Ordinal)));
         File.WriteAllText(Path.Combine(_workspace, "notes.txt"), "not a mod");
 
-        var mods = new ModScanner(NullLogger<ModScanner>.Instance).Scan(_workspace, CancellationToken.None);
+        var mods = new ModScanner(NullLogger<ModScanner>.Instance).Scan(_workspace, TestContext.Current.CancellationToken);
 
         Assert.Equal(2, mods.Count);
         Assert.Equal("Alpha", mods[0].Name);

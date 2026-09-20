@@ -1,9 +1,90 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:Ferrite.App.ViewModels"
+        xmlns:views="clr-namespace:Ferrite.App.Views"
         x:Class="Ferrite.App.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
         Title="Ferrite"
-        Width="1280" Height="800"
-        MinWidth="960" MinHeight="640"
-        Background="#121316">
-  <TextBlock Text="Ferrite" Foreground="#E0A458" FontSize="28" Margin="24" />
+        Width="1360" Height="860"
+        MinWidth="1024" MinHeight="680"
+        WindowStartupLocation="CenterScreen">
+
+  <Grid ColumnDefinitions="228,*">
+
+    <Border Grid.Column="0"
+            Background="{DynamicResource FerriteSurfaceSunken}"
+            BorderBrush="{DynamicResource FerriteBorder}"
+            BorderThickness="0,0,1,0">
+      <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="0,16">
+
+        <StackPanel Grid.Row="0" Margin="20,0,20,20" Spacing="2">
+          <TextBlock Text="Ferrite" FontSize="20" FontWeight="Bold" />
+          <TextBlock Classes="faint" Text="Minecraft launcher" />
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Margin="8,0" Spacing="2">
+          <ListBox SelectedIndex="{Binding SelectedPageIndex}" Background="Transparent"
+                   BorderThickness="0" Padding="0">
+            <ListBoxItem Content="Library" />
+            <ListBoxItem Content="Browse" />
+            <ListBoxItem Content="Java" />
+            <ListBoxItem Content="Accounts" />
+            <ListBoxItem Content="Settings" />
+          </ListBox>
+        </StackPanel>
+
+        <StackPanel Grid.Row="3" Margin="20,12,20,0" Spacing="4">
+          <TextBlock Classes="label" Text="ACCOUNT" />
+          <TextBlock Text="{Binding ActiveAccountName}" />
+          <TextBlock Classes="faint" Text="{Binding RunningInstanceName}" />
+        </StackPanel>
+
+      </Grid>
+    </Border>
+
+    <Grid Grid.Column="1" RowDefinitions="Auto,*,Auto">
+
+      <Border Grid.Row="0" Padding="24,16" BorderBrush="{DynamicResource FerriteBorder}"
+              BorderThickness="0,0,0,1">
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBlock Grid.Column="0" Classes="h1" Text="{Binding CurrentPage}" />
+          <TextBlock Grid.Column="1" Classes="muted" VerticalAlignment="Center" Text="{Binding StatusText}" />
+        </Grid>
+      </Border>
+
+      <Panel Grid.Row="1">
+        <ContentControl Content="{Binding DetailPage}" IsVisible="{Binding IsDetailOpen}" />
+        <ContentControl Content="{Binding Library}" IsVisible="{Binding IsLibrarySelected}" />
+        <ContentControl Content="{Binding Browse}" IsVisible="{Binding IsBrowseSelected}" />
+        <ContentControl Content="{Binding Java}" IsVisible="{Binding IsJavaSelected}" />
+        <ContentControl Content="{Binding Accounts}" IsVisible="{Binding IsAccountsSelected}" />
+        <ContentControl Content="{Binding Settings}" IsVisible="{Binding IsSettingsSelected}" />
+
+        <Border VerticalAlignment="Top" Margin="24" Padding="16,12"
+                CornerRadius="6" Background="{DynamicResource FerriteSurfaceRaised}"
+                BorderBrush="{DynamicResource FerriteDanger}" BorderThickness="1"
+                IsVisible="{Binding HasError}">
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+            <TextBlock Grid.Column="0" Text="{Binding ErrorMessage}" />
+            <Button Grid.Column="1" Classes="ghost" Content="Dismiss" Command="{Binding DismissErrorCommand}" />
+          </Grid>
+        </Border>
+      </Panel>
+
+      <Border Grid.Row="2" Padding="24,10" Background="{DynamicResource FerriteSurfaceSunken}"
+              BorderBrush="{DynamicResource FerriteBorder}" BorderThickness="0,1,0,0"
+              IsVisible="{Binding IsActivityVisible}">
+        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+          <TextBlock Grid.Column="0" Classes="muted" VerticalAlignment="Center" Text="{Binding ActivityText}" />
+          <ProgressBar Grid.Column="1" VerticalAlignment="Center"
+                       Value="{Binding ActivityFraction}"
+                       IsIndeterminate="{Binding IsActivityIndeterminate}"
+                       Minimum="0" Maximum="1" />
+        </Grid>
+      </Border>
+
+    </Grid>
+
+  </Grid>
+
 </Window>

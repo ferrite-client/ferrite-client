@@ -1,0 +1,75 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Ferrite.App.ViewModels"
+             x:Class="Ferrite.App.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel">
+
+  <ScrollViewer Margin="24">
+    <StackPanel Spacing="18" MaxWidth="760" HorizontalAlignment="Left">
+
+      <TextBlock Classes="h2" Text="Appearance" />
+      <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+        <StackPanel Grid.Column="0" Spacing="4">
+          <TextBlock Classes="label" Text="THEME" />
+          <ComboBox ItemsSource="{Binding Themes}" SelectedItem="{Binding Theme}" HorizontalAlignment="Stretch" />
+        </StackPanel>
+        <StackPanel Grid.Column="1" Spacing="4">
+          <TextBlock Classes="label" Text="LANGUAGE" />
+          <ComboBox ItemsSource="{Binding Languages}" SelectedItem="{Binding Language}" HorizontalAlignment="Stretch" />
+        </StackPanel>
+      </Grid>
+      <CheckBox Content="Show snapshots in the version list" IsChecked="{Binding ShowSnapshots}" />
+
+      <Border Height="1" Background="{DynamicResource FerriteBorder}" />
+
+      <TextBlock Classes="h2" Text="Network" />
+      <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+        <StackPanel Grid.Column="0" Spacing="4">
+          <TextBlock Classes="label" Text="CONCURRENT DOWNLOADS" />
+          <NumericUpDown Value="{Binding MaxConcurrentDownloads}" Minimum="1" Maximum="64" Increment="1" />
+        </StackPanel>
+        <StackPanel Grid.Column="1" Spacing="4">
+          <TextBlock Classes="label" Text="HTTP PROXY" />
+          <TextBox Text="{Binding ProxyUrl}" PlaceholderText="http://host:port" />
+        </StackPanel>
+      </Grid>
+
+      <Border Height="1" Background="{DynamicResource FerriteBorder}" />
+
+      <TextBlock Classes="h2" Text="Accounts" />
+      <StackPanel Spacing="4">
+        <TextBlock Classes="label" Text="MICROSOFT CLIENT ID" />
+        <TextBox Text="{Binding MicrosoftClientId}" />
+        <TextBlock Classes="faint"
+                   Text="Required for Microsoft sign-in. See docs/HUMAN_ACTION_REQUIRED.md for the exact steps." />
+      </StackPanel>
+
+      <Border Height="1" Background="{DynamicResource FerriteBorder}" />
+
+      <TextBlock Classes="h2" Text="Storage" />
+      <StackPanel Spacing="6">
+        <TextBlock Classes="label" Text="DATA ROOT" />
+        <TextBlock Classes="mono" Text="{Binding DataRoot}" />
+        <TextBlock Classes="faint"
+                   Text="Set the FERRITE_HOME environment variable to move the data root before launching." />
+        <StackPanel Orientation="Horizontal" Spacing="10">
+          <TextBlock Classes="label" Text="LIBRARY AND CACHE SIZE" VerticalAlignment="Center" />
+          <TextBlock Text="{Binding CacheSizeText}" VerticalAlignment="Center" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <Button Content="Open data folder" Command="{Binding OpenDataFolderCommand}" />
+          <Button Content="Open logs" Command="{Binding OpenLogsFolderCommand}" />
+          <Button Content="Refresh size" Command="{Binding RefreshCacheSizeCommand}" />
+          <Button Classes="danger" Content="Clear metadata cache" Command="{Binding ClearMetadataCacheCommand}" />
+        </StackPanel>
+      </StackPanel>
+
+      <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,6,0,0">
+        <Button Classes="primary" Content="Save settings" Command="{Binding SaveCommand}" />
+        <TextBlock Classes="muted" VerticalAlignment="Center" Text="{Binding StatusNote}" />
+      </StackPanel>
+
+    </StackPanel>
+  </ScrollViewer>
+
+</UserControl>

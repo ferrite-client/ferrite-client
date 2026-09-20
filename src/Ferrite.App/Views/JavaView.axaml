@@ -1,0 +1,51 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Ferrite.App.ViewModels"
+             x:Class="Ferrite.App.Views.JavaView"
+             x:DataType="vm:JavaViewModel">
+
+  <Grid RowDefinitions="Auto,*,Auto" Margin="24">
+
+    <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10" Margin="0,0,0,16">
+      <TextBlock Grid.Column="0" Classes="muted" VerticalAlignment="Center"
+                 Text="Ferrite probes each runtime by running it, so only working installations are listed." />
+      <Button Grid.Column="1" Content="Rescan" Command="{Binding ScanCommand}" />
+      <Button Grid.Column="2" Classes="primary" Content="Use as default" Command="{Binding SetDefaultCommand}" />
+    </Grid>
+
+    <ScrollViewer Grid.Row="1">
+      <ItemsControl ItemsSource="{Binding Runtimes}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate>
+            <Border Classes="card" Margin="0,0,0,8">
+              <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                <StackPanel Grid.Column="0" Spacing="2">
+                  <TextBlock Classes="h2" Text="{Binding DisplayName}" />
+                  <TextBlock Classes="mono" Text="{Binding ExecutablePath}" />
+                  <StackPanel Orientation="Horizontal" Spacing="12">
+                    <TextBlock Classes="faint" Text="{Binding Source}" />
+                    <TextBlock Classes="faint" Text="{Binding Component}" />
+                  </StackPanel>
+                </StackPanel>
+                <Button Grid.Column="1" Content="Open folder" Command="{Binding $parent[UserControl].((vm:JavaViewModel)DataContext).OpenFolderCommand}"
+                        VerticalAlignment="Center" />
+              </Grid>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
+
+    <Border Grid.Row="2" Classes="card" Margin="0,16,0,0">
+      <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto" ColumnSpacing="10">
+        <TextBlock Grid.Column="0" Classes="label" Text="DOWNLOAD A RUNTIME FROM MOJANG" VerticalAlignment="Center" />
+        <ComboBox Grid.Column="1" ItemsSource="{Binding Components}" SelectedItem="{Binding SelectedComponent}" Width="220" />
+        <Button Grid.Column="2" Content="List builds" Command="{Binding ListBuildsCommand}" />
+        <TextBlock Grid.Column="3" Classes="faint" VerticalAlignment="Center" Text="{Binding StatusNote}" />
+        <Button Grid.Column="4" Classes="primary" Content="Download" Command="{Binding ProvisionCommand}" />
+      </Grid>
+    </Border>
+
+  </Grid>
+
+</UserControl>

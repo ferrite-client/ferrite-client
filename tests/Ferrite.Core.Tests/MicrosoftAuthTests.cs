@@ -20,7 +20,7 @@ public sealed class MicrosoftAuthTests : IAsyncLifetime
     private AuthEndpoints _endpoints = null!;
     private SecretRedactor _redactor = null!;
 
-    public Task InitializeAsync()
+    public ValueTask InitializeAsync()
     {
         _server = new TestHttpServer();
         _http = new HttpService(new HttpServiceOptions(), NullLogger<HttpService>.Instance);
@@ -32,10 +32,10 @@ public sealed class MicrosoftAuthTests : IAsyncLifetime
             _server.BaseUrl + "/mc/login",
             _server.BaseUrl + "/mc/profile",
             _server.BaseUrl + "/mc/entitlements");
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         _http.Dispose();
         await _server.DisposeAsync();
@@ -57,7 +57,7 @@ public sealed class MicrosoftAuthTests : IAsyncLifetime
             }
             """));
 
-        var challenge = await CreateClient().RequestDeviceCodeAsync(CancellationToken.None);
+        var challenge = await CreateClient().RequestDeviceCodeAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal("ABCD-EFGH", challenge.UserCode);
         Assert.Equal("device-code-value", challenge.DeviceCode);
@@ -85,7 +85,7 @@ public sealed class MicrosoftAuthTests : IAsyncLifetime
         });
 
         var challenge = new DeviceCodeChallenge("device", "CODE", "https://microsoft.com/link", null, 1, 30);
-        var tokens = await CreateClient().WaitForTokenAsync(challenge, null, CancellationToken.None);
+        var tokens = await CreateClient().WaitForTokenAsync(challenge, null, TestContext.Current.CancellationToken);
 
         Assert.Equal("msa-token", tokens.AccessToken);
         Assert.Equal("msa-refresh", tokens.RefreshToken);
@@ -101,7 +101,7 @@ public sealed class MicrosoftAuthTests : IAsyncLifetime
 
         var challenge = new DeviceCodeChallenge("device", "CODE", "https://microsoft.com/link", null, 1, 30);
         var exception = await Assert.ThrowsAsync<AuthenticationException>(() =>
-            CreateClient().WaitForTokenAsync(challenge, null, CancellationToken.None));
+            CreateClient().WaitForTokenAsync(challenge, null, TestContext.Current.CancellationToken));
 
         Assert.Equal("authorization_declined", exception.Code);
         Assert.Contains("declined", exception.Message, StringComparison.OrdinalIgnoreCase);
@@ -152,18 +152,18 @@ public sealed class MicrosoftAuthTests : IAsyncLifetime
         var client = CreateClient();
         var session = await client.AuthenticateAsync(
             new MicrosoftTokenSet("msa-token", "msa-refresh", DateTimeOffset.UtcNow.AddHours(1)),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         Assert.Equal("mc-token", session.AccessToken);
         Assert.Equal("2535410000000000", session.Xuid);
 
-        var profile = await client.GetProfileAsync(session.AccessToken, CancellationToken.None);
+        var profile = await client.GetProfileAsync(session.AccessToken, TestContext.Current.CancellationToken);
         Assert.NotNull(profile);
         Assert.Equal("Steve", profile!.PlayerName);
         Assert.Equal("https://example.invalid/skin.png", profile.SkinUrl);
         Assert.Equal("https://example.invalid/cape.png", profile.CapeUrl);
 
-        var entitlement = await client.CheckEntitlementAsync(session.AccessToken, CancellationToken.None);
+        var entitlement = await client.CheckEntitlementAsync(session.AccessToken, TestContext.Current.CancellationToken);
         Assert.True(entitlement.OwnsMinecraft);
     }
 
@@ -175,7 +175,7 @@ public sealed class MicrosoftAuthTests : IAsyncLifetime
             """{"Identity":"0","XErr":2148916238,"Message":"","Redirect":"https://start.ui.xboxlive.com/AddChildToFamily"}"""));
 
         var exception = await Assert.ThrowsAsync<AuthenticationException>(() =>
-            CreateClient().AuthorizeXstsAsync("xbl-token", CancellationToken.None));
+            CreateClient().AuthorizeXstsAsync("xbl-token", TestContext.Current.CancellationToken));
 
         Assert.Equal("2148916238", exception.Code);
         Assert.Contains("child account", exception.Message, StringComparison.OrdinalIgnoreCase);
@@ -193,7 +193,7 @@ public sealed class MicrosoftAuthTests : IAsyncLifetime
 
         Assert.False(client.IsConfigured);
         var exception = await Assert.ThrowsAsync<AuthenticationException>(() =>
-            client.RequestDeviceCodeAsync(CancellationToken.None));
+            client.RequestDeviceCodeAsync(TestContext.Current.CancellationToken));
         Assert.Equal("client_id_missing", exception.Code);
     }
 
@@ -204,7 +204,7 @@ public sealed class MicrosoftAuthTests : IAsyncLifetime
             200,
             """{"Token":"xbl-secret-token","DisplayClaims":{"xui":[{"uhs":"hash"}]}}"""));
 
-        await CreateClient().AuthenticateXboxLiveAsync("msa-secret-token", CancellationToken.None);
+        await CreateClient().AuthenticateXboxLiveAsync("msa-secret-token", TestContext.Current.CancellationToken);
 
         var redacted = _redactor.Redact("calling with msa-secret-token and xbl-secret-token");
         Assert.DoesNotContain("msa-secret-token", redacted, StringComparison.Ordinal);
@@ -217,7 +217,7 @@ public sealed class MicrosoftAuthTests : IAsyncLifetime
     {
         _server.AddHandler("GET", "/mc/entitlements", _ => new TestResponse(200, """{"items":[]}"""));
 
-        var result = await CreateClient().CheckEntitlementAsync("mc-token", CancellationToken.None);
+        var result = await CreateClient().CheckEntitlementAsync("mc-token", TestContext.Current.CancellationToken);
         Assert.False(result.OwnsMinecraft);
     }
 
@@ -226,7 +226,7 @@ public sealed class MicrosoftAuthTests : IAsyncLifetime
     {
         _server.AddHandler("GET", "/mc/profile", _ => new TestResponse(404, """{"error":"NOT_FOUND"}"""));
 
-        var profile = await CreateClient().GetProfileAsync("mc-token", CancellationToken.None);
+        var profile = await CreateClient().GetProfileAsync("mc-token", TestContext.Current.CancellationToken);
         Assert.Null(profile);
     }
 

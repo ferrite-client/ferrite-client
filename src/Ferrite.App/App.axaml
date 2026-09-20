@@ -1,10 +1,42 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Ferrite.App.ViewModels"
+             xmlns:views="clr-namespace:Ferrite.App.Views"
              x:Class="Ferrite.App.App"
              RequestedThemeVariant="Dark">
 
+  <Application.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="avares://Ferrite/Styles/Palette.axaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </Application.Resources>
+
+  <Application.DataTemplates>
+    <DataTemplate DataType="vm:LibraryViewModel">
+      <views:LibraryView />
+    </DataTemplate>
+    <DataTemplate DataType="vm:BrowseViewModel">
+      <views:BrowseView />
+    </DataTemplate>
+    <DataTemplate DataType="vm:JavaViewModel">
+      <views:JavaView />
+    </DataTemplate>
+    <DataTemplate DataType="vm:AccountsViewModel">
+      <views:AccountsView />
+    </DataTemplate>
+    <DataTemplate DataType="vm:SettingsViewModel">
+      <views:SettingsView />
+    </DataTemplate>
+    <DataTemplate DataType="vm:InstanceDetailViewModel">
+      <views:InstanceDetailView />
+    </DataTemplate>
+  </Application.DataTemplates>
+
   <Application.Styles>
     <FluentTheme />
+    <StyleInclude Source="avares://Ferrite/Styles/Controls.axaml" />
   </Application.Styles>
 
 </Application>

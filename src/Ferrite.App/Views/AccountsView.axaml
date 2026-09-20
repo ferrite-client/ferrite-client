@@ -1,0 +1,63 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Ferrite.App.ViewModels"
+             x:Class="Ferrite.App.Views.AccountsView"
+             x:DataType="vm:AccountsViewModel">
+
+  <Grid RowDefinitions="Auto,*,Auto" Margin="24">
+
+    <StackPanel Grid.Row="0" Spacing="10" Margin="0,0,0,16">
+      <TextBlock Classes="muted"
+                 Text="Sign-in uses Microsoft's device-code flow. Ferrite never sees or stores your password." />
+      <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
+        <TextBox Grid.Column="0" PlaceholderText="Microsoft client id (Azure public client)"
+                 Text="{Binding ClientId}" />
+        <Button Grid.Column="1" Content="Save client id" Command="{Binding SaveClientIdCommand}" />
+        <Button Grid.Column="2" Classes="primary" Content="Sign in"
+                IsEnabled="{Binding !IsSigningIn}" Command="{Binding SignInCommand}" />
+      </Grid>
+      <StackPanel Orientation="Horizontal" Spacing="12" IsVisible="{Binding HasUserCode}">
+        <TextBlock Classes="label" Text="CODE" VerticalAlignment="Center" />
+        <TextBlock Classes="h1 mono" Text="{Binding UserCode}" VerticalAlignment="Center" />
+        <Button Content="Open sign-in page" Command="{Binding OpenProfileUrlCommand}" />
+        <Button Content="Cancel" Command="{Binding CancelSignInCommand}" />
+      </StackPanel>
+      <TextBlock Classes="muted" Text="{Binding SignInStatus}" />
+    </StackPanel>
+
+    <ScrollViewer Grid.Row="1">
+      <ItemsControl ItemsSource="{Binding Accounts}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate>
+            <Border Classes="card" Margin="0,0,0,8">
+              <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                <StackPanel Grid.Column="0" Spacing="2">
+                  <TextBlock Classes="h2" Text="{Binding DisplayName}" />
+                  <TextBlock Classes="mono" Text="{Binding Uuid}" />
+                  <TextBlock Classes="faint" Text="{Binding Kind}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                  <Button Content="Use" Command="{Binding $parent[ItemsControl].((vm:AccountsViewModel)DataContext).SetActiveCommand}"
+                          CommandParameter="{Binding}" />
+                  <Button Classes="danger" Content="Sign out"
+                          Command="{Binding $parent[ItemsControl].((vm:AccountsViewModel)DataContext).SignOutCommand}"
+                          CommandParameter="{Binding}" />
+                </StackPanel>
+              </Grid>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
+
+    <StackPanel Grid.Row="2" Spacing="6" Margin="0,16,0,0">
+      <TextBlock Classes="faint" IsVisible="{Binding !HasAccounts}"
+                 Text="No accounts yet. Add a Microsoft client id, then sign in." />
+      <TextBlock Classes="faint" IsVisible="{Binding SecretStorageDegraded}"
+                 Text="Credential protection is degraded on this platform; tokens are stored with user-only file permissions." />
+      <TextBlock Classes="faint" Text="{Binding StatusNote}" />
+    </StackPanel>
+
+  </Grid>
+
+</UserControl>

@@ -1,0 +1,46 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!--
+    Ferrite palette: neutral graphite surfaces with a copper accent and a teal success tone.
+    Two accents keep the interface from reading as a single-hue theme.
+  -->
+  <ResourceDictionary.ThemeDictionaries>
+
+    <ResourceDictionary x:Key="Dark">
+      <SolidColorBrush x:Key="FerriteSurface" Color="#14161A" />
+      <SolidColorBrush x:Key="FerriteSurfaceRaised" Color="#1B1E24" />
+      <SolidColorBrush x:Key="FerriteSurfaceSunken" Color="#0F1114" />
+      <SolidColorBrush x:Key="FerriteBorder" Color="#2A2F37" />
+      <SolidColorBrush x:Key="FerriteBorderStrong" Color="#3A414B" />
+      <SolidColorBrush x:Key="FerriteText" Color="#E8EAED" />
+      <SolidColorBrush x:Key="FerriteTextMuted" Color="#9AA2AD" />
+      <SolidColorBrush x:Key="FerriteTextFaint" Color="#6C7480" />
+      <SolidColorBrush x:Key="FerriteAccent" Color="#D08A3E" />
+      <SolidColorBrush x:Key="FerriteAccentHover" Color="#E0A458" />
+      <SolidColorBrush x:Key="FerriteAccentText" Color="#1A1409" />
+      <SolidColorBrush x:Key="FerriteSuccess" Color="#4FB3A5" />
+      <SolidColorBrush x:Key="FerriteDanger" Color="#D2665C" />
+      <SolidColorBrush x:Key="FerriteWarning" Color="#D8B04A" />
+    </ResourceDictionary>
+
+    <ResourceDictionary x:Key="Light">
+      <SolidColorBrush x:Key="FerriteSurface" Color="#F6F6F4" />
+      <SolidColorBrush x:Key="FerriteSurfaceRaised" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="FerriteSurfaceSunken" Color="#EAEAE6" />
+      <SolidColorBrush x:Key="FerriteBorder" Color="#D6D6D0" />
+      <SolidColorBrush x:Key="FerriteBorderStrong" Color="#BCBCB4" />
+      <SolidColorBrush x:Key="FerriteText" Color="#1C1E22" />
+      <SolidColorBrush x:Key="FerriteTextMuted" Color="#5A6068" />
+      <SolidColorBrush x:Key="FerriteTextFaint" Color="#82888F" />
+      <SolidColorBrush x:Key="FerriteAccent" Color="#A5621B" />
+      <SolidColorBrush x:Key="FerriteAccentHover" Color="#8E5215" />
+      <SolidColorBrush x:Key="FerriteAccentText" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="FerriteSuccess" Color="#2F7D72" />
+      <SolidColorBrush x:Key="FerriteDanger" Color="#B03A2E" />
+      <SolidColorBrush x:Key="FerriteWarning" Color="#8A6D1F" />
+    </ResourceDictionary>
+
+  </ResourceDictionary.ThemeDictionaries>
+
+</ResourceDictionary>

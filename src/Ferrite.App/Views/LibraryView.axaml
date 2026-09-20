@@ -1,0 +1,110 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Ferrite.App.ViewModels"
+             x:Class="Ferrite.App.Views.LibraryView"
+             x:DataType="vm:LibraryViewModel">
+
+  <Grid RowDefinitions="Auto,*,Auto" Margin="24">
+
+    <Grid Grid.Row="0" ColumnDefinitions="*,Auto" ColumnSpacing="12" Margin="0,0,0,16">
+      <TextBox Grid.Column="0" PlaceholderText="Search instances" Text="{Binding SearchText}" />
+      <Button Grid.Column="1" Classes="primary" Content="New instance"
+              Command="{Binding OpenCreateCommand}" />
+    </Grid>
+
+    <ScrollViewer Grid.Row="1">
+      <ItemsControl ItemsSource="{Binding VisibleInstances}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate DataType="vm:InstanceCardViewModel">
+            <Border Classes="card" Margin="0,0,0,10">
+              <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                <StackPanel Grid.Column="0" Spacing="4">
+                  <TextBlock Classes="h2" Text="{Binding Name}" />
+                  <TextBlock Classes="muted" Text="{Binding Subtitle}" />
+                  <TextBlock Classes="faint" Text="{Binding ModpackText}" IsVisible="{Binding HasModpack}" />
+                  <StackPanel Orientation="Horizontal" Spacing="14" Margin="0,4,0,0">
+                    <TextBlock Classes="faint" Text="{Binding MemoryText}" />
+                    <TextBlock Classes="faint" Text="{Binding SizeText}" />
+                    <TextBlock Classes="faint" Text="{Binding LastPlayedText}" />
+                  </StackPanel>
+                  <TextBlock Classes="faint" Text="{Binding StatusNote}" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
+                            VerticalAlignment="Center">
+                  <Button Classes="primary" Content="Play" IsVisible="{Binding !IsRunning}"
+                          Command="{Binding PlayCommand}" />
+                  <Button Content="Stop" IsVisible="{Binding IsRunning}" Command="{Binding StopCommand}" />
+                  <Button Content="Manage" Command="{Binding OpenCommand}" />
+                  <Button Content="Folder" Command="{Binding OpenFolderCommand}" />
+                  <Button Content="Repair" Command="{Binding RepairCommand}" />
+                  <Button Content="Delete" Classes="danger" Command="{Binding DeleteCommand}" />
+                </StackPanel>
+              </Grid>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
+
+    <TextBlock Grid.Row="1" Classes="muted" Margin="0,24,0,0" VerticalAlignment="Top"
+               IsVisible="{Binding !HasInstances}"
+               Text="No instances yet. Create one to install Minecraft, optionally with a mod loader." />
+
+    <!-- Creation form -->
+    <Border Grid.Row="0" Grid.RowSpan="3" Margin="-24" Padding="24"
+            Background="{DynamicResource FerriteSurface}" IsVisible="{Binding IsCreating}">
+      <Border Classes="card" MaxWidth="560" VerticalAlignment="Center" HorizontalAlignment="Center">
+        <StackPanel Spacing="14">
+          <TextBlock Classes="h2" Text="New instance" />
+
+          <StackPanel Spacing="4">
+            <TextBlock Classes="label" Text="NAME" />
+            <TextBox Text="{Binding NewName}" />
+          </StackPanel>
+
+          <StackPanel Spacing="4">
+            <TextBlock Classes="label" Text="MINECRAFT VERSION" />
+            <ComboBox ItemsSource="{Binding Versions}" SelectedItem="{Binding NewVersion}"
+                      HorizontalAlignment="Stretch">
+              <ComboBox.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Id}" />
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+            <CheckBox Content="Show snapshots" IsChecked="{Binding ShowSnapshots}" />
+          </StackPanel>
+
+          <StackPanel Spacing="4">
+            <TextBlock Classes="label" Text="MOD LOADER" />
+            <ComboBox ItemsSource="{Binding LoaderOptions}" SelectedItem="{Binding NewLoader}"
+                      HorizontalAlignment="Stretch" />
+          </StackPanel>
+
+          <StackPanel Spacing="4" IsVisible="{Binding NeedsLoaderVersion}">
+            <TextBlock Classes="label" Text="LOADER VERSION" />
+            <ComboBox ItemsSource="{Binding LoaderVersions}" SelectedItem="{Binding NewLoaderVersion}"
+                      HorizontalAlignment="Stretch">
+              <ComboBox.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Version}" />
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+          </StackPanel>
+
+          <TextBlock Text="{Binding FormError}" Foreground="{DynamicResource FerriteDanger}"
+                     IsVisible="{Binding HasFormError}" />
+
+          <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+            <Button Content="Cancel" Command="{Binding CancelCreateCommand}" />
+            <Button Classes="primary" Content="Create and install" Command="{Binding CreateCommand}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </Border>
+
+  </Grid>
+
+</UserControl>
