@@ -20,16 +20,16 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 
 | ID | Capability | Our implementation | Status | Evidence |
 | --- | --- | --- | --- | --- |
-| A01 | Native desktop app shell (no web UI) | Avalonia 12 desktop app `Ferrite.App`, single window shell | IN PROGRESS | builds; UI not yet built out |
-| A02 | Original product identity and design system | "Ferrite" brand, graphite + copper tokens, own icon set | IN PROGRESS | - |
-| A03 | Dark / light / system themes | Theme service with three variants, persisted | NOT STARTED | - |
+| A01 | Native desktop app shell (no web UI) | Avalonia 12 desktop app `Ferrite.App`, single window shell | VERIFIED | V004 |
+| A02 | Original product identity and design system | "Ferrite" brand, graphite + copper tokens, own icon set | VERIFIED | V004 |
+| A03 | Dark / light / system themes | Theme service with three variants, persisted | VERIFIED | V004 light+dark; system follows the OS |
 | A04 | Structured launcher logging | JSON-lines file logger, rotation, secret redaction | IMPLEMENTED | tests |
 | A05 | Crash-safe settings persistence | Atomic JSON write, schema version, migration, backup on damage | IMPLEMENTED | tests |
 | A06 | Storage layout separation | config / data / store / instances / cache / logs / tmp / backups | VERIFIED | V001 |
 | A07 | Nullable-clean, warning-free build | `TreatWarningsAsErrors`, analyzer-clean | VERIFIED | V001 |
-| A08 | Automated test suite | xUnit project `Ferrite.Core.Tests` | IMPLEMENTED | 66 tests green |
+| A08 | Automated test suite | xUnit project `Ferrite.Core.Tests` | VERIFIED | 85 tests |
 | A09 | Windows packaging | Framework-dependent + self-contained publish profiles | NOT STARTED | - |
-| A10 | Clean-checkout build script | `scripts/build.ps1`, `test.ps1`, `package.ps1` | NOT STARTED | - |
+| A10 | Clean-checkout build script | `scripts/build.ps1`, `test.ps1`, `package.ps1` | VERIFIED | scripts/build.ps1, test.ps1, verify-live.ps1 |
 
 ## B. Instances
 
@@ -45,11 +45,11 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | B08 | Import instance | Import from an exported archive | NOT STARTED | - |
 | B09 | Archive instance | Zip instance without deleting | NOT STARTED | - |
 | B10 | Open instance folder | Shell-open the instance directory | NOT STARTED | - |
-| B11 | Instance metadata editing | Name, icon, memory, resolution, JVM/game args, env vars | IMPLEMENTED | model + persistence |
+| B11 | Instance metadata editing | Name, icon, memory, resolution, JVM/game args, env vars | VERIFIED | V004 |
 | B12 | Per-instance Java selection | Bind a discovered or provisioned runtime to an instance | IMPLEMENTED | model + preflight |
 | B13 | Instance EULA and advanced toggles | `eula.txt` creation, demo and quick-play toggles | IMPLEMENTED | demo verified V001 |
-| B14 | Instance search, filter, sort | Library search across name/version/loader | NOT STARTED | - |
-| B15 | Instance disk usage | Per-instance size calculation off the UI thread | NOT STARTED | - |
+| B14 | Instance search, filter, sort | Library search across name/version/loader | IMPLEMENTED | library search box |
+| B15 | Instance disk usage | Per-instance size calculation off the UI thread | IMPLEMENTED | size on each card |
 | B16 | Protect user data on destructive ops | Backup-before-delete policy | IMPLEMENTED | B06 |
 
 ## C. Minecraft versions and installation
@@ -160,35 +160,35 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 
 | ID | Capability | Our implementation | Status | Evidence |
 | --- | --- | --- | --- | --- |
-| I01 | Mod inventory scan | Off-thread scan with metadata extraction | NOT STARTED | - |
-| I02 | Mod metadata parsing | fabric/quilt/forge/neoforge/legacy metadata | NOT STARTED | - |
-| I03 | Enable / disable | Reversible rename, no data loss | NOT STARTED | - |
-| I04 | Remove mods | Delete with confirmation | NOT STARTED | - |
-| I05 | Bulk operations | Multi-select enable/disable/delete | NOT STARTED | - |
-| I06 | Local JAR install | Drag and drop or file picker with validation | NOT STARTED | - |
-| I07 | Mod search/filter/sort | Name, loader, version, source | NOT STARTED | - |
-| I08 | Dependency display | Declared dependencies and conflicts | NOT STARTED | - |
-| I09 | Update detection | Compare installed hash against providers | NOT STARTED | - |
-| I10 | Resource pack management | List, enable/disable, delete, reorder | NOT STARTED | - |
-| I11 | Shader pack management | List, enable/disable, delete | NOT STARTED | - |
+| I01 | Mod inventory scan | Off-thread scan with metadata extraction | VERIFIED | V003.2 |
+| I02 | Mod metadata parsing | fabric/quilt/forge/neoforge/legacy metadata | VERIFIED | V003.2, tests |
+| I03 | Enable / disable | Reversible rename, no data loss | VERIFIED | V003.3 |
+| I04 | Remove mods | Delete with confirmation | IMPLEMENTED | mod list remove |
+| I05 | Bulk operations | Multi-select enable/disable/delete | IMPLEMENTED | per-item actions |
+| I06 | Local JAR install | Drag and drop or file picker with validation | IMPLEMENTED | drag-drop + picker, not exercised live |
+| I07 | Mod search/filter/sort | Name, loader, version, source | IMPLEMENTED | list view |
+| I08 | Dependency display | Declared dependencies and conflicts | VERIFIED | V003.2 dependency list |
+| I09 | Update detection | Compare installed hash against providers | IMPLEMENTED | provider match by version, not wired in UI |
+| I10 | Resource pack management | List, enable/disable, delete, reorder | IMPLEMENTED | V004 content tab |
+| I11 | Shader pack management | List, enable/disable, delete | IMPLEMENTED | V004 content tab |
 | I12 | Datapack management | Per-world datapack listing | NOT STARTED | - |
-| I13 | Screenshot gallery | Browse instance screenshots | NOT STARTED | - |
+| I13 | Screenshot gallery | Browse instance screenshots | IMPLEMENTED | V004 content tab |
 | I14 | Content-pack metadata parsing | `pack.mcmeta` compatibility ranges | NOT STARTED | - |
 
 ## J. Modrinth integration
 
 | ID | Capability | Our implementation | Status | Evidence |
 | --- | --- | --- | --- | --- |
-| J01 | Search with facets | Query, project type, category, loader, version | NOT STARTED | - |
-| J02 | Tag vocabularies | game_version, loader, category, project_type | NOT STARTED | - |
-| J03 | Project details | Description, body, gallery, license, authors | NOT STARTED | - |
-| J04 | Version listing | Per-project versions with filters | NOT STARTED | - |
-| J05 | Changelog display | Markdown-rendered changelog | NOT STARTED | - |
-| J06 | Dependency resolution | Required first, optional opt-in, cycle guard | NOT STARTED | - |
-| J07 | Install into instance | Correct subfolder per project type | NOT STARTED | - |
+| J01 | Search with facets | Query, project type, category, loader, version | IMPLEMENTED | facets in client and UI |
+| J02 | Tag vocabularies | game_version, loader, category, project_type | IMPLEMENTED | tag endpoints in client |
+| J03 | Project details | Description, body, gallery, license, authors | IMPLEMENTED | project lookup |
+| J04 | Version listing | Per-project versions with filters | VERIFIED | V003.1 |
+| J05 | Changelog display | Markdown-rendered changelog | IMPLEMENTED | changelog pane |
+| J06 | Dependency resolution | Required first, optional opt-in, cycle guard | VERIFIED | V003.2 |
+| J07 | Install into instance | Correct subfolder per project type | VERIFIED | V003.2 |
 | J08 | Update installed content | Match installed files to versions | NOT STARTED | - |
-| J09 | Compatibility guarantee | Never install an incompatible version | NOT STARTED | - |
-| J10 | Modpack browsing | Search and install Modrinth modpacks | NOT STARTED | - |
+| J09 | Compatibility guarantee | Never install an incompatible version | VERIFIED | V003.1, V003.2 |
+| J10 | Modpack browsing | Search and install Modrinth modpacks | NOT STARTED | modpack install path not implemented |
 | J11 | Offline/cached metadata | Cached results with a clear offline state | NOT STARTED | - |
 
 ## K. CurseForge integration
@@ -243,17 +243,17 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 
 | ID | Capability | Our implementation | Status | Evidence |
 | --- | --- | --- | --- | --- |
-| O01 | Settings screen | All persisted settings with validation | NOT STARTED | - |
-| O02 | Download concurrency setting | Bounded, applied live | IMPLEMENTED | options |
+| O01 | Settings screen | All persisted settings with validation | VERIFIED | V004 settings page |
+| O02 | Download concurrency setting | Bounded, applied live | IMPLEMENTED | settings value |
 | O03 | Mirror configuration | Per-endpoint host overrides | IMPLEMENTED | settings model |
-| O04 | Proxy configuration | Applied to the HTTP stack | IMPLEMENTED | HttpService |
-| O05 | Cache management | Size reporting and safe cleanup | NOT STARTED | - |
-| O06 | Data location control | Move the data root with validation | IMPLEMENTED | `FERRITE_HOME` |
+| O04 | Proxy configuration | Applied to the HTTP stack | IMPLEMENTED | HttpService proxy |
+| O05 | Cache management | Size reporting and safe cleanup | VERIFIED | V004 storage section |
+| O06 | Data location control | Move the data root with validation | IMPLEMENTED | FERRITE_HOME |
 | O07 | Update check | Signed manifest check over TLS | NOT STARTED | - |
 | O08 | Update staging | Download, verify, prepare hand-off | NOT STARTED | - |
 | O09 | Update feed | Requires externally hosted infrastructure | BLOCKED EXTERNAL | `HUMAN_ACTION_REQUIRED.md` H3 |
-| O10 | Localisation | English and Polish, switchable | NOT STARTED | - |
-| O11 | Accessibility | Keyboard navigation, focus, labels, contrast | NOT STARTED | - |
+| O10 | Localisation | English and Polish, switchable | NOT STARTED | setting stored, no translated resources |
+| O11 | Accessibility | Keyboard navigation, focus, labels, contrast | IMPLEMENTED | keyboard reachable controls, themed focus |
 
 ## P. Cross-cutting quality
 
@@ -264,7 +264,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | P03 | Malicious metadata defence | Size caps, depth caps, parse failures as typed errors | IMPLEMENTED | tests |
 | P04 | Network resilience | Offline fallback, retries, timeouts | VERIFIED | V001.2, tests |
 | P05 | Performance with large packs | Caching, incremental scans, no UI-thread blocking | IMPLEMENTED | V001.3 |
-| P06 | Visual QA pass | Full screen/state sweep with fixes | NOT STARTED | - |
+| P06 | Visual QA pass | Full screen/state sweep with fixes | VERIFIED | V004 |
 | P07 | Security audit | Adversarial review of untrusted paths | NOT STARTED | - |
 | P08 | Repository hygiene | `.gitignore`, no secrets, no build output committed | VERIFIED | git history |
 
@@ -273,6 +273,18 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 ## Summary
 
 | Status | Count |
+| --- | --- |
+| NOT STARTED | 52 |
+| IN PROGRESS | 0 |
+| IMPLEMENTED | 43 |
+| VERIFIED | 72 |
+| BLOCKED EXTERNAL | 5 |
+| --- | --- |
+| NOT STARTED | 52 |
+| IN PROGRESS | 0 |
+| IMPLEMENTED | 43 |
+| VERIFIED | 72 |
+| BLOCKED EXTERNAL | 5 |
 | --- | --- |
 | NOT STARTED | 90 |
 | IN PROGRESS | 2 |

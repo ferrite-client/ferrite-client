@@ -1,5 +1,6 @@
 using System.IO.Compression;
 using System.Text.Json;
+using Ferrite.Core.Util;
 using Microsoft.Extensions.Logging;
 using Tomlyn;
 
@@ -244,14 +245,20 @@ public sealed class ModScanner
     {
         var entry = archive.Entries.FirstOrDefault(candidate =>
             string.Equals(candidate.FullName, entryName, StringComparison.OrdinalIgnoreCase));
-        if (entry is null || entry.Length > MaxMetadataBytes)
+        if (entry is null)
         {
             return null;
         }
 
-        using var stream = entry.Open();
-        using var reader = new StreamReader(stream);
-        return reader.ReadToEnd();
+        try
+        {
+            return ArchiveExtractor.ReadBounded(entry, MaxMetadataBytes, entryName);
+        }
+        catch (PathSafetyException)
+        {
+            // A mod that declares a small metadata file but streams a huge one is not readable.
+            return null;
+        }
     }
 
     private static string? GetString(JsonElement element, string property) =>

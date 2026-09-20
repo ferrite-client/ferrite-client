@@ -74,3 +74,33 @@ primitive and a process-execution bug is code execution.
 ## Reporting
 
 Security-relevant behaviour changes must update this document and add a regression test.
+
+---
+
+## Audit log
+
+### 2026-09-21 - implementation audit
+
+Every path that consumes untrusted input was re-read after the feature work, with these results.
+
+| Area | Finding |
+| --- | --- |
+| Archive extraction | Entry names are normalised and containment-checked; absolute paths, traversal segments, drive qualifiers, reserved device names, and symlinks are rejected or skipped. Entry count and expanded size are bounded. Covered by tests. |
+| Archive metadata reads | **Fixed.** `ReadEntryText` and the mod scanner trusted the archive header's declared entry length before reading. The declared length is attacker-controlled, so both now bound the decompressed stream itself and throw `PathSafetyException` past the cap. A regression test covers it. |
+| Zip bomb in mod metadata | Covered by the fix above: a mod whose metadata entry streams more than 4 MiB is treated as unreadable rather than buffered. |
+| Path construction | Instance-scoped writes go through containment checks in the content installer and the virtual-asset mirror. Runtime entry paths and installer data entries are containment-checked or sanitised. |
+| Remote file names | Provider file names pass through `PathSafety.SanitizeFileName` before they become paths. |
+| Process execution | Java, installer processors, and shell-open all use `ProcessStartInfo.ArgumentList`. No shell string is constructed anywhere in the codebase. |
+| Command arguments | Launch argument substitution fails closed on an unknown placeholder, and processor substitution resolves bracketed maven coordinates to store paths rather than passing them through. |
+| Credential persistence | Tokens live in the DPAPI-protected secret store, keyed per account. Non-Windows builds report degraded protection in the UI. |
+| Credential disclosure | The central redactor is applied to every log line and to the launch-command preview; both are covered by tests. Third-party logging (NeoForge's ModLauncher) was observed redacting tokens itself, which is why the launcher must not rely on it. |
+| Temporary files | Downloads write to a `.part` sibling and are moved into place only after verification. Installer working directories are deleted in a `finally` block. |
+| HTTP handling | HTTPS everywhere, bounded response sizes, per-attempt timeouts, retry classification, and no plaintext endpoints in the default configuration. |
+| Update installation | Not implemented, so there is no updater attack surface yet. When it is added it must follow the staging and verification rules above. |
+
+**Residual risks accepted for now**
+
+- Mod JARs are parsed as ZIP archives and their metadata is read; the JAR's own bytecode is never
+  loaded or executed by the launcher.
+- The launcher runs with user privileges. A defect in a path check would be a file-write primitive,
+  which is why containment is centralised rather than re-implemented per call site.

@@ -165,14 +165,36 @@ public static class ArchiveExtractor
             return null;
         }
 
-        if (entry.Length > maxBytes)
-        {
-            throw new PathSafetyException($"Entry '{entryPath}' exceeds the {maxBytes} byte read limit.");
-        }
+        return ReadBounded(entry, maxBytes, entryPath);
+    }
 
+    /// <summary>
+    /// Reads an entry with a hard cap on decompressed bytes. The declared length in the archive
+    /// header is attacker-controlled, so the stream itself is bounded rather than trusted.
+    /// </summary>
+    internal static string ReadBounded(ZipArchiveEntry entry, int maxBytes, string entryPath)
+    {
         using var source = entry.Open();
         using var reader = new StreamReader(source, System.Text.Encoding.UTF8);
-        return reader.ReadToEnd();
+        var buffer = new char[8192];
+        var builder = new System.Text.StringBuilder();
+        while (true)
+        {
+            var read = reader.Read(buffer, 0, buffer.Length);
+            if (read == 0)
+            {
+                break;
+            }
+
+            if (builder.Length + read > maxBytes)
+            {
+                throw new PathSafetyException($"Entry '{entryPath}' exceeds the {maxBytes} byte read limit.");
+            }
+
+            builder.Append(buffer, 0, read);
+        }
+
+        return builder.ToString();
     }
 
     public static IReadOnlyList<string> ListEntries(string archivePath)

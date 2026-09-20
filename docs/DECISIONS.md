@@ -121,3 +121,24 @@ resolve bracketed coordinates such as `[net.neoforged:neoform:...@zip]` to store
 **Why.** These shapes were read from a real `neoforge-21.1.251` installer. Guessing produced a
 `NullPointerException` inside the official processor, which is a precise signal that the contract
 was wrong rather than the loader.
+
+## D013 - xunit v3 with the Microsoft.Testing.Platform runner
+
+**Decision.** Both test projects are xunit v3 executables, and `scripts/test.ps1` runs each project
+through its own entry point (`dotnet run --project <project>`).
+
+**Why.** Avalonia's headless xunit integration requires xunit v3, and .NET 10's SDK no longer
+supports the VSTest path for Microsoft.Testing.Platform projects. The SDK's `dotnet test`
+integration reported `Zero tests ran` for these projects in this SDK build, while the runner's own
+entry point discovers and runs them reliably. The script documents that explicitly rather than
+leaving a command that silently runs nothing.
+
+## D014 - Interface design language
+
+**Decision.** Graphite neutral surfaces, a copper accent for primary actions and selection, and a
+teal tone for success. Navigation is a list, not a row of form controls. Cards are used only for
+repeated items and framed panels, never nested.
+
+**Why.** The brief requires an original visual identity and forbids copied assets. The palette is
+deliberately two-accent rather than single-hue, and the navigation list keeps the shell reading as
+an application rather than a settings form. Both themes were rendered and inspected (V004).

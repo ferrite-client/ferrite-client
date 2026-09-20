@@ -6,8 +6,20 @@ own. XMCL is used only as a functional reference for what a current, complete la
 
 ## Status
 
-Under active construction. `FEATURE_PARITY.md` is the authoritative statement of what is
-implemented, verified, or externally blocked. Do not trust a summary over that file.
+Working launcher, under continued construction. `FEATURE_PARITY.md` is the authoritative statement
+of what is implemented, verified, or externally blocked. Do not trust a summary over that file.
+
+What has been exercised end to end against live services (evidence in `docs/VERIFICATION.md`):
+
+- Installing Minecraft 26.3 from Mojang metadata: 5,223 files, 584.6 MiB, hash-verified.
+- Launching it to the main menu: LWJGL 3.4.3, OpenGL via the installed NVIDIA driver, sound engine
+  started, clean shutdown.
+- Integrity verification and repair of a deliberately corrupted library.
+- Installing and launching **Fabric** 0.19.5 on 1.21.1, and **NeoForge** 21.1.251 on 1.21.1 by
+  running the official installer processor chain.
+- Installing a real mod from Modrinth with loader-aware version selection, reading its metadata
+  from the mod file, and disabling/re-enabling it without touching its bytes.
+- Java discovery across PATH, vendor installs, and the Minecraft launcher's own runtimes.
 
 ## Requirements
 
@@ -18,10 +30,14 @@ implemented, verified, or externally blocked. Do not trust a summary over that f
 ## Build, test, run
 
 ```powershell
-dotnet build Ferrite.slnx
-dotnet test Ferrite.slnx
+./scripts/build.ps1
+./scripts/test.ps1
 dotnet run --project src/Ferrite.App
 ```
+
+Note: .NET 10's `dotnet test` integration does not discover xunit v3 tests here, so
+`scripts/test.ps1` runs each test project through its runner entry point. See
+`docs/DEVELOPMENT.md`.
 
 ## Data locations
 

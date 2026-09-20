@@ -185,3 +185,76 @@ instance reaches a working game, not merely a started JVM.
 **Observation.** NeoForge's own ModLauncher redacted the access token in its log output
 (`--accessToken, ❄❄❄❄❄❄❄❄`), which is independent confirmation that the token was passed as an
 argument and that credential handling in third-party logging is worth not relying on.
+
+---
+
+## V003 - Content: Modrinth install, mod inventory, enable/disable (2026-09-21)
+
+### V003.1 Search and loader-aware version selection
+
+Command: `Ferrite.Verify content 1.21.1 --slug sodium`
+
+The instance used was the NeoForge 21.1.251 instance created in V002.2. Ferrite selected
+`sodium-neoforge-0.8.13+mc1.21.1.jar`, not the Fabric build, because version selection filters on
+the instance's loader and game version. A Fabric-only project would have been refused rather than
+silently installed.
+
+### V003.2 Install and inventory
+
+```
+Plan: 1 file(s)
+  mods/sodium-neoforge-0.8.13+mc1.21.1.jar (1.2 MiB)
+Installed 1 file(s)
+Mod inventory now reports 1 mod(s):
+  Sodium [neoforge] id=sodium version=0.8.13+mc1.21.1 enabled=True
+      depends on: minecraft, neoforge, embeddium
+```
+
+The metadata came from the mod's own `META-INF/neoforge.mods.toml`, not from the file name, and the
+declared dependencies were extracted from it.
+
+### V003.3 Enable / disable round trip
+
+Command: `Ferrite.Verify toggle 1.21.1`
+
+```
+Toggling sodium-neoforge-0.8.13+mc1.21.1.jar
+  disabled -> sodium-neoforge-0.8.13+mc1.21.1.jar.disabled
+  metadata still readable while disabled: Sodium, enabled=False
+  re-enabled -> sodium-neoforge-0.8.13+mc1.21.1.jar
+  metadata after re-enable: Sodium, enabled=True
+```
+
+Disabling renames the file and never rewrites it, so the mod's bytes are untouched.
+
+---
+
+## V004 - Interface rendering and visual QA (2026-09-21)
+
+**Method.** `tests/Ferrite.App.Tests` renders the real `MainWindow` and the real views through
+Avalonia's headless Skia platform, captures frames, and asserts on the rendered visual tree. This
+catches layout-time failures, missing bindings, and missing resources that a compile cannot. Frames
+are written to `$env:FERRITE_UI_SHOTS` for inspection.
+
+Commands: `pwsh -File scripts/test.ps1`
+
+Result: `Ferrite.App.Tests Total: 5, Errors: 0, Failed: 0`.
+
+Screens inspected: shell (dark), shell (light), shell at the 1024x680 minimum size, and every page
+(Library, Browse, Java, Accounts, Settings) plus the instance detail page.
+
+**Issues found and fixed during this pass**
+
+1. Navigation used the theme's default radio glyphs, which read as form controls rather than
+   navigation, and the selected row used Fluent's blue instead of Ferrite's copper accent. Replaced
+   with a navigation list styled to the Ferrite palette.
+2. The window-size row packed two numeric inputs and a separator into one narrow column, producing
+   a cramped, misaligned row. Split into two equal fields with spinners hidden and a clarifying
+   hint.
+3. The Browse results pane and the detail pane were empty voids before any data arrived. Added
+   empty-state copy that also explains how the filters are applied.
+
+**Residual visual risks.** The interface has been reviewed at 1360x860, 1200x800 and 1024x680 in
+both themes. Very long instance or mod names, large mod lists, and live progress states were
+exercised only through the data model, not visually, because the environment has no populated
+library; the layouts use wrapping text and scrolling containers so they degrade predictably.

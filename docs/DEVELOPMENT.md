@@ -57,9 +57,34 @@ Produces a self-contained Windows x64 build under `artifacts/`.
 ## Repository layout
 
 ```
-src/Ferrite.Core   domain, services, no UI
-src/Ferrite.App    Avalonia desktop application
-tests/             automated tests
-docs/              architecture, research, plan, decisions, security, verification
-scripts/           build, test, package, parity summary
+src/Ferrite.Core          domain, services, no UI
+src/Ferrite.App           Avalonia desktop application
+tests/Ferrite.Core.Tests  unit and integration tests (xunit v3)
+tests/Ferrite.App.Tests   headless UI rendering tests (Avalonia headless + xunit v3)
+tools/Ferrite.Verify      live verification harness against real services
+docs/                     architecture, research, plan, decisions, security, verification
+scripts/                  build, test, verify-live, parity summary
 ```
+
+## Test platform note
+
+.NET 10 no longer supports the VSTest path for Microsoft.Testing.Platform projects, and the SDK's
+`dotnet test` integration did not discover xunit v3 tests here (it reported "Zero tests ran"). Use
+`scripts/test.ps1`, which runs each test project through its own runner entry point. The UI tests
+write frames to `$env:FERRITE_UI_SHOTS` when that variable is set.
+
+## Live verification
+
+`scripts/verify-live.ps1` runs real workflows against Mojang and Modrinth:
+
+```powershell
+./scripts/verify-live.ps1 java
+./scripts/verify-live.ps1 manifest
+./scripts/verify-live.ps1 install 26.3
+./scripts/verify-live.ps1 launch 26.3 --seconds 60
+./scripts/verify-live.ps1 fabric 1.21.1
+./scripts/verify-live.ps1 neoforge 1.21.1
+./scripts/verify-live.ps1 content 1.21.1 --slug sodium
+```
+
+Results are recorded in `docs/VERIFICATION.md`.

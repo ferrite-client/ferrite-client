@@ -138,6 +138,15 @@ public sealed class ArchiveExtractorTests : IDisposable
         Assert.Single(ArchiveExtractor.ListEntries(archive));
     }
 
+    [Fact]
+    public void ReadEntryText_enforces_the_read_cap_on_the_stream()
+    {
+        var archive = CreateArchive(("big.json", new string('x', 20_000)));
+
+        Assert.Throws<PathSafetyException>(() =>
+            ArchiveExtractor.ReadEntryText(archive, "big.json", maxBytes: 1024));
+    }
+
     private string CreateArchive(params (string Name, string Content)[] entries)
     {
         var path = Path.Combine(_workspace, "archive-" + Guid.NewGuid().ToString("N") + ".zip");
