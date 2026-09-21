@@ -8,11 +8,17 @@
   <Grid RowDefinitions="Auto,*" Margin="24">
 
     <StackPanel Grid.Row="0" Spacing="10" Margin="0,0,0,16">
-      <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
+      <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto" ColumnSpacing="10">
         <TextBox Grid.Column="0" PlaceholderText="{Binding SearchPlaceholder}"
                  Text="{Binding SearchText}" />
         <Button Grid.Column="1" Classes="primary" Content="{DynamicResource L.Browse.Search}" Command="{Binding SearchCommand}" />
         <Button Grid.Column="2" Content="{DynamicResource L.Browse.RefreshInstances}" Command="{Binding RefreshInstancesCommand}" />
+        <Button Grid.Column="3" Classes="chip" VerticalAlignment="Center"
+                Content="{DynamicResource L.Browse.Saved}" IsVisible="{Binding IsSearchView}"
+                Command="{Binding ShowSavedCommand}" />
+        <Button Grid.Column="4" Classes="chip" VerticalAlignment="Center"
+                Content="{DynamicResource L.Browse.SearchResults}" IsVisible="{Binding IsSavedView}"
+                Command="{Binding ShowSearchCommand}" />
       </Grid>
 
       <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*" ColumnSpacing="10">
@@ -99,7 +105,7 @@
           </ListBox>
           <TextBlock Classes="muted" Margin="12" VerticalAlignment="Top"
                      IsVisible="{Binding !HasResults}"
-                     Text="{DynamicResource L.Browse.Empty}" />
+                     Text="{Binding EmptyMessage}" />
         </Grid>
       </Border>
 
@@ -186,6 +192,7 @@
           </ScrollViewer>
 
           <StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+            <Button Content="{Binding SavedButtonText}" Command="{Binding ToggleSavedCommand}" />
             <Button Content="{DynamicResource L.Browse.OpenProjectPage}" Command="{Binding OpenProjectPageCommand}" />
             <Button Classes="primary" Content="{DynamicResource L.Browse.Install}" IsEnabled="{Binding CanInstall}"
                     Command="{Binding InstallCommand}" />

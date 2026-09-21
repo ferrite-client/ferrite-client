@@ -96,6 +96,15 @@ internal static class StringsPl
                 "Przeszukaj dostawcę treści w poszukiwaniu modów, modpacków, paczek zasobów i shaderów. "
                 + "Wyniki są filtrowane według wersji Minecrafta i loadera wybranej instancji.",
             ["L.Browse.InstallInto"] = "ZAINSTALUJ W",
+            ["L.Browse.Saved"] = "Zapisane",
+            ["L.Browse.SearchResults"] = "Wyniki wyszukiwania",
+            ["L.Browse.Save"] = "Zapisz",
+            ["L.Browse.Unsave"] = "Usuń z zapisanych",
+            ["L.Browse.SavedProject"] = "Zapisano {0}",
+            ["L.Browse.UnsavedProject"] = "Usunięto {0} z zapisanych",
+            ["L.Browse.SavedSummary"] = "{0} zapisanych projektów dla tego dostawcy",
+            ["L.Browse.NoSaved"] =
+                "Nic jeszcze nie zapisano dla tego dostawcy. Wyszukaj, a potem użyj Zapisz na projekcie.",
             ["L.Browse.FieldVersion"] = "WERSJA",
             ["L.Browse.IncludeOptional"] = "Uwzględnij opcjonalne zależności",
             ["L.Browse.OpenProjectPage"] = "Otwórz stronę projektu",

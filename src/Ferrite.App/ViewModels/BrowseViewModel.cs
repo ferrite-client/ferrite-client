@@ -119,7 +119,14 @@ public sealed partial class BrowseViewModel : ObservableObject
         StatusNote = null;
         OnPropertyChanged(nameof(HasResults));
         _ = LoadFacetsAsync();
-        _ = SearchAsync();
+        if (IsSavedView)
+        {
+            _ = RebuildSavedResultsAsync();
+        }
+        else
+        {
+            _ = SearchAsync();
+        }
     }
 
     partial void OnSelectedResultChanged(ContentSummary? value)
@@ -127,6 +134,7 @@ public sealed partial class BrowseViewModel : ObservableObject
         OnPropertyChanged(nameof(HasSelection));
         _ = LoadVersionsAsync();
         _ = LoadProjectDetailsAsync(value);
+        _ = RefreshSelectedSavedAsync();
     }
 
     partial void OnSelectedVersionChanged(ContentVersion? value) => OnPropertyChanged(nameof(CanInstall));

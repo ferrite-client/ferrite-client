@@ -104,6 +104,7 @@ public sealed class AppServices : IDisposable
             Manifests,
             loggerFactory.CreateLogger<ContentInstaller>());
         Credentials = new ProviderCredentialStore(secrets);
+        SavedProjects = new SavedProjectStore(paths, loggerFactory.CreateLogger<SavedProjectStore>());
         CurseForgeApi = new CurseForgeClient(
             Http,
             loggerFactory.CreateLogger<CurseForgeClient>(),
@@ -220,6 +221,9 @@ public sealed class AppServices : IDisposable
     public ContentInstaller Content { get; }
 
     public ProviderCredentialStore Credentials { get; }
+
+    /// <summary>Provider projects the user saved to revisit, and the browser's saved view.</summary>
+    public SavedProjectStore SavedProjects { get; }
 
     public CachedContentProvider CurseForge { get; }
 

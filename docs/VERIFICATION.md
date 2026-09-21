@@ -2310,3 +2310,44 @@ does not inspect an arbitrary file tree, it does not read the game's own in-memo
 conclusions are rules over evidence rather than a diagnosis. A model-backed variant would need an
 externally supplied endpoint and key, the same shape of dependency as the Microsoft client id and
 the CurseForge key.
+
+## V038 - Saved projects, and the browser's saved view (2026-09-21)
+
+Commands: `SavedProjectStoreTests` (Core), `BrowseSavedTests` (App), and the whole suite
+(`350` Core tests, `81` App tests, all passing).
+
+XMCL's catalogue has "Mod Collections - save projects you want to revisit and turn a collection into
+a reusable setup. Followed Modrinth projects". The first inventory did not list it. Ferrite now lets
+the browser save a project and lists the saved ones in a dedicated view.
+
+### V038.1 The store is the only writer
+
+`SavedProjectStore` owns `config/saved-projects.json` and serialises every change through one gate,
+so two toggles cannot interleave into a half-written document. An entry is keyed by provider plus
+project id, which is what makes "save, save again" a single entry and keeps the same project id from
+two providers apart. The Core tests cover the toggle round trip, deduplication, the same id under two
+providers, persistence across a fresh store over the same root, an unreadable document (the store
+logs, preserves the file, starts empty, and stays usable), and a removal of something that was never
+saved.
+
+### V038.2 The saved view reuses the result list
+
+The saved view is the same result list filled from the active provider's saved entries rather than
+from a search, so selecting one still loads its versions, its project body, and its install path
+through the code that already existed instead of a parallel path. Filtering to the active provider is
+deliberate: a saved entry from a different provider would otherwise be resolved against the wrong
+API. The App tests save three projects across two providers, open the saved view, and confirm only
+the active provider's two appear; unsaving from the view removes the entry and the empty state says
+so; saving and unsaving the selected project flips the button label and the stored list; and leaving
+the view returns to searching.
+
+### V038.3 The interface
+
+The browser header gains a `Saved` control that swaps the result list for the saved view, with a
+`Search results` control to come back, and the project panel gains a save toggle whose label reflects
+the selected project's state. The saved view's empty state is its own message rather than the search
+prompt. Every new label exists in English and Polish; the localisation tests pass.
+
+**Limitations, stated precisely.** Saving is per provider, so the same project saved from two
+providers is two entries; there is no folder or tag grouping inside the saved list, and the saved
+view lists all of a provider's saved projects with no further filtering.

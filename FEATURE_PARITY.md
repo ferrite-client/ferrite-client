@@ -195,7 +195,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | J09 | Compatibility guarantee | Never install an incompatible version | VERIFIED | V003.1, V003.2 |
 | J10 | Modpack browsing | A modpack result becomes a new instance through the modpack installers | VERIFIED | V025.3 dispatch, download, checksum; V005.1/V005.2 real pack install and launch |
 | J11 | Offline/cached metadata | Network-first cache; a failed call serves cached data and says how old it is | VERIFIED | V009 |
-| J12 | Mod collections | Save ("follow") projects to revisit, and turn a collection into a setup | NOT STARTED | XMCL feature catalogue 11 |
+| J12 | Mod collections | Save a project to revisit it; the browser lists a provider's saved projects and installs from there | VERIFIED | V038 |
 
 ## K. CurseForge integration
 
@@ -287,8 +287,8 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 
 | Status | Count |
 | --- | --- |
-| NOT STARTED | 9 |
+| NOT STARTED | 8 |
 | IN PROGRESS | 0 |
 | IMPLEMENTED | 0 |
-| VERIFIED | 158 |
+| VERIFIED | 159 |
 | BLOCKED EXTERNAL | 18 |

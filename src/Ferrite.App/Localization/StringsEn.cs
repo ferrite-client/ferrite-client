@@ -96,6 +96,15 @@ internal static class StringsEn
                 "Search a provider for mods, modpacks, resource packs, and shaders. Results are filtered "
                 + "to the selected instance's Minecraft version and loader.",
             ["L.Browse.InstallInto"] = "INSTALL INTO",
+            ["L.Browse.Saved"] = "Saved",
+            ["L.Browse.SearchResults"] = "Search results",
+            ["L.Browse.Save"] = "Save",
+            ["L.Browse.Unsave"] = "Remove from saved",
+            ["L.Browse.SavedProject"] = "Saved {0}",
+            ["L.Browse.UnsavedProject"] = "Removed {0} from saved",
+            ["L.Browse.SavedSummary"] = "{0} saved project(s) for this provider",
+            ["L.Browse.NoSaved"] =
+                "Nothing is saved for this provider yet. Search, then use Save on a project.",
             ["L.Browse.FieldVersion"] = "VERSION",
             ["L.Browse.IncludeOptional"] = "Include optional dependencies",
             ["L.Browse.OpenProjectPage"] = "Open project page",

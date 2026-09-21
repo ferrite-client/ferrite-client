@@ -66,6 +66,9 @@ public sealed class AppPaths
 
     public string SecretsFile => Path.Combine(ConfigDirectory, "accounts.bin");
 
+    /// <summary>Provider projects the user saved to revisit.</summary>
+    public string SavedProjectsFile => Path.Combine(ConfigDirectory, "saved-projects.json");
+
     /// <param name="baseDirectory">
     /// Where to look for the marker files. Defaults to the executable's directory; a test supplies its
     /// own so it never touches the real installation.
