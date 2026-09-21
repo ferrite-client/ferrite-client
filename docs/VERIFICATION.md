@@ -1212,3 +1212,40 @@ references no `args.txt` at all, so nothing is missing.
 Both defects were in rows marked `IMPLEMENTED` with evidence like "same path as Fabric" or "same path
 as NeoForge". Those claims were plausible and wrong. The audit continues row by row: a row moves to
 `VERIFIED` only when the workflow has actually been run, which is how these two were found.
+
+---
+
+## V018 - Credential storage, and the boundary of the auth rows (2026-09-21)
+
+### V018.1 Secure credential storage is verified
+
+Command: `pwsh -File scripts/test.ps1` (`ProviderCredentialStoreTests`)
+
+The store is exercised against the real operating system facility rather than a stub:
+
+- A key is written through `ProtectedSecretStore`, which on Windows calls
+  `ProtectedData.Protect(..., DataProtectionScope.CurrentUser)`.
+- The test then reads the file on disk and asserts the plaintext value does not appear in it, so the
+  protection is observable, not assumed.
+- A second store instance reads the value back, which is a real decrypt by the same user.
+- Clearing a key removes it from disk as well as memory.
+- Loading twice does not discard what was written since the first load, which is the property the
+  account store and the provider key store share one file for.
+
+### V018.2 Why the rest of the authentication chain is BLOCKED EXTERNAL
+
+Every remaining authentication row needs the same two things, both of which only the user can
+provide: an Azure public-client application id (`HUMAN_ACTION_REQUIRED.md` H1 step 1-7) and a
+Minecraft-owned Microsoft account to sign in with. There is no way to exercise a device-code
+sign-in, an Xbox Live token exchange, an entitlement check, a profile fetch, or a token refresh
+without them, and forging one would prove nothing about whether the chain works.
+
+What is already done, and what the evidence column records it as: the full chain is implemented
+(device code, Xbox Live user token, XSTS with XErr mapping, `login_with_xbox`, entitlements,
+profile, refresh with an expiry threshold, Yggdrasil-overridable endpoints), and each step is tested
+against a scripted HTTP boundary with the request shapes the services document.
+
+The exact verification to perform afterwards is written in H1: enter the client id in Settings, sign
+in, and confirm the account appears, a launch uses it, and a second account can be added and
+switched between. Until then those rows are `BLOCKED EXTERNAL` rather than `VERIFIED`, and the
+parity matrix says which dependency is missing for each one.

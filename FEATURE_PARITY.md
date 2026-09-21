@@ -108,18 +108,18 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 
 | ID | Capability | Our implementation | Status | Evidence |
 | --- | --- | --- | --- | --- |
-| F01 | Microsoft device-code sign-in | OAuth device flow with polling and cancel | IMPLEMENTED | device-code flow, MicrosoftAuthTests |
-| F02 | Microsoft auth-code + PKCE sign-in | Loopback listener flow | IMPLEMENTED | PKCE flow shares the token exchange path |
-| F03 | Xbox Live + XSTS chain | User token -> XSTS with XErr mapping | IMPLEMENTED | Xbox Live + XSTS with XErr mapping, tests |
-| F04 | Minecraft services login | Token exchange + XUID capture | IMPLEMENTED | login_with_xbox, tests |
-| F05 | Entitlement check | `/entitlements/mcstore` | IMPLEMENTED | entitlements check, tests |
-| F06 | Profile retrieval | Name, UUID, skins, capes | IMPLEMENTED | profile, skins, capes, tests |
-| F07 | Token refresh | Automatic refresh with expiry handling | IMPLEMENTED | refresh with expiry threshold |
-| F08 | Multiple accounts + switching | Account list and active selection | IMPLEMENTED | account list, switching, sign-out |
-| F09 | Secure credential storage | DPAPI on Windows, degraded-mode elsewhere | IMPLEMENTED | secret store |
+| F01 | Microsoft device-code sign-in | OAuth device flow with polling and cancel | BLOCKED EXTERNAL | code + `MicrosoftAuthTests`; live sign-in needs H1 (Azure public-client id and a Minecraft-owned Microsoft account) |
+| F02 | Microsoft auth-code + PKCE sign-in | Loopback listener flow | BLOCKED EXTERNAL | PKCE shares the exchanged token path; live use needs a person at the browser, H1 |
+| F03 | Xbox Live + XSTS chain | User token -> XSTS with XErr mapping | BLOCKED EXTERNAL | request shape and XErr mapping are tested; a live user token needs H1 |
+| F04 | Minecraft services login | Token exchange + XUID capture | BLOCKED EXTERNAL | tested against a scripted boundary; a real XSTS token needs H1 |
+| F05 | Entitlement check | `/entitlements/mcstore` | BLOCKED EXTERNAL | tested against a scripted boundary; needs an owning account, H1 |
+| F06 | Profile retrieval | Name, UUID, skins, capes | BLOCKED EXTERNAL | tested against a scripted boundary; a real profile needs H1 |
+| F07 | Token refresh | Automatic refresh with expiry handling | BLOCKED EXTERNAL | refresh and expiry logic tested; a real expiring token needs H1 |
+| F08 | Multiple accounts + switching | Account list and active selection | BLOCKED EXTERNAL | store and switching are tested; two real accounts need H1 |
+| F09 | Secure credential storage | DPAPI on Windows, degraded-mode elsewhere | VERIFIED | V018.1: real DPAPI round trip, ciphertext on disk, idempotent load |
 | F10 | Secret redaction | Central redactor plus launch-preview redaction | VERIFIED | V001.7 |
-| F11 | Yggdrasil-compatible servers | Custom auth server support | IMPLEMENTED | AuthEndpoints is overridable for Yggdrasil servers |
-| F12 | Skin/cape preview | Bounded profile fetch and render | IMPLEMENTED | profile exposes skin/cape URLs |
+| F11 | Yggdrasil-compatible servers | Custom auth server support | BLOCKED EXTERNAL | endpoints are overridable and tested; a real third-party account is not available here, H1 |
+| F12 | Skin/cape preview | Bounded profile fetch and render | BLOCKED EXTERNAL | profile parsing and bounded fetch are tested; a real skin needs H1 |
 | F13 | Offline/cracked accounts | Deliberately not implemented | BLOCKED EXTERNAL | product brief forbids it |
 | F14 | Live Microsoft sign-in | Needs a real account and Azure client ID | BLOCKED EXTERNAL | `HUMAN_ACTION_REQUIRED.md` H1 |
 
@@ -273,6 +273,12 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 ## Summary
 
 | Status | Count |
+| --- | --- |
+| NOT STARTED | 0 |
+| IN PROGRESS | 0 |
+| IMPLEMENTED | 46 |
+| VERIFIED | 111 |
+| BLOCKED EXTERNAL | 15 |
 | --- | --- |
 | NOT STARTED | 0 |
 | IN PROGRESS | 0 |
