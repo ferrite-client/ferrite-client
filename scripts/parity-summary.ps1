@@ -39,12 +39,12 @@ foreach ($status in $statuses) {
 }
 $summaryText = $summary -join "`r`n"
 
-$pattern = '(?s)(## Summary\r?\n\r?\n)(\| Status \| Count \|.*?)(\r?\n)'
+$pattern = '(?s)(## Summary\r?\n\r?\n)((?:\|[^\r\n]*\r?\n?)+)'
 if ($content -notmatch $pattern) {
     throw 'Could not find the Summary table in FEATURE_PARITY.md'
 }
 
-$updated = [regex]::Replace($content, $pattern, { param($m) $m.Groups[1].Value + $summaryText + $m.Groups[3].Value })
+$updated = [regex]::Replace($content, $pattern, { param($m) $m.Groups[1].Value + $summaryText + "`r`n" })
 if ($updated -ne $content) {
     Set-Content -LiteralPath $parityFile -Value $updated -NoNewline
     Write-Output 'Summary table updated.'
