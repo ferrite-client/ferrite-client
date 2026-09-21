@@ -44,6 +44,75 @@ public sealed class ShellRenderingTests : IDisposable
         }
     }
 
+    /// <summary>The Content tab lists available updates with a per-item selection.</summary>
+    [AvaloniaFact]
+    public void Instance_content_tab_renders_available_updates()
+    {
+        var record = _services.Instances
+            .CreateAsync(
+                new InstanceRecord
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Modded instance",
+                    MinecraftVersion = "1.21.1",
+                    Loader = LoaderKind.Fabric,
+                    LoaderVersion = "0.15.11",
+                },
+                CancellationToken.None)
+            .GetAwaiter()
+            .GetResult();
+
+        var shell = new MainWindowViewModel(_services);
+        var viewModel = new InstanceDetailViewModel(record, _services, shell);
+        viewModel.Updates.Add(new ContentUpdateItemViewModel(
+            new ContentUpdate
+            {
+                Entry = new ContentManifestEntry
+                {
+                    RelativePath = "mods/sodium-fabric-0.5.11+mc1.21.jar",
+                    Provider = ModrinthClient.ProviderName,
+                    ProjectId = "AANobbMI",
+                    VersionId = "RncWhTxD",
+                },
+                Title = "Sodium 0.8.13 for Fabric 1.21.1",
+                Available = new ContentVersion(
+                    ModrinthClient.ProviderName,
+                    "SMxNOGZ6",
+                    "AANobbMI",
+                    "mc1.21.1-0.8.13-fabric",
+                    "Sodium 0.8.13 for Fabric 1.21.1",
+                    null,
+                    "release",
+                    ["1.21.1"],
+                    ["fabric"],
+                    [],
+                    [],
+                    null),
+            },
+            "Modrinth"));
+        viewModel.UpdateStatus = "Modrinth: 1 update(s), 0 up to date";
+
+        var window = new Window
+        {
+            Content = new InstanceDetailView { DataContext = viewModel },
+            Width = 1200,
+            Height = 900,
+        };
+        window.Show();
+
+        var tabs = window.GetVisualDescendants().OfType<TabControl>().First();
+        tabs.SelectedIndex = 2;
+
+        var frame = window.CaptureRenderedFrame();
+        Assert.NotNull(frame);
+
+        var texts = Texts(window);
+        Assert.Contains("Sodium 0.8.13 for Fabric 1.21.1", texts);
+        Assert.Contains(texts, text => text.Contains("Check for updates", StringComparison.Ordinal));
+
+        Save(frame!, "instance-updates");
+    }
+
     [AvaloniaFact]
     public void Shell_renders_with_navigation_and_status_bar()
     {

@@ -74,6 +74,7 @@ public sealed class AppServices : IDisposable
             loggerFactory.CreateLogger<ForgeLoaderService>(),
             loggerFactory);
         Cache = new ContentCache(paths.CacheDirectory, loggerFactory.CreateLogger<ContentCache>());
+        Manifests = new ContentManifestStore(loggerFactory.CreateLogger<ContentManifestStore>());
         Modrinth = new CachedContentProvider(
             new ModrinthClient(
                 Http,
@@ -81,7 +82,12 @@ public sealed class AppServices : IDisposable
                 modrinthApiBase ?? ModrinthClient.ApiBase),
             Cache,
             loggerFactory.CreateLogger<CachedContentProvider>());
-        Content = new ContentInstaller(Modrinth, Downloads, loggerFactory.CreateLogger<ContentInstaller>());
+        Content = new ContentInstaller(
+            Modrinth,
+            Downloads,
+            paths,
+            Manifests,
+            loggerFactory.CreateLogger<ContentInstaller>());
         Credentials = new ProviderCredentialStore(secrets);
         CurseForgeApi = new CurseForgeClient(
             Http,
@@ -94,7 +100,14 @@ public sealed class AppServices : IDisposable
         CurseForgeContent = new ContentInstaller(
             CurseForge,
             Downloads,
+            paths,
+            Manifests,
             loggerFactory.CreateLogger<ContentInstaller>());
+        ContentUpdates = new ContentUpdater(
+            Downloads,
+            Manifests,
+            paths,
+            loggerFactory.CreateLogger<ContentUpdater>());
         ContentProviders = [Modrinth, CurseForge];
         Mods = new InstanceContentManager(new ModScanner(loggerFactory.CreateLogger<ModScanner>()));
         Modpacks = new MrpackInstaller(
@@ -170,6 +183,8 @@ public sealed class AppServices : IDisposable
 
     public ContentCache Cache { get; }
 
+    public ContentManifestStore Manifests { get; }
+
     public CachedContentProvider Modrinth { get; }
 
     public ContentInstaller Content { get; }
@@ -185,6 +200,8 @@ public sealed class AppServices : IDisposable
     public CurseForgeClient CurseForgeApi { get; }
 
     public ContentInstaller CurseForgeContent { get; }
+
+    public ContentUpdater ContentUpdates { get; }
 
     /// <summary>Providers the browser can switch between, in display order.</summary>
     public IReadOnlyList<IContentProvider> ContentProviders { get; }

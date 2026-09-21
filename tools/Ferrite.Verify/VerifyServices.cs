@@ -60,9 +60,12 @@ internal sealed class VerifyServices : IDisposable
             LoggerFactory.CreateLogger<ForgeLoaderService>(),
             LoggerFactory);
         Modrinth = new ModrinthClient(Http, LoggerFactory.CreateLogger<ModrinthClient>());
+        Manifests = new ContentManifestStore(LoggerFactory.CreateLogger<ContentManifestStore>());
         Content = new ContentInstaller(
             Modrinth,
             Downloads,
+            Paths,
+            Manifests,
             LoggerFactory.CreateLogger<ContentInstaller>());
         Secrets = new ProtectedSecretStore(
             Paths.SecretsFile,
@@ -76,7 +79,14 @@ internal sealed class VerifyServices : IDisposable
         CurseForgeContent = new ContentInstaller(
             CurseForge,
             Downloads,
+            Paths,
+            Manifests,
             LoggerFactory.CreateLogger<ContentInstaller>());
+        ContentUpdates = new ContentUpdater(
+            Downloads,
+            Manifests,
+            Paths,
+            LoggerFactory.CreateLogger<ContentUpdater>());
         Mods = new InstanceContentManager(new ModScanner(LoggerFactory.CreateLogger<ModScanner>()));
         Modpacks = new MrpackInstaller(
             Downloads,
@@ -146,6 +156,10 @@ internal sealed class VerifyServices : IDisposable
     public ModrinthClient Modrinth { get; }
 
     public ContentInstaller Content { get; }
+
+    public ContentManifestStore Manifests { get; }
+
+    public ContentUpdater ContentUpdates { get; }
 
     public ProtectedSecretStore Secrets { get; }
 

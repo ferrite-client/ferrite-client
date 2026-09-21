@@ -12,6 +12,13 @@ public static class ContentCompatibility
         "fabric", "quilt", "forge", "neoforge", "liteloader", "rift", "cauldron", "optifine",
     ];
 
+    /// <summary>
+    /// Tokens providers use to mean "the base game, whatever loader is present". Modrinth reports a
+    /// resource pack's loader as <c>minecraft</c>, so treating it as a mod loader would refuse every
+    /// resource pack on a vanilla instance.
+    /// </summary>
+    private static readonly string[] LoaderAgnosticTokens = ["minecraft", "vanilla", "datapack"];
+
     /// <summary>Never returns true for a version that does not match the instance's game/loader.</summary>
     public static bool IsCompatible(ContentVersion version, string? gameVersion, string? loader)
     {
@@ -24,10 +31,21 @@ public static class ContentCompatibility
             return false;
         }
 
-        if (!string.IsNullOrEmpty(loader)
-            && version.Loaders.Count > 0
-            && !version.Loaders.Any(candidate => Matches(candidate, loader)))
+        var specific = version.Loaders
+            .Where(candidate => !LoaderAgnosticTokens.Contains(Normalize(candidate), StringComparer.Ordinal))
+            .ToList();
+
+        if (!string.IsNullOrEmpty(loader))
         {
+            if (specific.Count > 0 && !specific.Any(candidate => Matches(candidate, loader)))
+            {
+                return false;
+            }
+        }
+        else if (specific.Count > 0)
+        {
+            // The instance declares no loader. A loader-specific build cannot be loaded by the base
+            // game, and suggesting one would produce an install that silently does nothing.
             return false;
         }
 

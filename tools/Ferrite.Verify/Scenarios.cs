@@ -416,16 +416,18 @@ internal static partial class Scenarios
         VerifyServices services,
         string minecraftVersion,
         string slug,
+        string? versionId,
+        LoaderKind loader,
         CancellationToken cancellationToken)
     {
-        var instance = await GetOrCreateInstanceAsync(services, minecraftVersion, cancellationToken);
+        var instance = await GetOrCreateInstanceAsync(services, minecraftVersion, loader, cancellationToken);
         Console.WriteLine(
             $"Instance: {instance.Name} ({instance.Loader.ToDisplayName()} {instance.LoaderVersion ?? "vanilla"})");
 
         var plan = await services.Content.PlanAsync(
             instance,
             slug,
-            versionId: null,
+            versionId,
             includeOptionalDependencies: false,
             cancellationToken);
 
@@ -557,12 +559,20 @@ internal static partial class Scenarios
                 true,
                 null).VersionId;
 
+    /// <summary>Vanilla instance, used by the scenarios whose subject is not the loader.</summary>
+    private static Task<InstanceRecord> GetOrCreateInstanceAsync(
+        VerifyServices services,
+        string versionId,
+        CancellationToken cancellationToken) =>
+        GetOrCreateInstanceAsync(services, versionId, LoaderKind.Vanilla, cancellationToken);
+
     private static async Task<InstanceRecord> GetOrCreateInstanceAsync(
         VerifyServices services,
         string versionId,
+        LoaderKind loader,
         CancellationToken cancellationToken)
     {
-        var name = $"verify-{versionId}";
+        var name = loader == LoaderKind.Vanilla ? $"verify-{versionId}" : $"verify-{versionId}-{loader}";
         var existing = (await services.Instances.LoadAllAsync(cancellationToken))
             .FirstOrDefault(record => string.Equals(record.Name, name, StringComparison.OrdinalIgnoreCase));
         if (existing is not null)
@@ -576,7 +586,7 @@ internal static partial class Scenarios
                 Id = Guid.NewGuid(),
                 Name = name,
                 MinecraftVersion = versionId,
-                Loader = LoaderKind.Vanilla,
+                Loader = loader,
             },
             cancellationToken);
     }

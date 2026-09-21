@@ -187,3 +187,17 @@ extraction path is checked for containment inside the intended destination.
   cache that cannot be written must never fail a search.
 - The cache is per request shape, not per HTTP call, so the same key produced by different arrival
   paths still hits, and a query with different filters cannot be answered by an unrelated entry.
+
+## 12. Content updates
+
+- `ContentManifest` (next to `instance.json`) records which provider project and version each
+  launcher-installed file came from, keyed by the file's path relative to the game directory.
+  `ContentInstaller` writes an entry only for files that actually downloaded, so an update check
+  never chases a file that is absent. Files a user dropped into `mods/` are deliberately absent:
+  there is no way to know their project, and guessing would risk replacing the wrong file.
+- `ContentUpdater.CheckAsync` resolves the newest version compatible with the instance through the
+  same `IContentProvider` contract the browser uses, and reports updates, already-current files,
+  and skips as three separate lists.
+- `ContentUpdater.ApplyAsync` downloads and hash-verifies each replacement first and only then
+  removes the file it replaces, so a failed download leaves the instance untouched. The manifest is
+  rewritten only for the entries that succeeded.

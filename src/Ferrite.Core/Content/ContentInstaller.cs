@@ -18,15 +18,21 @@ public sealed class ContentInstaller
 
     private readonly IContentProvider _provider;
     private readonly DownloadEngine _downloads;
+    private readonly Platform.AppPaths _paths;
+    private readonly ContentManifestStore _manifests;
     private readonly ILogger<ContentInstaller> _logger;
 
     public ContentInstaller(
         IContentProvider provider,
         DownloadEngine downloads,
+        Platform.AppPaths paths,
+        ContentManifestStore manifests,
         ILogger<ContentInstaller> logger)
     {
         _provider = provider;
         _downloads = downloads;
+        _paths = paths;
+        _manifests = manifests;
         _logger = logger;
     }
 
@@ -185,6 +191,7 @@ public sealed class ContentInstaller
 
         var requests = new List<DownloadRequest>(plan.Items.Count);
         var targets = new List<string>(plan.Items.Count);
+        var recorded = new List<ContentInstallItem>(plan.Items.Count);
         var warnings = new List<string>(plan.Warnings);
 
         foreach (var item in plan.Items)
@@ -200,6 +207,7 @@ public sealed class ContentInstaller
             }
 
             targets.Add(target);
+            recorded.Add(item);
             requests.Add(new DownloadRequest
             {
                 Url = item.Url,
@@ -226,7 +234,60 @@ public sealed class ContentInstaller
             warnings.Add($"{Path.GetFileName(failure.TargetPath)}: {failure.Message}");
         }
 
+        RecordManifest(instance, gameDirectory, summary, recorded, targets);
+
         return new ContentInstallResult(summary.DownloadedFiles + summary.SkippedFiles, targets, warnings);
+    }
+
+    /// <summary>
+    /// Records what landed on disk so the content can be checked for updates later. Only files that
+    /// actually succeeded are recorded, otherwise an update check would chase a file that is absent.
+    /// </summary>
+    private void RecordManifest(
+        InstanceRecord instance,
+        string gameDirectory,
+        DownloadSummary summary,
+        IReadOnlyList<ContentInstallItem> items,
+        IReadOnlyList<string> targets)
+    {
+        var failed = summary.Failures
+            .Select(failure => failure.TargetPath)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        var filePath = _paths.InstanceContentManifestFile(instance.Id);
+        var manifest = _manifests.Load(filePath);
+        var recorded = 0;
+
+        for (var index = 0; index < items.Count; index++)
+        {
+            if (failed.Contains(targets[index]))
+            {
+                continue;
+            }
+
+            var relative = Path.GetRelativePath(gameDirectory, targets[index]).Replace('\\', '/');
+            if (relative.StartsWith("..", StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            manifest.Upsert(new ContentManifestEntry
+            {
+                RelativePath = relative,
+                Provider = _provider.Name,
+                ProjectId = items[index].ProjectId,
+                VersionId = items[index].VersionId,
+                ProjectType = items[index].ProjectType,
+                Sha1 = items[index].Sha1,
+                InstalledAt = DateTimeOffset.UtcNow,
+            });
+            recorded++;
+        }
+
+        if (recorded > 0)
+        {
+            _manifests.Save(filePath, manifest);
+        }
     }
 
     private async Task<ContentVersion?> ResolveDependencyAsync(

@@ -129,45 +129,40 @@
       </TabItem>
 
       <TabItem Header="Content">
-        <ScrollViewer>
-          <StackPanel Spacing="18" Margin="0,16,0,0">
-            <StackPanel Spacing="6">
-              <TextBlock Classes="label" Text="RESOURCE PACKS" />
-              <ItemsControl ItemsSource="{Binding ResourcePacks}">
-                <ItemsControl.ItemTemplate>
-                  <DataTemplate>
-                    <TextBlock Text="{Binding FileName}" />
-                  </DataTemplate>
-                </ItemsControl.ItemTemplate>
-              </ItemsControl>
-              <TextBlock Classes="faint" Text="No resource packs." IsVisible="{Binding !HasResourcePacks}" />
-            </StackPanel>
-
-            <StackPanel Spacing="6">
-              <TextBlock Classes="label" Text="SHADER PACKS" />
-              <ItemsControl ItemsSource="{Binding ShaderPacks}">
-                <ItemsControl.ItemTemplate>
-                  <DataTemplate>
-                    <TextBlock Text="{Binding FileName}" />
-                  </DataTemplate>
-                </ItemsControl.ItemTemplate>
-              </ItemsControl>
-              <TextBlock Classes="faint" Text="No shader packs." IsVisible="{Binding !HasShaderPacks}" />
-            </StackPanel>
-
-            <StackPanel Spacing="6">
-              <TextBlock Classes="label" Text="SCREENSHOTS" />
-              <ItemsControl ItemsSource="{Binding Screenshots}">
-                <ItemsControl.ItemTemplate>
-                  <DataTemplate>
-                    <TextBlock Text="{Binding FileName}" />
-                  </DataTemplate>
-                </ItemsControl.ItemTemplate>
-              </ItemsControl>
-              <TextBlock Classes="faint" Text="No screenshots." IsVisible="{Binding !HasScreenshots}" />
-            </StackPanel>
+        <Grid RowDefinitions="Auto,*,Auto" Margin="0,16,0,0">
+          <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8" Margin="0,0,0,12">
+            <Button Classes="primary" Content="Check for updates" Command="{Binding CheckUpdatesCommand}" />
+            <Button Content="Update selected" Command="{Binding ApplyUpdatesCommand}" />
           </StackPanel>
-        </ScrollViewer>
+
+          <ScrollViewer Grid.Row="1">
+            <StackPanel Spacing="8">
+              <ItemsControl ItemsSource="{Binding Updates}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="vm:ContentUpdateItemViewModel">
+                    <Border Classes="card" Margin="0,0,0,8">
+                      <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                        <CheckBox Grid.Column="0" IsChecked="{Binding IsSelected}" VerticalAlignment="Center" />
+                        <StackPanel Grid.Column="1" Spacing="2">
+                          <TextBlock Classes="h2" Text="{Binding Name}" />
+                          <TextBlock Classes="mono" Text="{Binding Detail}" />
+                          <TextBlock Classes="faint" Text="{Binding ProviderNote}" />
+                          <TextBlock Classes="muted" Text="{Binding Note}" />
+                        </StackPanel>
+                      </Grid>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+
+              <TextBlock Classes="muted" IsVisible="{Binding !HasUpdates}"
+                         Text="No updates found. Only content Ferrite installed can be checked; mods you added yourself are left alone." />
+            </StackPanel>
+          </ScrollViewer>
+
+          <TextBlock Grid.Row="2" Classes="faint" TextWrapping="Wrap" Margin="0,12,0,0"
+                     Text="{Binding UpdateStatus}" />
+        </Grid>
       </TabItem>
 
       <TabItem Header="Worlds">

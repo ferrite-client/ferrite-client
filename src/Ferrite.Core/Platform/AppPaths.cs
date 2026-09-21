@@ -79,6 +79,10 @@ public sealed class AppPaths
     public string InstanceMetadataFile(Guid instanceId) =>
         Path.Combine(InstanceDirectory(instanceId), "instance.json");
 
+    /// <summary>Records which provider project each launcher-installed file came from.</summary>
+    public string InstanceContentManifestFile(Guid instanceId) =>
+        Path.Combine(InstanceDirectory(instanceId), "content-manifest.json");
+
     /// <summary>The isolated game directory ("&lt;instance&gt;/minecraft").</summary>
     public string InstanceGameDirectory(Guid instanceId) =>
         Path.Combine(InstanceDirectory(instanceId), "minecraft");

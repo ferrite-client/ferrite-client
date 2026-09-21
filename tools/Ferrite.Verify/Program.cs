@@ -46,6 +46,13 @@ internal static class Program
                     services,
                     versionId,
                     GetOption(args, "--slug") ?? "sodium",
+                    GetOption(args, "--version"),
+                    ParseLoader(GetOption(args, "--loader")),
+                    cancellation.Token),
+                "updates" => await Scenarios.CheckContentUpdatesAsync(
+                    services,
+                    GetOption(args, "--instance"),
+                    args.Contains("--apply", StringComparer.OrdinalIgnoreCase),
                     cancellation.Token),
                 "toggle" => await Scenarios.ToggleModAsync(services, versionId, cancellation.Token),
                 "modpack" => await Scenarios.InstallModpackAsync(
@@ -172,6 +179,17 @@ internal static class Program
 
         return null;
     }
+
+    /// <summary>Parses a loader name from the command line; anything unknown means vanilla.</summary>
+    private static LoaderKind ParseLoader(string? name) => name?.ToLowerInvariant() switch
+    {
+        "fabric" => LoaderKind.Fabric,
+        "quilt" => LoaderKind.Quilt,
+        "forge" => LoaderKind.Forge,
+        "neoforge" => LoaderKind.NeoForge,
+        "optifine" => LoaderKind.OptiFine,
+        _ => LoaderKind.Vanilla,
+    };
 
     private static int Fail(string message)
     {

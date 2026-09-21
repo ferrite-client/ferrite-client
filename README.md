@@ -26,6 +26,8 @@ What has been exercised end to end against live services (evidence in `docs/VERI
 - Parsing a real crash report, listing the mods it names, matching stack frames to installed mods
   without overclaiming, and exporting a redacted support bundle with the launcher's operation
   history.
+- Updating content the launcher installed: a real Sodium 0.5.11 install was updated to 0.8.13, with
+  the old file removed only after the replacement was hash-verified.
 - Java discovery across PATH, vendor installs, and the Minecraft launcher's own runtimes.
 
 Content browsing covers Modrinth and CurseForge through one browser. CurseForge needs a

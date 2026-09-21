@@ -208,3 +208,28 @@ job is to fetch current metadata.
 **Why.** The point of the cache is that going offline does not break browsing, not that it becomes
 the primary source. The UI states the age of what it is showing, so the user can tell a live answer
 from a remembered one.
+
+## D020 - Only launcher-installed content is tracked and updated
+
+**Decision.** Installing content writes a manifest entry linking the file to a provider project and
+version. Update checks consider only those entries; a file with no entry is left alone.
+
+**Rejected.** Matching installed jars to projects by file name or by scanning embedded metadata for
+an update id. Both produce false matches — two projects ship files with the same name, and a fork
+carries the upstream's id — and the failure mode is replacing the wrong mod in someone's pack.
+
+**Why.** Updates are a convenience; silently overwriting the wrong file is data loss. The manifest
+also gives the launcher something it otherwise lacks: the knowledge of what it manages, which is
+what makes "verify" and "repair" meaningful per file.
+
+## D021 - A versioned build is not offered to an instance without that loader
+
+**Decision.** `ContentCompatibility` refuses a version whose loader list names a mod loader when the
+instance declares none. Tokens that mean the base game (`minecraft`, `vanilla`, `datapack`) are not
+treated as loader restrictions.
+
+**Why.** A live update run offered a NeoForge Sodium build to a vanilla instance: with no loader on
+the instance, the old rule skipped the check entirely and took the newest version regardless of
+loader. The install would have succeeded and done nothing, which is the worst kind of failure —
+silent. The exception exists because Modrinth labels every resource pack with the `minecraft`
+loader, and treating that as a mod loader would refuse all of them on a vanilla instance.

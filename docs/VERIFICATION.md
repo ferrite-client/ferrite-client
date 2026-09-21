@@ -632,3 +632,84 @@ result and the note, so a regression that silently drops the explanation fails t
 
 `AppServices` gained an optional Modrinth endpoint parameter so this state is reachable in a test
 without touching the network stack, which is also useful for pointing Ferrite at a mirror.
+
+---
+
+## V010 - Content updates (2026-09-21)
+
+Environment: Windows 11 x64, .NET 10.0.5, live Modrinth. Scratch data roots throughout, so nothing
+in the user's library changed.
+
+### V010.1 Install an old version, then update it
+
+The install was pinned to an older Sodium release (`RncWhTxD`, mc1.21-0.5.11) so that a real update
+existed:
+
+```
+$ Ferrite.Verify content 1.21.1 --slug sodium --version RncWhTxD --loader fabric
+Instance: verify-1.21.1-Fabric (Fabric vanilla)
+Plan: 1 file(s)
+Installed 1 file(s)
+  Sodium [fabric] id=sodium version=0.5.11+mc1.21 enabled=True
+
+manifest: mods/sodium-fabric-0.5.11+mc1.21.jar <- modrinth:AANobbMI@RncWhTxD
+```
+
+```
+$ Ferrite.Verify updates --instance verify-1.21.1-Fabric --apply
+Instance: verify-1.21.1-Fabric (1.21.1, Fabric -)
+Tracked content: 1 file(s)
+  mods/sodium-fabric-0.5.11+mc1.21.jar <- modrinth:AANobbMI@RncWhTxD
+modrinth: 1 update(s), 0 up to date, 0 skipped
+  update: mods/sodium-fabric-0.5.11+mc1.21.jar RncWhTxD -> mc1.21.1-0.8.13-fabric
+Applied 1 update(s)
+Tracked content now: 1 file(s)
+  mods/sodium-fabric-0.8.13+mc1.21.1.jar @ SMxNOGZ6 (1.5 MiB)
+```
+
+The replaced file is gone, the new one is present with its real size, and the manifest now points at
+the new version — which is why the second `updates` run reports no further changes.
+
+### V010.2 A defect the live run caught: a NeoForge build offered to a vanilla instance
+
+The first update run was against a **vanilla** instance (the harness creates one when no loader is
+given) and it selected `mc1.21.1-0.8.13-neoforge`. That would have produced an install the game
+cannot load. The cause was `ContentCompatibility`: with no loader on the instance, it skipped the
+loader check entirely and took the newest version of any loader.
+
+The rule is now explicit. A version whose loader list names a real mod loader is refused for an
+instance that declares no loader, because Java-edition mod loaders are not interchangeable. Tokens
+that mean "the base game" (`minecraft`, as Modrinth reports for every resource pack) do not count
+as a loader restriction, so resource packs and datapacks still install into a vanilla instance.
+
+Re-run on the same shape of instance:
+
+```
+$ Ferrite.Verify updates --instance verify-1.21.1 --apply
+modrinth: 0 update(s), 0 up to date, 0 skipped
+  warn: No compatible version of mods/sodium-fabric-0.5.11+mc1.21.jar exists for this instance.
+No updates to install.
+```
+
+`ContentUpdateTests` covers both directions: a Fabric and a NeoForge build are rejected for a vanilla
+instance, a Fabric build is accepted for a Fabric instance, and a resource pack declaring
+`minecraft` is accepted by both.
+
+### V010.3 What a failed update does
+
+`ContentUpdateTests` also covers the cases that matter when the network or the provider misbehaves:
+
+- A 500 during the replacement download leaves the installed file and the manifest entry exactly as
+  they were, because the old file is only removed after the new one is verified.
+- A version with no download URL (CurseForge third-party distribution disabled) is reported and not
+  applied.
+- A file that is no longer on disk, and a file recorded against a different provider, are reported
+  as skipped rather than offered.
+- A damaged manifest reads as empty instead of throwing.
+
+### V010.4 Interface
+
+`instance-updates.png` renders the Content tab: per-item checkbox, the file it will replace, the
+version it moves to, the provider, and the check result. The Content tab previously duplicated the
+Files tab's folder listings; it now has its own purpose, and the folder listings live only under
+Files.
