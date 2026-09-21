@@ -124,6 +124,10 @@ internal sealed class VerifyServices : IDisposable
             Paths,
             LoggerFactory.CreateLogger<CurseForgePackInstaller>());
         Worlds = new WorldService(LoggerFactory.CreateLogger<WorldService>());
+        LocalServers = new LocalServerService(
+            Downloads,
+            Paths,
+            LoggerFactory.CreateLogger<LocalServerService>());
         WorldsArchive = new WorldArchive(Paths.BackupsDirectory, LoggerFactory.CreateLogger<WorldArchive>());
         Servers = new ServerListService(LoggerFactory.CreateLogger<ServerListService>());
         Pinger = new ServerPinger(LoggerFactory.CreateLogger<ServerPinger>());
@@ -201,6 +205,9 @@ internal sealed class VerifyServices : IDisposable
     public CurseForgePackInstaller CurseForgePacks { get; }
 
     public WorldService Worlds { get; }
+
+    /// <summary>Prepare, start, stop, and export a local server for an instance.</summary>
+    public LocalServerService LocalServers { get; }
 
     public WorldArchive WorldsArchive { get; }
 

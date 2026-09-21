@@ -597,6 +597,61 @@
         </Grid>
       </TabItem>
 
+      <TabItem Header="{DynamicResource L.Instance.TabLocalServer}">
+        <Grid RowDefinitions="Auto,Auto,Auto,*" Margin="0,16,0,0" RowSpacing="12">
+          <TextBlock Grid.Row="0" Classes="muted" TextWrapping="Wrap"
+                     Text="{DynamicResource L.Instance.ServerHint}" />
+
+          <WrapPanel Grid.Row="1" Orientation="Horizontal">
+            <StackPanel Spacing="4" Margin="0,0,16,8">
+              <TextBlock Classes="label" Text="{DynamicResource L.Instance.ServerLevelName}" />
+              <TextBox Text="{Binding ServerLevelName}" Width="180"
+                       AutomationProperties.Name="{DynamicResource L.Instance.ServerLevelName}" />
+            </StackPanel>
+            <StackPanel Spacing="4" Margin="0,0,16,8">
+              <TextBlock Classes="label" Text="{DynamicResource L.Instance.ServerMotd}" />
+              <TextBox Text="{Binding ServerMotd}" Width="240"
+                       AutomationProperties.Name="{DynamicResource L.Instance.ServerMotd}" />
+            </StackPanel>
+            <StackPanel Spacing="4" Margin="0,0,16,8">
+              <TextBlock Classes="label" Text="{DynamicResource L.Instance.ServerPort}" />
+              <NumericUpDown Value="{Binding ServerPort}" Minimum="1" Maximum="65535" Width="120"
+                             AutomationProperties.Name="{DynamicResource L.Instance.ServerPort}" />
+            </StackPanel>
+            <StackPanel Spacing="4" Margin="0,0,16,8">
+              <TextBlock Classes="label" Text="{DynamicResource L.Instance.ServerMaxPlayers}" />
+              <NumericUpDown Value="{Binding ServerMaxPlayers}" Minimum="1" Maximum="1000" Width="120"
+                             AutomationProperties.Name="{DynamicResource L.Instance.ServerMaxPlayers}" />
+            </StackPanel>
+            <StackPanel Spacing="4" Margin="0,0,16,8">
+              <TextBlock Classes="label" Text="{DynamicResource L.Instance.FieldMaxMemory}" />
+              <NumericUpDown Value="{Binding ServerMemoryMb}" Minimum="512" Maximum="65536" Increment="512"
+                             Width="140"
+                             AutomationProperties.Name="{DynamicResource L.Instance.ServerMemory}" />
+            </StackPanel>
+            <StackPanel Spacing="8" VerticalAlignment="Bottom" Margin="0,0,16,8">
+              <CheckBox Content="{DynamicResource L.Instance.ServerOnlineMode}"
+                        IsChecked="{Binding ServerOnlineMode}" />
+              <CheckBox Content="{DynamicResource L.Instance.ServerAcceptEula}"
+                        IsChecked="{Binding ServerAcceptEula}" />
+            </StackPanel>
+          </WrapPanel>
+
+          <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8">
+            <Button Classes="primary" Content="{DynamicResource L.Instance.ServerPrepare}"
+                    Command="{Binding PrepareServerCommand}" IsEnabled="{Binding !IsServerBusy}" />
+            <Button Content="{DynamicResource L.Instance.ServerStart}"
+                    Command="{Binding StartServerCommand}" IsEnabled="{Binding CanStartServer}" />
+            <Button Content="{DynamicResource L.Instance.ServerStop}"
+                    Command="{Binding StopServerCommand}" IsEnabled="{Binding IsServerRunning}" />
+            <Button Content="{DynamicResource L.Instance.ServerExport}" Click="OnExportServerClick" />
+          </StackPanel>
+
+          <TextBlock Grid.Row="3" Classes="muted" TextWrapping="Wrap" Text="{Binding ServerStatus}"
+                     IsVisible="{Binding HasServerStatus}" />
+        </Grid>
+      </TabItem>
+
       <TabItem Header="{DynamicResource L.Instance.TabAssistant}">
         <Grid RowDefinitions="Auto,*" Margin="0,16,0,0" RowSpacing="12">
           <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">

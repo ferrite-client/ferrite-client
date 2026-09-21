@@ -2395,3 +2395,62 @@ error line. Every new label exists in English and Polish; the localisation tests
 
 **Limitations, stated precisely.** The theme is a background image and an accent colour. There is no
 blur, no font selection, and no custom stylesheet, for the reason given above.
+
+## V040 - Local server: prepare, run, stop, export (2026-09-21)
+
+Commands: `LocalServerTests` (Core), `InstanceLocalServerViewTests` (App), the live run below, and the
+whole suite (`374` Core tests, `89` App tests, all passing).
+
+XMCL's catalogue has "Launch a local server - turn an instance into a configurable local server with a
+world, player limit, and exportable files" and "Server Export". The first inventory did not list
+either. Ferrite now prepares, starts, stops, and exports a local server for an instance.
+
+### V040.1 A real server, from this instance's own version
+
+Command: `Ferrite.Verify local-server 1.21.1 --root <tmp> --seconds 240 --out <tmp>/server-export.zip`.
+
+```
+Version 1.21.1 publishes a server jar: True
+  [Downloading] 100.0%  6.1 MiB/s    Minecraft server
+Server jar: ...\server\server.jar (51,627,615 bytes)
+Java: Eclipse Adoptium 21.0.10 X64 (C:\Program Files\Eclipse Adoptium\jdk-21.0.10.7-hotspot\bin\java.exe)
+Command: "...\java.exe" -Xmx2048M -jar server.jar nogui
+[info] LaunchService: Launched instance acc18a47-... (pid 20340) with 4 arguments
+The server reported that it is ready.
+The server created its world folder: True
+The server was stopped.
+  [10:34:50] [Server thread/INFO]: Preparing level "ferrite-verify"
+  [10:34:54] [Server thread/INFO]: Preparing spawn area: 51%
+  [10:34:54] [Server thread/INFO]: Done (4.174s)! For help, type "help"
+Exported to ...\server-export.zip (103,501,377 bytes)
+PASS: a real Minecraft server started from this instance's own version.
+```
+
+The jar is the version's own `downloads.server` artifact, fetched over TLS and verified against the
+version document's SHA-1 before it is used. The readiness line is the server's own, not a timer, and
+the world folder really appeared. The export was then opened: 48 entries including `server.jar`,
+`server.properties`, `eula.txt`, and `ferrite-verify/level.dat`.
+
+### V040.2 The settings file is merged, not rewritten
+
+`ServerPropertiesDocument` edits the keys the launcher owns and leaves every other line - a comment, a
+key the user added, `difficulty=hard` - exactly as it was, and a value containing a newline (an MOTD
+can) is escaped so it cannot split the file. The Core tests pin the merge, the round trip, the
+refusal of a jar whose SHA-1 does not match, the honest error when a version publishes no server
+download, `eula=false` until the user accepts the agreement, the argument-list command, and the
+export archive's contents.
+
+### V040.3 The interface
+
+The instance page gains a `Local server` tab: level name, MOTD, port, player limit, server memory,
+online mode, and the EULA, with prepare, start, stop, and export. Preparing and starting both resolve
+the instance's own version first, so a modded instance still gets the version its mods were built for.
+The App tests confirm the tab shows the settings read from the server's own file rather than a second
+copy, and that a never-prepared instance still opens with sensible defaults.
+
+**Limitations, stated precisely.** The server is the vanilla one for the instance's Minecraft version;
+the launcher does not yet build a loader-specific server (Fabric/NeoForge server jars), so a modded
+instance's server is vanilla and will not load its mods. The server shares the instance's process slot,
+so a client launch and a server launch for the same instance cannot run at once. Online mode defaults
+to on; the verification run used `online-mode=false` deliberately so it could start without an
+authentication service.

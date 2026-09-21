@@ -117,6 +117,13 @@ internal static class Program
                     GetOption(args, "--motd"),
                     int.TryParse(GetOption(args, "--port"), out var lanPort) ? lanPort : null,
                     cancellation.Token),
+                "local-server" => await Scenarios.LocalServerAsync(
+                    services,
+                    versionId,
+                    seconds,
+                    GetOption(args, "--instance"),
+                    GetOption(args, "--out"),
+                    cancellation.Token),
                 "packs" => await Scenarios.PackMetadataAsync(
                     services,
                     GetOption(args, "--game-dir"),

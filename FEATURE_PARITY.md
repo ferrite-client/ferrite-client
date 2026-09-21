@@ -234,8 +234,8 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | M08 | Server list UI | MOTD, players, latency, version | VERIFIED | V006.3, Servers tab |
 | M09 | LAN world discovery | Listens on the game's LAN broadcast address and lists worlds that are still announcing, with one-click add to the instance | VERIFIED | V013 |
 | M10 | Internet LAN relay | Requires a relay service Ferrite does not operate | BLOCKED EXTERNAL | `HUMAN_ACTION_REQUIRED.md` H4 |
-| M11 | Launch a local server | Turn an instance into a configurable local server and start it | NOT STARTED | XMCL feature catalogue 06 |
-| M12 | Server export | Select world and server files and export a runnable server | NOT STARTED | XMCL feature catalogue 18 |
+| M11 | Launch a local server | Prepare the version's own server jar, start it, stop it | VERIFIED | V040.1 live 1.21.1 server reached its own ready line; vanilla only, so a modded instance's server does not load its mods |
+| M12 | Server export | Export the prepared server, world included, as a zip | VERIFIED | V040.1 (103 MB zip, 48 entries including the world) and `LocalServerTests` |
 
 ## N. Diagnostics and observability
 
@@ -287,8 +287,8 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 
 | Status | Count |
 | --- | --- |
-| NOT STARTED | 7 |
+| NOT STARTED | 5 |
 | IN PROGRESS | 0 |
 | IMPLEMENTED | 0 |
-| VERIFIED | 160 |
+| VERIFIED | 162 |
 | BLOCKED EXTERNAL | 18 |

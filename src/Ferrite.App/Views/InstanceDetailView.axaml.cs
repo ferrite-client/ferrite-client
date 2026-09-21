@@ -169,6 +169,34 @@ public partial class InstanceDetailView : UserControl
         }
     }
 
+    /// <summary>Exports the prepared local server, world included, as a zip the user chooses.</summary>
+    private async void OnExportServerClick(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not InstanceDetailViewModel viewModel)
+        {
+            return;
+        }
+
+        var storage = TopLevel.GetTopLevel(this)?.StorageProvider;
+        if (storage is null)
+        {
+            return;
+        }
+
+        var file = await storage.SaveFilePickerAsync(new FilePickerSaveOptions
+        {
+            Title = "Export the local server",
+            SuggestedFileName = viewModel.Name + "-server.zip",
+            DefaultExtension = "zip",
+            FileTypeChoices =
+            [
+                new FilePickerFileType("Zip archive") { Patterns = ["*.zip"] },
+            ],
+        });
+
+        await viewModel.ExportServerAsync(file?.TryGetLocalPath());
+    }
+
     /// <summary>
     /// Picks a background image for the instance's theme. The file is copied into the instance, so it
     /// keeps working after the original is moved or deleted.
