@@ -168,3 +168,30 @@ screen, the instance's `minecraft/logs/latest.log`.
 **Blocked until then.** The in-game half of FEATURE_PARITY row H11. The launcher's half - the argument
 list, the single-argument world name, and the two defects that were found and fixed in it - is
 verified and recorded in `docs/VERIFICATION.md` V032.
+
+---
+
+## H7 - Bedrock Edition is not installable by a third-party launcher
+
+**Needed.** Either a decision to keep Bedrock Edition out of scope, or a distribution channel from
+Mojang/Microsoft that a launcher other than theirs may use.
+
+**Why.** Bedrock Edition on Windows is delivered as a Microsoft Store package. There is no public
+install manifest, no per-version document, and no supported way for a third-party launcher to
+install, update, or launch it the way Java Edition's version metadata allows. It also has no
+mod-loading pipeline of the kind this product implements: Bedrock add-ons are content packs with
+their own private format, not JARs loaded by a loader. This is a deliberate boundary rather than an
+unfinished feature, which is why the row is `BLOCKED EXTERNAL` and not something the code can close.
+
+**Steps.**
+
+1. Decide whether Bedrock belongs in this product at all. The brief names Java Edition's launcher
+   metadata, loaders, and mod formats as the target; XMCL itself labels its Bedrock support
+   "experimental".
+2. If it does belong, the closest legitimate capability is a hand-off: detect the Store-installed
+   package and offer to open it, rather than pretending to install or manage it.
+
+**What to hand back.** A decision. Nothing is entered into Ferrite.
+
+**Blocked until then.** The Bedrock half of FEATURE_PARITY row G13. Everything about Java Edition is
+unaffected.
