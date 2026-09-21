@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Ferrite.App.Localization;
 
 namespace Ferrite.App.ViewModels;
 
@@ -69,7 +70,7 @@ public sealed partial class LibraryViewModel
                 .RenameAsync(target.Record.Id, RenameName, CancellationToken.None)
                 .ConfigureAwait(true);
             RenameTarget = null;
-            _shell.ReportStatus("Instance renamed");
+            _shell.ReportStatus(Localizer.Get("L.Library.InstanceRenamed"));
             await RefreshAsync().ConfigureAwait(true);
         }
         catch (Exception exception)
@@ -98,7 +99,7 @@ public sealed partial class LibraryViewModel
                 .CloneAsync(target.Record.Id, CloneName, CancellationToken.None)
                 .ConfigureAwait(true);
             CloneTarget = null;
-            _shell.ReportStatus($"{clone.Name} created");
+            _shell.ReportStatus(Localizer.Format("L.Library.InstanceCreated", clone.Name));
             await RefreshAsync().ConfigureAwait(true);
         }
         catch (Exception exception)

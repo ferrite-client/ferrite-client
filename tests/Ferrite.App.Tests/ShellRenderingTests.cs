@@ -10,6 +10,7 @@ using Ferrite.Core.Content;
 using Ferrite.Core.Minecraft;
 using Ferrite.Core.Platform;
 using Ferrite.Core.Storage;
+using Ferrite.App.Localization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -30,6 +31,9 @@ public sealed class ShellRenderingTests : IDisposable
         Directory.CreateDirectory(_root);
         var loggerFactory = LoggerFactory.Create(builder => builder.SetMinimumLevel(LogLevel.Warning));
         _services = new AppServices(loggerFactory, AppPaths.ForRoot(_root));
+
+        // The real application applies the language during startup; a headless test must do it.
+        Localizer.Apply(Avalonia.Application.Current, Localizer.English);
     }
 
     public void Dispose()

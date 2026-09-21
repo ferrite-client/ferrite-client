@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Ferrite.App.Localization;
 using Ferrite.App.Services;
 using Ferrite.Core.Diagnostics;
 using Ferrite.Core.Minecraft;
@@ -32,7 +33,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
     private object? _detailPage;
 
     [ObservableProperty]
-    private string _statusText = "Ready";
+    private string _statusText = Localizer.Get("L.Common.Ready");
 
     [ObservableProperty]
     private string? _activityText;
@@ -50,7 +51,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
     private string? _errorMessage;
 
     [ObservableProperty]
-    private string _activeAccountName = "No account";
+    private string _activeAccountName = Localizer.Get("L.Shell.NoAccount");
 
     [ObservableProperty]
     private string? _runningInstanceName;
@@ -85,6 +86,16 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     public bool IsSettingsSelected => CurrentPage == AppPage.Settings;
 
+    /// <summary>The page name as shown in the shell header, in the current language.</summary>
+    public string CurrentPageTitle => Localizer.Get(CurrentPage switch
+    {
+        AppPage.Library => "L.Nav.Library",
+        AppPage.Browse => "L.Nav.Browse",
+        AppPage.Java => "L.Nav.Java",
+        AppPage.Accounts => "L.Nav.Accounts",
+        _ => "L.Nav.Settings",
+    });
+
     public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
 
     public bool IsDetailOpen => DetailPage is not null;
@@ -105,6 +116,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
     partial void OnCurrentPageChanged(AppPage value)
     {
         DetailPage = null;
+        OnPropertyChanged(nameof(CurrentPageTitle));
         OnPropertyChanged(nameof(SelectedPageIndex));
         OnPropertyChanged(nameof(IsLibrarySelected));
         OnPropertyChanged(nameof(IsBrowseSelected));
@@ -128,7 +140,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
             "Launcher ready; {Count} instance(s), {Accounts} account(s)",
             Library.Instances.Count,
             Accounts.Accounts.Count);
-        StatusText = "Ready";
+        StatusText = Localizer.Get("L.Common.Ready");
     }
 
     public void RefreshActiveAccount()
@@ -137,7 +149,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         var account = activeId is { } id
             ? _services.Accounts.Accounts.FirstOrDefault(candidate => candidate.Id == id)
             : null;
-        ActiveAccountName = account?.DisplayName ?? "No account";
+        ActiveAccountName = account?.DisplayName ?? Localizer.Get("L.Shell.NoAccount");
     }
 
     public void ReportStatus(string text) => StatusText = text;
@@ -146,7 +158,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
     {
         _currentOperation?.Fail(message);
         ErrorMessage = message;
-        StatusText = "Something went wrong";
+        StatusText = Localizer.Get("L.Shell.Error");
     }
 
     public void ClearError() => ErrorMessage = null;
@@ -165,13 +177,18 @@ public sealed partial class MainWindowViewModel : ObservableObject
     {
         ActivityText = progress.Stage switch
         {
-            InstallStage.ResolvingMetadata => "Resolving metadata...",
-            InstallStage.Planning => $"Planning {progress.Message}...",
+            InstallStage.ResolvingMetadata => Localizer.Get("L.Activity.Resolving"),
+            InstallStage.Planning => Localizer.Format("L.Activity.Planning", progress.Message),
             InstallStage.Downloading => progress.Download is { } download
-                ? $"Downloading {download.CurrentItem ?? string.Empty} ({download.Fraction:P0})"
-                : "Downloading...",
-            InstallStage.ExtractingNatives => $"Extracting natives ({progress.Message})",
-            _ => "Finishing...",
+                ? Localizer.Format(
+                    "L.Activity.DownloadingItem",
+                    download.CurrentItem ?? string.Empty,
+                    download.Fraction.ToString("P0"))
+                : Localizer.Get("L.Activity.Downloading"),
+            InstallStage.ExtractingNatives => Localizer.Format(
+                "L.Activity.ExtractingNatives",
+                progress.Message),
+            _ => Localizer.Get("L.Activity.Finishing"),
         };
 
         IsActivityVisible = true;

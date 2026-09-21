@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Ferrite.App.Localization;
 using Ferrite.App.Services;
 using Ferrite.Core.Content;
 using Ferrite.Core.Diagnostics;
@@ -32,13 +33,27 @@ public sealed partial class SettingsViewModel : ObservableObject
         ThemeVariant.System,
     ];
 
-    public IReadOnlyList<string> Languages { get; } = ["en", "pl"];
+    private LanguageOption? _selectedLanguage;
+
+    /// <summary>Languages the interface can be shown in, as codes the settings store holds.</summary>
+    public IReadOnlyList<LanguageOption> Languages { get; } = Localizer.Available;
 
     [ObservableProperty]
     private ThemeVariant _theme = ThemeVariant.Dark;
 
-    [ObservableProperty]
-    private string _language = "en";
+    /// <summary>The chosen language. Changing it applies immediately, without a restart.</summary>
+    public LanguageOption? SelectedLanguage
+    {
+        get => _selectedLanguage;
+        set
+        {
+            if (SetProperty(ref _selectedLanguage, value) && value is not null)
+            {
+                Localizer.Apply(Avalonia.Application.Current, value.Code);
+                _services.Settings.Current.Language = value.Code;
+            }
+        }
+    }
 
     [ObservableProperty]
     private int _maxConcurrentDownloads = 8;
@@ -98,7 +113,9 @@ public sealed partial class SettingsViewModel : ObservableObject
     {
         var settings = _services.Settings.Current;
         Theme = settings.Theme;
-        Language = settings.Language;
+        SelectedLanguage = Languages.FirstOrDefault(option =>
+            string.Equals(option.Code, Localizer.Normalize(settings.Language), StringComparison.Ordinal))
+            ?? Languages[0];
         MaxConcurrentDownloads = settings.MaxConcurrentDownloads;
         ProxyUrl = settings.ProxyUrl;
         MicrosoftClientId = settings.MicrosoftClientId;
@@ -172,13 +189,13 @@ public sealed partial class SettingsViewModel : ObservableObject
     {
         if (!_services.Credentials.HasCurseForgeApiKey)
         {
-            CurseForgeKeyStatus = "No key stored. CurseForge browsing and modpack installs stay disabled.";
+            CurseForgeKeyStatus = Localizer.Get("L.Settings.NoKeyStored");
             return;
         }
 
         CurseForgeKeyStatus = _services.Credentials.IsDegraded
-            ? "Key stored with file permissions only (this platform has no OS-backed protection)."
-            : "Key stored and protected by the operating system.";
+            ? Localizer.Get("L.Settings.KeyStoredDegraded")
+            : Localizer.Get("L.Settings.KeyStoredProtected");
     }
 
     [RelayCommand]
@@ -186,7 +203,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     {
         var settings = _services.Settings.Current;
         settings.Theme = Theme;
-        settings.Language = Language;
+        settings.Language = SelectedLanguage?.Code ?? Localizer.Language;
         settings.MaxConcurrentDownloads = Math.Clamp(MaxConcurrentDownloads, 1, 64);
         settings.ProxyUrl = string.IsNullOrWhiteSpace(ProxyUrl) ? null : ProxyUrl.Trim();
         settings.MicrosoftClientId = string.IsNullOrWhiteSpace(MicrosoftClientId) ? null : MicrosoftClientId.Trim();
@@ -204,7 +221,7 @@ public sealed partial class SettingsViewModel : ObservableObject
             RefreshCurseForgeKeyStatus();
         }
 
-        StatusNote = "Settings saved";
+        StatusNote = Localizer.Get("L.Settings.Saved");
         _shell.ReportStatus(StatusNote);
     }
 
@@ -215,7 +232,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         _services.Credentials.Save();
         NewCurseForgeApiKey = null;
         RefreshCurseForgeKeyStatus();
-        StatusNote = "CurseForge API key removed";
+        StatusNote = Localizer.Get("L.Settings.KeyRemoved");
     }
 
     [RelayCommand]
@@ -233,7 +250,7 @@ public sealed partial class SettingsViewModel : ObservableObject
 
         if (string.IsNullOrWhiteSpace(UpdateFeedUrl))
         {
-            UpdateStatus = "No update feed is configured.";
+            UpdateStatus = Localizer.Get("L.Settings.NoFeed");
             return;
         }
 
@@ -250,15 +267,18 @@ public sealed partial class SettingsViewModel : ObservableObject
             var version = result.Manifest.Version;
             if (!result.IsNewer)
             {
-                UpdateStatus = $"Ferrite {current} is the newest release on this feed.";
+                UpdateStatus = Localizer.Format("L.Settings.UpToDate", current);
             }
             else if (result.Package is null)
             {
-                UpdateStatus = $"Ferrite {version} is available, but the feed publishes no build for this machine.";
+                UpdateStatus = Localizer.Format("L.Settings.NoPackage", version);
             }
             else
             {
-                UpdateStatus = $"Ferrite {version} is available ({ByteSize.Format(result.Package.Size)}).";
+                UpdateStatus = Localizer.Format(
+                    "L.Settings.UpdateAvailable",
+                    version,
+                    ByteSize.Format(result.Package.Size));
             }
 
             _shell.ReportStatus(UpdateStatus);
@@ -284,7 +304,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     {
         if (_pendingUpdate is not { IsNewer: true } check || check.Package is null)
         {
-            UpdateStatus = "Check for updates first.";
+            UpdateStatus = Localizer.Get("L.Settings.CheckFirst");
             return;
         }
 
@@ -304,9 +324,10 @@ public sealed partial class SettingsViewModel : ObservableObject
                 stage,
                 Environment.ProcessId,
                 installDirectory);
-            UpdateStatus =
-                $"Ferrite {stage.Version} is staged and verified ({ByteSize.Format(stage.Bytes)}). "
-                + "Close Ferrite, then run the command below.";
+            UpdateStatus = Localizer.Format(
+                "L.Settings.Staged",
+                stage.Version,
+                ByteSize.Format(stage.Bytes));
             _shell.ReportStatus(UpdateStatus);
         }
         catch (Exception exception)
@@ -351,7 +372,7 @@ public sealed partial class SettingsViewModel : ObservableObject
             }
 
             Directory.CreateDirectory(cache);
-            StatusNote = "Metadata cache cleared; it will be fetched again when needed.";
+            StatusNote = Localizer.Get("L.Settings.CacheCleared");
             await RefreshCacheSizeAsync().ConfigureAwait(true);
         }
         catch (Exception exception)

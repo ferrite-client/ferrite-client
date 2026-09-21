@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.Input;
+using Ferrite.App.Localization;
 using Ferrite.Core.Java;
 using Ferrite.Core.Loaders;
 using Ferrite.Core.Minecraft;
@@ -89,13 +90,13 @@ public sealed partial class LibraryViewModel
     {
         if (NewVersion is null)
         {
-            FormError = "Choose a Minecraft version.";
+            FormError = Localizer.Get("L.Library.ChooseMinecraftVersion");
             return;
         }
 
         if (NewLoader != LoaderKind.Vanilla && NewLoaderVersion is null)
         {
-            FormError = "Choose a loader version.";
+            FormError = Localizer.Get("L.Library.ChooseLoaderVersion");
             return;
         }
 
@@ -119,7 +120,10 @@ public sealed partial class LibraryViewModel
             var versionId = InstanceLauncher.LaunchVersionId(record);
             if (NewLoader is not LoaderKind.Vanilla && NewLoaderVersion is not null)
             {
-                _shell.ReportStatus($"Installing {NewLoader.ToDisplayName()} {NewLoaderVersion.Version}...");
+            _shell.ReportStatus(Localizer.Format(
+                "L.Library.InstallingLoader",
+                NewLoader.ToDisplayName(),
+                NewLoaderVersion.Version));
                 var java = JavaSelection.SelectBest(
                     await _services.Java.DetectAsync(CancellationToken.None).ConfigureAwait(true),
                     JavaCompatibility.RequiredMajorFor(NewVersion.Id));
@@ -159,7 +163,7 @@ public sealed partial class LibraryViewModel
                 CancellationToken.None).ConfigureAwait(true);
 
             IsCreating = false;
-            _shell.ReportStatus($"{name} is ready");
+            _shell.ReportStatus(Localizer.Format("L.Library.InstanceReady", name));
             await RefreshAsync().ConfigureAwait(true);
         }
         catch (Exception exception)

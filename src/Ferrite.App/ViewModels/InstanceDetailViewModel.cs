@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Ferrite.App.Services;
+using Ferrite.App.Localization;
 using Ferrite.Core.Content;
 using Ferrite.Core.Diagnostics;
 using Ferrite.Core.Java;
@@ -196,7 +197,7 @@ public sealed partial class InstanceDetailViewModel : ObservableObject
 
         if (latest is null)
         {
-            LogText = "No logs yet.";
+            LogText = Localizer.Get("L.Instance.NoLogs");
             return;
         }
 

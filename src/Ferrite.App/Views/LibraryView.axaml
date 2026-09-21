@@ -7,9 +7,9 @@
   <Grid RowDefinitions="Auto,*,Auto" Margin="24">
 
     <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12" Margin="0,0,0,16">
-      <TextBox Grid.Column="0" PlaceholderText="Search instances" Text="{Binding SearchText}" />
-      <Button Grid.Column="1" Content="Import modpack" Click="OnImportModpackClick" />
-      <Button Grid.Column="2" Classes="primary" Content="New instance"
+        <TextBox Grid.Column="0" PlaceholderText="{DynamicResource L.Library.SearchInstances}" Text="{Binding SearchText}" />
+        <Button Grid.Column="1" Content="{DynamicResource L.Library.ImportModpack}" Click="OnImportModpackClick" />
+        <Button Grid.Column="2" Classes="primary" Content="{DynamicResource L.Library.NewInstance}"
               Command="{Binding OpenCreateCommand}" />
     </Grid>
 
@@ -33,15 +33,15 @@
 
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
                             VerticalAlignment="Center">
-                  <Button Classes="primary" Content="Play" IsVisible="{Binding !IsRunning}"
+            <Button Classes="primary" Content="{DynamicResource L.Library.Play}" IsVisible="{Binding !IsRunning}"
                           Command="{Binding PlayCommand}" />
-                  <Button Content="Stop" IsVisible="{Binding IsRunning}" Command="{Binding StopCommand}" />
-                  <Button Content="Manage" Command="{Binding OpenCommand}" />
-                  <Button Content="Rename" Command="{Binding RenameCommand}" />
-                  <Button Content="Clone" Command="{Binding CloneCommand}" />
-                  <Button Content="Folder" Command="{Binding OpenFolderCommand}" />
-                  <Button Content="Repair" Command="{Binding RepairCommand}" />
-                  <Button Content="Delete" Classes="danger" Command="{Binding DeleteCommand}" />
+            <Button Content="{DynamicResource L.Library.Stop}" IsVisible="{Binding IsRunning}" Command="{Binding StopCommand}" />
+            <Button Content="{DynamicResource L.Library.Manage}" Command="{Binding OpenCommand}" />
+            <Button Content="{DynamicResource L.Library.Rename}" Command="{Binding RenameCommand}" />
+            <Button Content="{DynamicResource L.Library.Clone}" Command="{Binding CloneCommand}" />
+            <Button Content="{DynamicResource L.Common.Folder}" Command="{Binding OpenFolderCommand}" />
+            <Button Content="{DynamicResource L.Common.Repair}" Command="{Binding RepairCommand}" />
+            <Button Content="{DynamicResource L.Common.Delete}" Classes="danger" Command="{Binding DeleteCommand}" />
                 </StackPanel>
               </Grid>
             </Border>
@@ -52,7 +52,7 @@
 
     <TextBlock Grid.Row="1" Classes="muted" Margin="0,24,0,0" VerticalAlignment="Top"
                IsVisible="{Binding !HasInstances}"
-               Text="No instances yet. Create one to install Minecraft, optionally with a mod loader." />
+                     Text="{DynamicResource L.Library.Empty}" />
 
     <TextBlock Grid.Row="2" Classes="muted" Text="{Binding ModpackStatus}" />
 
@@ -61,11 +61,11 @@
             Background="{DynamicResource FerriteSurface}" IsVisible="{Binding IsRenaming}">
       <Border Classes="card" MaxWidth="440" VerticalAlignment="Center" HorizontalAlignment="Center">
         <StackPanel Spacing="12">
-          <TextBlock Classes="h2" Text="Rename instance" />
+              <TextBlock Classes="h2" Text="{DynamicResource L.Library.RenameTitle}" />
           <TextBox Text="{Binding RenameName}" />
           <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
-            <Button Content="Cancel" Command="{Binding CancelRenameCommand}" />
-            <Button Classes="primary" Content="Rename" Command="{Binding ConfirmRenameCommand}" />
+              <Button Content="{DynamicResource L.Common.Cancel}" Command="{Binding CancelRenameCommand}" />
+              <Button Classes="primary" Content="{DynamicResource L.Library.Rename}" Command="{Binding ConfirmRenameCommand}" />
           </StackPanel>
         </StackPanel>
       </Border>
@@ -76,13 +76,13 @@
             Background="{DynamicResource FerriteSurface}" IsVisible="{Binding IsCloning}">
       <Border Classes="card" MaxWidth="440" VerticalAlignment="Center" HorizontalAlignment="Center">
         <StackPanel Spacing="12">
-          <TextBlock Classes="h2" Text="Clone instance" />
+              <TextBlock Classes="h2" Text="{DynamicResource L.Library.CloneTitle}" />
           <TextBlock Classes="muted"
-                     Text="The clone copies this instance's mods, configs, and settings into an independent instance." />
+                     Text="{DynamicResource L.Library.CloneHint}" />
           <TextBox Text="{Binding CloneName}" />
           <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
-            <Button Content="Cancel" Command="{Binding CancelCloneCommand}" />
-            <Button Classes="primary" Content="Clone" Command="{Binding ConfirmCloneCommand}" />
+              <Button Content="{DynamicResource L.Common.Cancel}" Command="{Binding CancelCloneCommand}" />
+              <Button Classes="primary" Content="{DynamicResource L.Library.Clone}" Command="{Binding ConfirmCloneCommand}" />
           </StackPanel>
         </StackPanel>
       </Border>
@@ -93,15 +93,15 @@
             Background="{DynamicResource FerriteSurface}" IsVisible="{Binding IsCreating}">
       <Border Classes="card" MaxWidth="560" VerticalAlignment="Center" HorizontalAlignment="Center">
         <StackPanel Spacing="14">
-          <TextBlock Classes="h2" Text="New instance" />
+              <TextBlock Classes="h2" Text="{DynamicResource L.Library.CreateTitle}" />
 
           <StackPanel Spacing="4">
-            <TextBlock Classes="label" Text="NAME" />
+              <TextBlock Classes="label" Text="{DynamicResource L.Library.FieldName}" />
             <TextBox Text="{Binding NewName}" />
           </StackPanel>
 
           <StackPanel Spacing="4">
-            <TextBlock Classes="label" Text="MINECRAFT VERSION" />
+              <TextBlock Classes="label" Text="{DynamicResource L.Library.FieldMinecraftVersion}" />
             <ComboBox ItemsSource="{Binding Versions}" SelectedItem="{Binding NewVersion}"
                       HorizontalAlignment="Stretch">
               <ComboBox.ItemTemplate>
@@ -110,17 +110,17 @@
                 </DataTemplate>
               </ComboBox.ItemTemplate>
             </ComboBox>
-            <CheckBox Content="Show snapshots" IsChecked="{Binding ShowSnapshots}" />
+            <CheckBox Content="{DynamicResource L.Library.ShowSnapshots}" IsChecked="{Binding ShowSnapshots}" />
           </StackPanel>
 
           <StackPanel Spacing="4">
-            <TextBlock Classes="label" Text="MOD LOADER" />
+              <TextBlock Classes="label" Text="{DynamicResource L.Library.FieldLoader}" />
             <ComboBox ItemsSource="{Binding LoaderOptions}" SelectedItem="{Binding NewLoader}"
                       HorizontalAlignment="Stretch" />
           </StackPanel>
 
           <StackPanel Spacing="4" IsVisible="{Binding NeedsLoaderVersion}">
-            <TextBlock Classes="label" Text="LOADER VERSION" />
+              <TextBlock Classes="label" Text="{DynamicResource L.Library.FieldLoaderVersion}" />
             <ComboBox ItemsSource="{Binding LoaderVersions}" SelectedItem="{Binding NewLoaderVersion}"
                       HorizontalAlignment="Stretch">
               <ComboBox.ItemTemplate>
@@ -135,8 +135,8 @@
                      IsVisible="{Binding HasFormError}" />
 
           <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
-            <Button Content="Cancel" Command="{Binding CancelCreateCommand}" />
-            <Button Classes="primary" Content="Create and install" Command="{Binding CreateCommand}" />
+              <Button Content="{DynamicResource L.Common.Cancel}" Command="{Binding CancelCreateCommand}" />
+              <Button Classes="primary" Content="{DynamicResource L.Library.CreateAndInstall}" Command="{Binding CreateCommand}" />
           </StackPanel>
         </StackPanel>
       </Border>

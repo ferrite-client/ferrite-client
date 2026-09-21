@@ -8,19 +8,19 @@
 
     <StackPanel Grid.Row="0" Spacing="10" Margin="0,0,0,16">
       <TextBlock Classes="muted"
-                 Text="Sign-in uses Microsoft's device-code flow. Ferrite never sees or stores your password." />
+                     Text="{DynamicResource L.Accounts.Hint}" />
       <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
-        <TextBox Grid.Column="0" PlaceholderText="Microsoft client id (Azure public client)"
+        <TextBox Grid.Column="0" PlaceholderText="{DynamicResource L.Accounts.ClientIdPlaceholder}"
                  Text="{Binding ClientId}" />
-        <Button Grid.Column="1" Content="Save client id" Command="{Binding SaveClientIdCommand}" />
-        <Button Grid.Column="2" Classes="primary" Content="Sign in"
+        <Button Grid.Column="1" Content="{DynamicResource L.Accounts.SaveClientId}" Command="{Binding SaveClientIdCommand}" />
+        <Button Grid.Column="2" Classes="primary" Content="{DynamicResource L.Accounts.SignIn}"
                 IsEnabled="{Binding !IsSigningIn}" Command="{Binding SignInCommand}" />
       </Grid>
       <StackPanel Orientation="Horizontal" Spacing="12" IsVisible="{Binding HasUserCode}">
-        <TextBlock Classes="label" Text="CODE" VerticalAlignment="Center" />
+          <TextBlock Classes="label" Text="{DynamicResource L.Accounts.FieldCode}" VerticalAlignment="Center" />
         <TextBlock Classes="h1 mono" Text="{Binding UserCode}" VerticalAlignment="Center" />
-        <Button Content="Open sign-in page" Command="{Binding OpenProfileUrlCommand}" />
-        <Button Content="Cancel" Command="{Binding CancelSignInCommand}" />
+          <Button Content="{DynamicResource L.Accounts.OpenSignInPage}" Command="{Binding OpenProfileUrlCommand}" />
+          <Button Content="{DynamicResource L.Common.Cancel}" Command="{Binding CancelSignInCommand}" />
       </StackPanel>
       <TextBlock Classes="muted" Text="{Binding SignInStatus}" />
     </StackPanel>
@@ -37,9 +37,9 @@
                   <TextBlock Classes="faint" Text="{Binding Kind}" />
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                  <Button Content="Use" Command="{Binding $parent[ItemsControl].((vm:AccountsViewModel)DataContext).SetActiveCommand}"
+        <Button Content="{DynamicResource L.Accounts.Use}" Command="{Binding $parent[ItemsControl].((vm:AccountsViewModel)DataContext).SetActiveCommand}"
                           CommandParameter="{Binding}" />
-                  <Button Classes="danger" Content="Sign out"
+        <Button Classes="danger" Content="{DynamicResource L.Accounts.SignOut}"
                           Command="{Binding $parent[ItemsControl].((vm:AccountsViewModel)DataContext).SignOutCommand}"
                           CommandParameter="{Binding}" />
                 </StackPanel>
@@ -52,9 +52,9 @@
 
     <StackPanel Grid.Row="2" Spacing="6" Margin="0,16,0,0">
       <TextBlock Classes="faint" IsVisible="{Binding !HasAccounts}"
-                 Text="No accounts yet. Add a Microsoft client id, then sign in." />
+                     Text="{DynamicResource L.Accounts.Empty}" />
       <TextBlock Classes="faint" IsVisible="{Binding SecretStorageDegraded}"
-                 Text="Credential protection is degraded on this platform; tokens are stored with user-only file permissions." />
+                     Text="{DynamicResource L.Accounts.Degraded}" />
       <TextBlock Classes="faint" Text="{Binding StatusNote}" />
     </StackPanel>
 

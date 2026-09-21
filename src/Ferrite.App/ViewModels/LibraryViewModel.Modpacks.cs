@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Ferrite.App.Localization;
 using Ferrite.Core.Content;
 using Ferrite.Core.Minecraft;
 
@@ -20,7 +21,7 @@ public sealed partial class LibraryViewModel
     {
         if (string.IsNullOrWhiteSpace(archivePath) || !File.Exists(archivePath))
         {
-            ModpackStatus = "That file could not be read.";
+            ModpackStatus = Localizer.Get("L.Library.UnreadableFile");
             return;
         }
 
@@ -36,15 +37,17 @@ public sealed partial class LibraryViewModel
                     .ConfigureAwait(true),
                 ModpackArchiveKind.CurseForge => await InstallCurseForgePackAsync(archivePath, request, progress)
                     .ConfigureAwait(true),
-                _ => throw new ContentProviderException(
-                    "That archive is not a modpack: it has neither modrinth.index.json nor manifest.json."),
+                _ => throw new ContentProviderException(Localizer.Get("L.Library.ModpackUnsupported")),
             };
 
-            ModpackStatus =
-                $"{result.Instance.Name}: {result.FilesDownloaded} file(s), {result.OverrideFiles} override(s)";
+            ModpackStatus = Localizer.Format(
+                "L.Library.ModpackStatus",
+                result.Instance.Name,
+                result.FilesDownloaded,
+                result.OverrideFiles);
             if (result.Warnings.Count > 0)
             {
-                ModpackStatus += $" · {result.Warnings.Count} warning(s)";
+                ModpackStatus += " · " + Localizer.Format("L.Browse.Warnings", result.Warnings.Count);
             }
 
             _shell.ReportStatus(ModpackStatus);
@@ -68,7 +71,7 @@ public sealed partial class LibraryViewModel
         IProgress<InstallProgress> progress)
     {
         var index = _services.Modpacks.ReadIndex(archivePath);
-        _shell.BeginActivity($"Installing {index.Name}...");
+        _shell.BeginActivity(Localizer.Format("L.Library.Installing", index.Name));
         return await _services.Modpacks
             .InstallAsync(request, progress, CancellationToken.None)
             .ConfigureAwait(true);
@@ -80,7 +83,7 @@ public sealed partial class LibraryViewModel
         IProgress<InstallProgress> progress)
     {
         var manifest = CurseForgePackInstaller.ReadManifest(archivePath);
-        _shell.BeginActivity($"Installing {manifest.Name}...");
+        _shell.BeginActivity(Localizer.Format("L.Library.Installing", manifest.Name));
         return await _services.CurseForgePacks
             .InstallAsync(request, progress, CancellationToken.None)
             .ConfigureAwait(true);

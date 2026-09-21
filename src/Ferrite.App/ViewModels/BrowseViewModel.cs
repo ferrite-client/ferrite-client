@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Ferrite.App.Localization;
 using Ferrite.App.Services;
 using Ferrite.Core.Content;
 using Ferrite.Core.Loaders;
@@ -95,7 +96,9 @@ public sealed partial class BrowseViewModel : ObservableObject
     /// <summary>Set when the active provider cannot be queried, such as a missing API key.</summary>
     public string? ProviderNote => ActiveProvider.UnavailableReason;
 
-    public string SearchPlaceholder => $"Search {SelectedProvider?.DisplayName ?? "content"}";
+    public string SearchPlaceholder => Localizer.Format(
+        "L.Browse.SearchPlaceholder",
+        SelectedProvider?.DisplayName ?? string.Empty);
 
     public bool HasResults => Results.Count > 0;
 
@@ -196,7 +199,7 @@ public sealed partial class BrowseViewModel : ObservableObject
                 Results.Add(hit);
             }
 
-            ResultSummary = $"{result.TotalHits:N0} results";
+            ResultSummary = Localizer.Format("L.Browse.Results", result.TotalHits);
             RefreshCacheNote();
             OnPropertyChanged(nameof(HasResults));
             SelectedResult = Results.FirstOrDefault();
@@ -238,7 +241,7 @@ public sealed partial class BrowseViewModel : ObservableObject
             RefreshCacheNote();
             if (SelectedVersion is null && versions.Count > 0)
             {
-                StatusNote = $"No {project.Title} version matches this instance's game version or loader.";
+                StatusNote = Localizer.Format("L.Browse.NoCompatible", project.Title);
             }
         }
         catch (Exception exception)
@@ -254,8 +257,10 @@ public sealed partial class BrowseViewModel : ObservableObject
     private void RefreshCacheNote()
     {
         CacheNote = ActiveProvider is CachedContentProvider { LastCacheHit: { } hit } cached
-            ? $"{ContentProviderNames.DisplayNameFor(cached.Name)} is unreachable; showing results cached "
-                + $"{hit.AgeText}."
+            ? Localizer.Format(
+                "L.Browse.CacheNote",
+                ContentProviderNames.DisplayNameFor(cached.Name),
+                hit.AgeText)
             : null;
     }
 }

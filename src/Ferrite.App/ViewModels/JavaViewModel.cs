@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Ferrite.App.Localization;
 using Ferrite.App.Services;
 using Ferrite.Core.Java;
 using Ferrite.Core.Minecraft;
@@ -72,7 +73,7 @@ public sealed partial class JavaViewModel : ObservableObject
                 Runtimes.Add(runtime);
             }
 
-            StatusNote = $"Found {runtimes.Count} runtime(s)";
+            StatusNote = Localizer.Format("L.Java.Found", runtimes.Count);
             OnPropertyChanged(nameof(HasRuntimes));
         }
         catch (Exception exception)
@@ -95,7 +96,7 @@ public sealed partial class JavaViewModel : ObservableObject
 
         _services.Settings.Current.DefaultJavaPath = runtime.ExecutablePath;
         await _services.Settings.SaveAsync(CancellationToken.None).ConfigureAwait(true);
-        StatusNote = $"Default runtime is now {runtime.DisplayName}";
+            StatusNote = Localizer.Format("L.Java.DefaultNow", runtime.DisplayName);
         _shell.ReportStatus(StatusNote);
     }
 
@@ -124,8 +125,8 @@ public sealed partial class JavaViewModel : ObservableObject
             }
 
             StatusNote = builds.Count == 0
-                ? $"Mojang publishes no {SelectedComponent} build for this platform"
-                : $"{builds.Count} published build(s) for {SelectedComponent}";
+                ? Localizer.Format("L.Java.NoBuilds", SelectedComponent)
+                : Localizer.Format("L.Java.Builds", builds.Count, SelectedComponent);
         }
         catch (Exception exception)
         {
@@ -151,7 +152,7 @@ public sealed partial class JavaViewModel : ObservableObject
                     CancellationToken.None)
                 .ConfigureAwait(true);
 
-            StatusNote = $"Provisioned {runtime.DisplayName}";
+            StatusNote = Localizer.Format("L.Java.Provisioned", runtime.DisplayName);
             await ScanAsync().ConfigureAwait(true);
         }
         catch (Exception exception)

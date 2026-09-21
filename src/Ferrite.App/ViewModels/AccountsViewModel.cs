@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Ferrite.App.Localization;
 using Ferrite.App.Services;
 using Ferrite.Core.Auth;
 using Ferrite.Core.Util;
@@ -68,7 +69,9 @@ public sealed partial class AccountsViewModel : ObservableObject
     {
         _services.Settings.Current.MicrosoftClientId = string.IsNullOrWhiteSpace(ClientId) ? null : ClientId.Trim();
         await _services.Settings.SaveAsync(CancellationToken.None).ConfigureAwait(true);
-        StatusNote = string.IsNullOrWhiteSpace(ClientId) ? "Client id cleared" : "Client id saved";
+        StatusNote = string.IsNullOrWhiteSpace(ClientId)
+            ? Localizer.Get("L.Accounts.ClientIdCleared")
+            : Localizer.Get("L.Accounts.ClientIdSaved");
     }
 
     [RelayCommand]
@@ -77,7 +80,7 @@ public sealed partial class AccountsViewModel : ObservableObject
         var clientId = _services.Settings.Current.MicrosoftClientId;
         if (string.IsNullOrWhiteSpace(clientId))
         {
-            StatusNote = "Add a Microsoft client id first; see docs/HUMAN_ACTION_REQUIRED.md.";
+            StatusNote = Localizer.Get("L.Accounts.NeedClientId");
             return;
         }
 
@@ -133,7 +136,7 @@ public sealed partial class AccountsViewModel : ObservableObject
         _services.Settings.Current.ActiveAccountId = account.Id;
         await _services.Settings.SaveAsync(CancellationToken.None).ConfigureAwait(true);
         _shell.RefreshActiveAccount();
-        StatusNote = $"Active account is {account.DisplayName}";
+            StatusNote = Localizer.Format("L.Accounts.Active", account.DisplayName);
     }
 
     [RelayCommand]
@@ -148,7 +151,7 @@ public sealed partial class AccountsViewModel : ObservableObject
 
         _shell.RefreshActiveAccount();
         Load();
-        StatusNote = "Signed out";
+            StatusNote = Localizer.Get("L.Accounts.SignedOut");
     }
 
     [RelayCommand]

@@ -291,3 +291,23 @@ wrong for every release after the one it was written from, and wrong silently.
 **Why.** The game already states the answer in a file the launcher installs. Reading it costs one
 ZIP entry, needs no maintenance, and degrades to "unknown" — which is honest — instead of to a
 confident wrong answer.
+
+## D026 - Interface text lives in code tables, and is verified against the views
+
+**Decision.** Two dictionaries (`StringsEn`, `StringsPl`) hold every string the application
+displays. `Localizer.Apply` writes the active table into `Application.Resources`, views reference
+keys with `DynamicResource`, and view models use `Localizer.Format`. A test parses the views and the
+source, compares them with both tables, and fails on a key that is used but undefined or defined but
+unused.
+
+**Rejected.** Resource files with satellite assemblies (`.resx`), and translating only the static
+labels while leaving messages English.
+
+**Why.** Two languages and one developer do not need a localisation pipeline, and a dictionary is
+greppable, diffable, and impossible to ship half-installed. The verification matters more than the
+storage format: in Avalonia a missing resource key leaves the property empty, so a typo produces a
+blank label and no error. That is exactly the failure this test exists to catch — it already caught
+three real ones, including a `Ready` literal hidden in a field initializer.
+
+**Boundary.** Strings produced inside `Ferrite.Core` remain English and are recorded as such in
+`FEATURE_PARITY.md` row O10 rather than being presented as translated.

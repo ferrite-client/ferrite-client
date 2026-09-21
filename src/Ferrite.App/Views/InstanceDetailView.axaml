@@ -13,22 +13,22 @@
         <TextBlock Classes="faint" Text="{Binding LoaderText}" />
       </StackPanel>
       <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-        <Button Content="Back" Command="{Binding BackCommand}" />
-        <Button Content="Open folder" Command="{Binding OpenFolderCommand}" />
-        <Button Content="Verify" Command="{Binding VerifyCommand}" />
-        <Button Content="Repair" Command="{Binding RepairCommand}" />
-        <Button Content="Export pack" Click="OnExportModpackClick" />
-        <Button Classes="primary" Content="Save" Command="{Binding SaveCommand}" />
+        <Button Content="{DynamicResource L.Instance.Back}" Command="{Binding BackCommand}" />
+        <Button Content="{DynamicResource L.Common.OpenFolder}" Command="{Binding OpenFolderCommand}" />
+        <Button Content="{DynamicResource L.Instance.Verify}" Command="{Binding VerifyCommand}" />
+        <Button Content="{DynamicResource L.Common.Repair}" Command="{Binding RepairCommand}" />
+        <Button Content="{DynamicResource L.Instance.ExportPack}" Click="OnExportModpackClick" />
+        <Button Classes="primary" Content="{DynamicResource L.Common.Save}" Command="{Binding SaveCommand}" />
       </StackPanel>
     </Grid>
 
     <TabControl Grid.Row="1">
 
-      <TabItem Header="Settings">
+      <TabItem Header="{DynamicResource L.Instance.TabSettings}">
         <ScrollViewer>
           <StackPanel Spacing="16" Margin="0,16,0,0" MaxWidth="720" HorizontalAlignment="Left">
             <StackPanel Spacing="4">
-              <TextBlock Classes="label" Text="JAVA RUNTIME" />
+              <TextBlock Classes="label" Text="{DynamicResource L.Instance.FieldJavaRuntime}" />
               <ComboBox ItemsSource="{Binding JavaRuntimes}" SelectedItem="{Binding SelectedJava}"
                         HorizontalAlignment="Stretch">
                 <ComboBox.ItemTemplate>
@@ -44,39 +44,39 @@
 
             <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
               <StackPanel Grid.Column="0" Spacing="4">
-                <TextBlock Classes="label" Text="MAX MEMORY (MB)" />
+              <TextBlock Classes="label" Text="{DynamicResource L.Instance.FieldMaxMemory}" />
                 <NumericUpDown Value="{Binding MemoryMb}" Minimum="0" Maximum="65536" Increment="512" />
               </StackPanel>
               <StackPanel Grid.Column="1" Spacing="4">
-                <TextBlock Classes="label" Text="MIN MEMORY (MB)" />
+              <TextBlock Classes="label" Text="{DynamicResource L.Instance.FieldMinMemory}" />
                 <NumericUpDown Value="{Binding MinMemoryMb}" Minimum="0" Maximum="65536" Increment="512" />
               </StackPanel>
               <StackPanel Grid.Column="2" Spacing="4">
-                <TextBlock Classes="label" Text="WINDOW SIZE" />
+              <TextBlock Classes="label" Text="{DynamicResource L.Instance.FieldWindowSize}" />
                 <Grid ColumnDefinitions="*,12,*" ColumnSpacing="0">
                   <NumericUpDown Grid.Column="0" Value="{Binding WindowWidth}" Minimum="0" Maximum="16384"
                                  Increment="10" />
                   <NumericUpDown Grid.Column="2" Value="{Binding WindowHeight}" Minimum="0" Maximum="16384"
                                  Increment="10" />
                 </Grid>
-                <TextBlock Classes="faint" Text="width x height, blank for the default" />
+                <TextBlock Classes="faint" Text="{DynamicResource L.Instance.WindowSizeHint}" />
               </StackPanel>
             </Grid>
 
             <StackPanel Spacing="4">
-              <TextBlock Classes="label" Text="DEFAULT SERVER (used when joining from the library)" />
+              <TextBlock Classes="label" Text="{DynamicResource L.Instance.FieldDefaultServer}" />
               <TextBox Text="{Binding ServerAddress}" PlaceholderText="play.example.net" />
             </StackPanel>
 
-            <CheckBox Content="Launch in demo mode" IsChecked="{Binding DemoMode}" />
+            <CheckBox Content="{DynamicResource L.Instance.DemoMode}" IsChecked="{Binding DemoMode}" />
 
             <StackPanel Spacing="4">
-              <TextBlock Classes="label" Text="EXTRA JVM ARGUMENTS (one per line)" />
+              <TextBlock Classes="label" Text="{DynamicResource L.Instance.FieldJvmArguments}" />
               <TextBox Text="{Binding JvmArgumentsText}" AcceptsReturn="True" Height="88" Classes="mono" />
             </StackPanel>
 
             <StackPanel Spacing="4">
-              <TextBlock Classes="label" Text="EXTRA GAME ARGUMENTS (one per line)" />
+              <TextBlock Classes="label" Text="{DynamicResource L.Instance.FieldGameArguments}" />
               <TextBox Text="{Binding GameArgumentsText}" AcceptsReturn="True" Height="72" Classes="mono" />
             </StackPanel>
 
@@ -85,12 +85,12 @@
         </ScrollViewer>
       </TabItem>
 
-      <TabItem Header="Mods">
+      <TabItem Header="{DynamicResource L.Instance.TabMods}">
         <Grid RowDefinitions="Auto,*" Margin="0,16,0,0">
           <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,12">
             <TextBlock Grid.Column="0" Classes="muted"
-                       Text="Drop mod files here, or use Add mods." VerticalAlignment="Center" />
-            <Button Grid.Column="1" Content="Add mods" Click="OnAddModsClick" />
+                     Text="{DynamicResource L.Instance.DropModsHint}" VerticalAlignment="Center" />
+            <Button Grid.Column="1" Content="{DynamicResource L.Instance.AddMods}" Click="OnAddModsClick" />
           </Grid>
 
           <ScrollViewer Grid.Row="1">
@@ -111,10 +111,10 @@
                         <TextBlock Classes="faint" Text="{Binding Note}" />
                       </StackPanel>
                       <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                        <Button Content="Disable" IsVisible="{Binding IsEnabled}" Command="{Binding ToggleCommand}" />
-                        <Button Content="Enable" IsVisible="{Binding !IsEnabled}" Command="{Binding ToggleCommand}" />
-                        <Button Content="Folder" Command="{Binding OpenFolderCommand}" />
-                        <Button Classes="danger" Content="Remove" Command="{Binding DeleteCommand}" />
+                <Button Content="{DynamicResource L.Instance.Disable}" IsVisible="{Binding IsEnabled}" Command="{Binding ToggleCommand}" />
+                <Button Content="{DynamicResource L.Instance.Enable}" IsVisible="{Binding !IsEnabled}" Command="{Binding ToggleCommand}" />
+                <Button Content="{DynamicResource L.Common.Folder}" Command="{Binding OpenFolderCommand}" />
+                <Button Classes="danger" Content="{DynamicResource L.Common.Remove}" Command="{Binding DeleteCommand}" />
                       </StackPanel>
                     </Grid>
                   </Border>
@@ -124,15 +124,15 @@
           </ScrollViewer>
 
           <TextBlock Grid.Row="1" Classes="muted" IsVisible="{Binding !HasMods}"
-                     Text="No mods installed in this instance." />
+                     Text="{DynamicResource L.Instance.NoMods}" />
         </Grid>
       </TabItem>
 
-      <TabItem Header="Content">
+      <TabItem Header="{DynamicResource L.Instance.TabContent}">
         <Grid RowDefinitions="Auto,*,Auto" Margin="0,16,0,0">
           <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8" Margin="0,0,0,12">
-            <Button Classes="primary" Content="Check for updates" Command="{Binding CheckUpdatesCommand}" />
-            <Button Content="Update selected" Command="{Binding ApplyUpdatesCommand}" />
+            <Button Classes="primary" Content="{DynamicResource L.Instance.CheckContentUpdates}" Command="{Binding CheckUpdatesCommand}" />
+            <Button Content="{DynamicResource L.Instance.UpdateSelected}" Command="{Binding ApplyUpdatesCommand}" />
           </StackPanel>
 
           <ScrollViewer Grid.Row="1">
@@ -156,7 +156,7 @@
               </ItemsControl>
 
               <TextBlock Classes="muted" IsVisible="{Binding !HasUpdates}"
-                         Text="No updates found. Only content Ferrite installed can be checked; mods you added yourself are left alone." />
+                         Text="{DynamicResource L.Instance.NoContentUpdates}" />
             </StackPanel>
           </ScrollViewer>
 
@@ -165,13 +165,13 @@
         </Grid>
       </TabItem>
 
-      <TabItem Header="Worlds">
+      <TabItem Header="{DynamicResource L.Instance.TabWorlds}">
         <Grid RowDefinitions="Auto,*" Margin="0,16,0,0">
           <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" Margin="0,0,0,12">
-            <Button Grid.Column="0" Content="Refresh" Command="{Binding RefreshGameDataCommand}" />
+            <Button Grid.Column="0" Content="{DynamicResource L.Common.Refresh}" Command="{Binding RefreshGameDataCommand}" />
             <TextBlock Grid.Column="1" Classes="muted" VerticalAlignment="Center"
-                       Text="Backups and deleted worlds are written to the launcher's backups folder." />
-            <Button Grid.Column="2" Content="Open saves" Click="OnOpenSavesClick" />
+                     Text="{DynamicResource L.Instance.WorldsHint}" />
+            <Button Grid.Column="2" Content="{DynamicResource L.Instance.OpenSaves}" Click="OnOpenSavesClick" />
           </Grid>
 
           <ScrollViewer Grid.Row="1">
@@ -187,10 +187,10 @@
                         <TextBlock Classes="faint" Text="{Binding Note}" />
                       </StackPanel>
                       <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                        <Button Content="Backup" Command="{Binding BackupCommand}" />
-                        <Button Content="Duplicate" Command="{Binding DuplicateCommand}" />
-                        <Button Content="Folder" Command="{Binding OpenFolderCommand}" />
-                        <Button Classes="danger" Content="Delete" Command="{Binding DeleteCommand}" />
+                <Button Content="{DynamicResource L.Instance.Backup}" Command="{Binding BackupCommand}" />
+                <Button Content="{DynamicResource L.Instance.Duplicate}" Command="{Binding DuplicateCommand}" />
+                <Button Content="{DynamicResource L.Common.Folder}" Command="{Binding OpenFolderCommand}" />
+                <Button Classes="danger" Content="{DynamicResource L.Common.Delete}" Command="{Binding DeleteCommand}" />
                       </StackPanel>
                     </Grid>
                   </Border>
@@ -200,23 +200,23 @@
           </ScrollViewer>
 
           <TextBlock Grid.Row="1" Classes="muted" IsVisible="{Binding !HasWorlds}"
-                     Text="No saved worlds in this instance yet." />
+                     Text="{DynamicResource L.Instance.NoWorlds}" />
         </Grid>
       </TabItem>
 
-      <TabItem Header="Servers">
+      <TabItem Header="{DynamicResource L.Instance.TabServers}">
         <Grid RowDefinitions="Auto,*" Margin="0,16,0,0">
           <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="10" Margin="0,0,0,12">
             <TextBox Grid.Column="0" PlaceholderText="play.example.net" Text="{Binding NewServerAddress}" />
-            <TextBox Grid.Column="1" Width="160" PlaceholderText="Name (optional)" Text="{Binding NewServerName}" />
-            <Button Grid.Column="2" Content="Add" Command="{Binding AddServerCommand}" />
-            <Button Grid.Column="3" Classes="primary" Content="Ping all" Command="{Binding PingServersCommand}" />
+            <TextBox Grid.Column="1" Width="160" PlaceholderText="{DynamicResource L.Instance.ServerNamePlaceholder}" Text="{Binding NewServerName}" />
+            <Button Grid.Column="2" Content="{DynamicResource L.Common.Add}" Command="{Binding AddServerCommand}" />
+            <Button Grid.Column="3" Classes="primary" Content="{DynamicResource L.Instance.PingAll}" Command="{Binding PingServersCommand}" />
           </Grid>
 
           <ScrollViewer Grid.Row="1">
             <StackPanel Spacing="18">
               <StackPanel Spacing="6">
-                <TextBlock Classes="label" Text="SAVED SERVERS" />
+                <TextBlock Classes="label" Text="{DynamicResource L.Instance.SavedServers}" />
                 <ItemsControl ItemsSource="{Binding Servers}">
                   <ItemsControl.ItemTemplate>
                     <DataTemplate DataType="vm:ServerItemViewModel">
@@ -228,7 +228,7 @@
                             <TextBlock Classes="muted" Text="{Binding StatusText}" />
                             <TextBlock Classes="faint" Text="{Binding Motd}" IsVisible="{Binding HasMotd}" />
                           </StackPanel>
-                          <Button Grid.Column="1" Classes="danger" Content="Remove"
+                          <Button Grid.Column="1" Classes="danger" Content="{DynamicResource L.Common.Remove}"
                                   Command="{Binding RemoveCommand}" VerticalAlignment="Center" />
                         </Grid>
                       </Border>
@@ -236,12 +236,12 @@
                   </ItemsControl.ItemTemplate>
                 </ItemsControl>
                 <TextBlock Classes="faint" IsVisible="{Binding !HasServers}"
-                           Text="No saved servers. Add one to see its status here." />
+                           Text="{DynamicResource L.Instance.NoServers}" />
               </StackPanel>
 
               <StackPanel Spacing="6">
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
-                  <Button Grid.Column="0" Content="Find LAN worlds"
+                  <Button Grid.Column="0" Content="{DynamicResource L.Instance.FindLanWorlds}"
                           Command="{Binding ToggleLanScanCommand}" />
                   <TextBlock Grid.Column="1" Classes="muted" VerticalAlignment="Center"
                              TextWrapping="Wrap" Text="{Binding LanStatus}" />
@@ -257,7 +257,7 @@
                             <TextBlock Classes="faint" Text="{Binding LastSeenText}" />
                             <TextBlock Classes="muted" Text="{Binding Note}" />
                           </StackPanel>
-                          <Button Grid.Column="1" Classes="primary" Content="Add"
+                          <Button Grid.Column="1" Classes="primary" Content="{DynamicResource L.Common.Add}"
                                   Command="{Binding AddToServersCommand}" VerticalAlignment="Center" />
                         </Grid>
                       </Border>
@@ -270,11 +270,11 @@
         </Grid>
       </TabItem>
 
-      <TabItem Header="Files">
+      <TabItem Header="{DynamicResource L.Instance.TabFiles}">
         <ScrollViewer>
           <StackPanel Spacing="18" Margin="0,16,0,0">
             <StackPanel Spacing="6">
-              <TextBlock Classes="label" Text="RESOURCE PACKS" />
+              <TextBlock Classes="label" Text="{DynamicResource L.Instance.ResourcePacks}" />
               <ItemsControl ItemsSource="{Binding ResourcePacks}">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate>
@@ -287,11 +287,11 @@
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
-              <TextBlock Classes="faint" Text="No resource packs." IsVisible="{Binding !HasResourcePacks}" />
+              <TextBlock Classes="faint" Text="{DynamicResource L.Instance.NoResourcePacks}" IsVisible="{Binding !HasResourcePacks}" />
             </StackPanel>
 
             <StackPanel Spacing="6">
-              <TextBlock Classes="label" Text="SHADER PACKS" />
+              <TextBlock Classes="label" Text="{DynamicResource L.Instance.ShaderPacks}" />
               <ItemsControl ItemsSource="{Binding ShaderPacks}">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate>
@@ -299,11 +299,11 @@
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
-              <TextBlock Classes="faint" Text="No shader packs." IsVisible="{Binding !HasShaderPacks}" />
+              <TextBlock Classes="faint" Text="{DynamicResource L.Instance.NoShaderPacks}" IsVisible="{Binding !HasShaderPacks}" />
             </StackPanel>
 
             <StackPanel Spacing="6">
-              <TextBlock Classes="label" Text="SCREENSHOTS" />
+              <TextBlock Classes="label" Text="{DynamicResource L.Instance.Screenshots}" />
               <ItemsControl ItemsSource="{Binding Screenshots}">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate>
@@ -311,15 +311,15 @@
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
-              <TextBlock Classes="faint" Text="No screenshots." IsVisible="{Binding !HasScreenshots}" />
+              <TextBlock Classes="faint" Text="{DynamicResource L.Instance.NoScreenshots}" IsVisible="{Binding !HasScreenshots}" />
             </StackPanel>
           </StackPanel>
         </ScrollViewer>
       </TabItem>
 
-      <TabItem Header="Logs">
+      <TabItem Header="{DynamicResource L.Instance.TabLogs}">
         <Grid RowDefinitions="Auto,*,Auto,Auto,*" Margin="0,16,0,0" RowSpacing="12">
-          <Button Grid.Row="0" Content="Refresh" Command="{Binding RefreshLogCommand}" HorizontalAlignment="Left" />
+          <Button Grid.Row="0" Content="{DynamicResource L.Common.Refresh}" Command="{Binding RefreshLogCommand}" HorizontalAlignment="Left" />
           <Border Grid.Row="1" Classes="card">
             <ScrollViewer>
               <SelectableTextBlock Classes="mono" Text="{Binding LogText}" />
@@ -328,7 +328,7 @@
 
           <Grid Grid.Row="2" ColumnDefinitions="220,*" ColumnSpacing="12">
             <StackPanel Grid.Column="0" Spacing="4">
-              <TextBlock Classes="label" Text="CRASH REPORTS" />
+              <TextBlock Classes="label" Text="{DynamicResource L.Instance.CrashReports}" />
               <ListBox ItemsSource="{Binding CrashReports}" SelectedItem="{Binding SelectedCrashReport}"
                        MaxHeight="140" Background="Transparent">
                 <ListBox.ItemTemplate>
@@ -341,7 +341,7 @@
                   </DataTemplate>
                 </ListBox.ItemTemplate>
               </ListBox>
-              <TextBlock Classes="faint" Text="No crash reports." IsVisible="{Binding !HasCrashReports}" />
+              <TextBlock Classes="faint" Text="{DynamicResource L.Instance.NoCrashReports}" IsVisible="{Binding !HasCrashReports}" />
             </StackPanel>
 
             <Border Grid.Column="1" Classes="card">

@@ -7,108 +7,115 @@
   <ScrollViewer Margin="24">
     <StackPanel Spacing="18" MaxWidth="760" HorizontalAlignment="Left">
 
-      <TextBlock Classes="h2" Text="Appearance" />
+      <TextBlock Classes="h2" Text="{DynamicResource L.Settings.Appearance}" />
       <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
         <StackPanel Grid.Column="0" Spacing="4">
-          <TextBlock Classes="label" Text="THEME" />
+          <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldTheme}" />
           <ComboBox ItemsSource="{Binding Themes}" SelectedItem="{Binding Theme}" HorizontalAlignment="Stretch" />
         </StackPanel>
         <StackPanel Grid.Column="1" Spacing="4">
-          <TextBlock Classes="label" Text="LANGUAGE" />
-          <ComboBox ItemsSource="{Binding Languages}" SelectedItem="{Binding Language}" HorizontalAlignment="Stretch" />
+          <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldLanguage}" />
+          <ComboBox ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedLanguage}"
+                    HorizontalAlignment="Stretch">
+            <ComboBox.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding DisplayName}" />
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
         </StackPanel>
       </Grid>
-      <CheckBox Content="Show snapshots in the version list" IsChecked="{Binding ShowSnapshots}" />
+      <CheckBox Content="{DynamicResource L.Settings.ShowSnapshots}" IsChecked="{Binding ShowSnapshots}" />
 
       <Border Height="1" Background="{DynamicResource FerriteBorder}" />
 
-      <TextBlock Classes="h2" Text="Network" />
+      <TextBlock Classes="h2" Text="{DynamicResource L.Settings.Network}" />
       <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
         <StackPanel Grid.Column="0" Spacing="4">
-          <TextBlock Classes="label" Text="CONCURRENT DOWNLOADS" />
+          <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldConcurrentDownloads}" />
           <NumericUpDown Value="{Binding MaxConcurrentDownloads}" Minimum="1" Maximum="64" Increment="1" />
         </StackPanel>
         <StackPanel Grid.Column="1" Spacing="4">
-          <TextBlock Classes="label" Text="HTTP PROXY" />
+          <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldProxy}" />
           <TextBox Text="{Binding ProxyUrl}" PlaceholderText="http://host:port" />
         </StackPanel>
       </Grid>
 
       <Border Height="1" Background="{DynamicResource FerriteBorder}" />
 
-      <TextBlock Classes="h2" Text="Accounts" />
+      <TextBlock Classes="h2" Text="{DynamicResource L.Settings.Accounts}" />
       <StackPanel Spacing="4">
-        <TextBlock Classes="label" Text="MICROSOFT CLIENT ID" />
+        <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldClientId}" />
         <TextBox Text="{Binding MicrosoftClientId}" />
         <TextBlock Classes="faint"
-                   Text="Required for Microsoft sign-in. See docs/HUMAN_ACTION_REQUIRED.md for the exact steps." />
+                   Text="{DynamicResource L.Settings.ClientIdHint}" />
       </StackPanel>
 
       <Border Height="1" Background="{DynamicResource FerriteBorder}" />
 
-      <TextBlock Classes="h2" Text="Content providers" />
+      <TextBlock Classes="h2" Text="{DynamicResource L.Settings.Providers}" />
       <StackPanel Spacing="4">
-        <TextBlock Classes="label" Text="CURSEFORGE API KEY" />
+        <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldCurseForgeKey}" />
         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
           <TextBox Grid.Column="0" PasswordChar="*" Text="{Binding NewCurseForgeApiKey}"
-                   PlaceholderText="Paste a key to store or replace the current one" />
-          <Button Grid.Column="1" Classes="danger" Content="Remove key"
+                   PlaceholderText="{DynamicResource L.Settings.CurseForgeKeyPlaceholder}" />
+          <Button Grid.Column="1" Classes="danger" Content="{DynamicResource L.Settings.RemoveKey}"
                   Command="{Binding ClearCurseForgeKeyCommand}" />
         </Grid>
         <TextBlock Classes="faint" TextWrapping="Wrap" Text="{Binding CurseForgeKeyStatus}" />
         <TextBlock Classes="faint" TextWrapping="Wrap"
-                   Text="CurseForge browsing, mod installation, and modpack imports need a key issued to you by CurseForge. The key is stored outside the settings file. See docs/HUMAN_ACTION_REQUIRED.md." />
+                   Text="{DynamicResource L.Settings.CurseForgeHint}" />
       </StackPanel>
 
       <Border Height="1" Background="{DynamicResource FerriteBorder}" />
 
-      <TextBlock Classes="h2" Text="Storage" />
+      <TextBlock Classes="h2" Text="{DynamicResource L.Settings.Storage}" />
       <StackPanel Spacing="6">
-        <TextBlock Classes="label" Text="DATA ROOT" />
+        <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldDataRoot}" />
         <TextBlock Classes="mono" Text="{Binding DataRoot}" />
         <TextBlock Classes="faint"
-                   Text="Set the FERRITE_HOME environment variable to move the data root before launching." />
+                   Text="{DynamicResource L.Settings.DataRootHint}" />
         <StackPanel Orientation="Horizontal" Spacing="10">
-          <TextBlock Classes="label" Text="LIBRARY AND CACHE SIZE" VerticalAlignment="Center" />
+          <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldCacheSize}" VerticalAlignment="Center" />
           <TextBlock Text="{Binding CacheSizeText}" VerticalAlignment="Center" />
         </StackPanel>
         <StackPanel Orientation="Horizontal" Spacing="8">
-          <Button Content="Open data folder" Command="{Binding OpenDataFolderCommand}" />
-          <Button Content="Open logs" Command="{Binding OpenLogsFolderCommand}" />
-          <Button Content="Refresh size" Command="{Binding RefreshCacheSizeCommand}" />
-          <Button Classes="danger" Content="Clear metadata cache" Command="{Binding ClearMetadataCacheCommand}" />
+          <Button Content="{DynamicResource L.Settings.OpenDataFolder}" Command="{Binding OpenDataFolderCommand}" />
+          <Button Content="{DynamicResource L.Settings.OpenLogs}" Command="{Binding OpenLogsFolderCommand}" />
+          <Button Content="{DynamicResource L.Settings.RefreshSize}" Command="{Binding RefreshCacheSizeCommand}" />
+          <Button Classes="danger" Content="{DynamicResource L.Settings.ClearMetadataCache}" Command="{Binding ClearMetadataCacheCommand}" />
         </StackPanel>
       </StackPanel>
 
       <Border Height="1" Background="{DynamicResource FerriteBorder}" />
 
-      <TextBlock Classes="h2" Text="Launcher updates" />
+      <TextBlock Classes="h2" Text="{DynamicResource L.Settings.Updates}" />
       <StackPanel Spacing="6">
         <StackPanel Spacing="4">
-          <TextBlock Classes="label" Text="UPDATE FEED URL" />
+          <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldUpdateFeed}" />
           <TextBox Text="{Binding UpdateFeedUrl}" PlaceholderText="https://example.com/ferrite/" />
         </StackPanel>
-        <CheckBox Content="Check for updates when Ferrite starts"
+        <CheckBox Content="{DynamicResource L.Settings.CheckOnStartup}"
                   IsChecked="{Binding CheckForUpdatesOnStartup}" />
         <StackPanel Orientation="Horizontal" Spacing="8">
-          <Button Classes="primary" Content="Check for updates" Command="{Binding CheckForUpdatesCommand}" />
-          <Button Content="Download and verify" Command="{Binding StageUpdateCommand}" />
-          <Button Content="Open staging folder" Command="{Binding OpenStagingFolderCommand}" />
+          <Button Classes="primary" Content="{DynamicResource L.Settings.CheckForUpdates}" Command="{Binding CheckForUpdatesCommand}" />
+          <Button Content="{DynamicResource L.Settings.DownloadAndVerify}" Command="{Binding StageUpdateCommand}" />
+          <Button Content="{DynamicResource L.Settings.OpenStaging}" Command="{Binding OpenStagingFolderCommand}" />
         </StackPanel>
         <TextBlock Classes="muted" TextWrapping="Wrap" Text="{Binding UpdateStatus}" />
         <StackPanel Spacing="4" IsVisible="{Binding UpdateHandoffCommand, Converter={x:Static ObjectConverters.IsNotNull}}">
-          <TextBlock Classes="label" Text="CLOSE FERRITE, THEN RUN" />
+          <TextBlock Classes="label" Text="{DynamicResource L.Settings.HandoffHint}" />
           <SelectableTextBlock Classes="mono" TextWrapping="Wrap" Text="{Binding UpdateHandoffCommand}" />
         </StackPanel>
         <TextBlock Classes="faint" TextWrapping="Wrap"
-                   Text="A feed must publish a manifest.json signed by the key built into this copy of Ferrite. Ferrite never replaces its own running files; the staged build is applied by the script above, which waits for Ferrite to close. See docs/HUMAN_ACTION_REQUIRED.md." />
+                   Text="{DynamicResource L.Settings.FeedHint}" />
       </StackPanel>
 
       <Border Height="1" Background="{DynamicResource FerriteBorder}" />
 
-      <TextBlock Classes="h2" Text="Diagnostics" />
+      <TextBlock Classes="h2" Text="{DynamicResource L.Settings.Diagnostics}" />
       <StackPanel Spacing="6">
-        <TextBlock Classes="label" Text="RECENT OPERATIONS" />
+        <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldRecentOperations}" />
         <ItemsControl ItemsSource="{Binding RecentOperations}">
           <ItemsControl.ItemTemplate>
             <DataTemplate>
@@ -121,24 +128,24 @@
             </DataTemplate>
           </ItemsControl.ItemTemplate>
         </ItemsControl>
-        <TextBlock Classes="faint" Text="No operations recorded yet." IsVisible="{Binding !HasRecentOperations}" />
+        <TextBlock Classes="faint" Text="{DynamicResource L.Settings.NoOperations}" IsVisible="{Binding !HasRecentOperations}" />
 
         <StackPanel Spacing="4" Margin="0,6,0,0">
-          <TextBlock Classes="label" Text="SUPPORT BUNDLE NOTES" />
+          <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldBundleNotes}" />
           <TextBox Text="{Binding DiagnosticsNotes}" AcceptsReturn="True" Height="60"
-                   PlaceholderText="What were you doing when it went wrong?" />
+                   PlaceholderText="{DynamicResource L.Settings.BundleNotesPlaceholder}" />
           <StackPanel Orientation="Horizontal" Spacing="8">
-            <Button Content="Export diagnostics bundle" Click="OnExportDiagnosticsClick" />
-            <Button Content="Refresh list" Command="{Binding RefreshOperationsCommand}" />
+            <Button Content="{DynamicResource L.Settings.ExportDiagnostics}" Click="OnExportDiagnosticsClick" />
+            <Button Content="{DynamicResource L.Settings.RefreshList}" Command="{Binding RefreshOperationsCommand}" />
           </StackPanel>
           <TextBlock Classes="muted" TextWrapping="Wrap" Text="{Binding DiagnosticsStatus}" />
           <TextBlock Classes="faint" TextWrapping="Wrap"
-                     Text="The bundle contains launcher logs, this operation list, and the newest crash report's analysis. Credentials are redacted before anything is written." />
+                     Text="{DynamicResource L.Settings.BundleHint}" />
         </StackPanel>
       </StackPanel>
 
       <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,6,0,0">
-        <Button Classes="primary" Content="Save settings" Command="{Binding SaveCommand}" />
+        <Button Classes="primary" Content="{DynamicResource L.Settings.SaveSettings}" Command="{Binding SaveCommand}" />
         <TextBlock Classes="muted" VerticalAlignment="Center" Text="{Binding StatusNote}" />
       </StackPanel>
 

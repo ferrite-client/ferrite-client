@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Ferrite.App.Localization;
 using Ferrite.Core.Content;
 using Ferrite.Core.Minecraft;
 
@@ -61,8 +62,10 @@ public sealed partial class InstanceDetailViewModel
             {
                 if (!provider.IsConfigured)
                 {
-                    messages.Add($"{ContentProviderNames.DisplayNameFor(provider.Name)} skipped: "
-                        + provider.UnavailableReason);
+                    messages.Add(Localizer.Format(
+                        "L.Instance.SkippedProvider",
+                        ContentProviderNames.DisplayNameFor(provider.Name),
+                        provider.UnavailableReason ?? string.Empty));
                     continue;
                 }
 
@@ -80,14 +83,17 @@ public sealed partial class InstanceDetailViewModel
                     }
                 }
 
-                messages.Add($"{ContentProviderNames.DisplayNameFor(provider.Name)}: "
-                    + $"{report.Updates.Count} update(s), {report.UpToDate.Count} up to date");
+                messages.Add(Localizer.Format(
+                    "L.Instance.ProviderSummary",
+                    ContentProviderNames.DisplayNameFor(provider.Name),
+                    report.Updates.Count,
+                    report.UpToDate.Count));
                 messages.AddRange(report.Warnings);
             }
 
             if (Updates.Count == 0 && messages.Count == 0)
             {
-                messages.Add("No launcher-installed content is recorded for this instance yet.");
+                messages.Add(Localizer.Get("L.Instance.NoTrackedContent"));
             }
 
             UpdateStatus = string.Join(" · ", messages);
@@ -111,7 +117,7 @@ public sealed partial class InstanceDetailViewModel
         var selected = Updates.Where(item => item.IsSelected).Select(item => item.Update).ToList();
         if (selected.Count == 0)
         {
-            UpdateStatus = "Select at least one update to apply.";
+            UpdateStatus = Localizer.Get("L.Instance.SelectUpdate");
             return;
         }
 
@@ -127,7 +133,7 @@ public sealed partial class InstanceDetailViewModel
                     CancellationToken.None)
                 .ConfigureAwait(true);
 
-            var note = $"Updated {result.Updated} file(s)";
+            var note = Localizer.Format("L.Instance.Updated", result.Updated);
             if (result.Warnings.Count > 0)
             {
                 note += $"; {result.Warnings.Count} warning(s): {string.Join("; ", result.Warnings.Take(3))}";

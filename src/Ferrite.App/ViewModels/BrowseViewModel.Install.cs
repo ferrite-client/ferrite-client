@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.Input;
+using Ferrite.App.Localization;
 using Ferrite.Core.Content;
 using Ferrite.Core.Download;
 using Ferrite.Core.Minecraft;
@@ -51,10 +52,10 @@ public sealed partial class BrowseViewModel
                     CancellationToken.None)
                 .ConfigureAwait(true);
 
-            StatusNote = $"Installed {result.Installed} file(s) into {instance.Name}";
+            StatusNote = Localizer.Format("L.Browse.Installed", result.Installed, instance.Name);
             if (result.Warnings.Count > 0)
             {
-                StatusNote += $" · {result.Warnings.Count} warning(s)";
+                StatusNote += " · " + Localizer.Format("L.Browse.Warnings", result.Warnings.Count);
             }
 
             _shell.ReportStatus(StatusNote);
@@ -75,12 +76,12 @@ public sealed partial class BrowseViewModel
         var file = version.PrimaryFile;
         if (file is null || string.IsNullOrEmpty(file.Url))
         {
-            StatusNote = "This modpack file cannot be downloaded automatically.";
+            StatusNote = Localizer.Get("L.Browse.ModpackNoDownload");
             return;
         }
 
         var title = SelectedResult?.Title ?? version.VersionNumber;
-        _shell.BeginActivity($"Downloading {title}...");
+        _shell.BeginActivity(Localizer.Format("L.Browse.Downloading", title));
         StatusNote = null;
 
         Directory.CreateDirectory(_services.Paths.TemporaryDirectory);
@@ -107,7 +108,8 @@ public sealed partial class BrowseViewModel
 
         if (summary.Failures.Count > 0 || !File.Exists(archivePath))
         {
-            StatusNote = summary.Failures.FirstOrDefault()?.Message ?? "The modpack could not be downloaded.";
+            StatusNote = summary.Failures.FirstOrDefault()?.Message
+                ?? Localizer.Get("L.Browse.ModpackDownloadFailed");
             return;
         }
 
@@ -126,7 +128,7 @@ public sealed partial class BrowseViewModel
                 "That project is not a modpack archive Ferrite can install."),
         };
 
-        StatusNote = $"Installed {result.Instance.Name}: {result.FilesDownloaded} file(s)";
+        StatusNote = Localizer.Format("L.Library.ModpackInstalled", result.Instance.Name, result.FilesDownloaded);
         _shell.ReportStatus(StatusNote);
         await LoadInstancesAsync().ConfigureAwait(true);
     }

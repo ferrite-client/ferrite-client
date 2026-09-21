@@ -254,3 +254,20 @@ extraction path is checked for containment inside the intended destination.
 - `InstanceContentManager.ListPacks` combines the two and marks a pack whose declared formats
   exclude the instance. When the instance's format cannot be determined the result is "unknown", not
   "incompatible": a claim that a pack is broken needs evidence.
+
+## 16. Interface text
+
+- `Localizer` holds one table per language and writes the active table into
+  `Application.Resources`, so every `DynamicResource` reference in the views updates the moment the
+  language changes. Text the view models compose (`Localizer.Format`) resolves the same way.
+- The tables are plain dictionaries in code rather than satellite assemblies: there are two
+  languages, no external translator workflow, and a dictionary is greppable and impossible to ship
+  half-installed. A missing key falls back to English and then to the key itself, so a gap shows up
+  as readable text rather than an empty control.
+- `LocalizationTests` compares the tables against both the views and the code: identical key sets,
+  identical placeholders, no unused keys, and no key used without a definition. A missing key in
+  Avalonia renders as nothing at all, which is why that check exists rather than relying on review.
+- Message text produced inside `Ferrite.Core` (provider errors, verification results, HTTP failures)
+  stays English. Those strings belong to the engine that produced them and frequently travel inside
+  exceptions; localising them would push a language dependency through every subsystem. The parity
+  matrix records this as the boundary of the feature rather than hiding it.

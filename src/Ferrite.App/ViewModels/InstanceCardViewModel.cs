@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Ferrite.App.Localization;
 using Ferrite.App.Services;
 using Ferrite.Core.Content;
 using Ferrite.Core.Loaders;
@@ -91,7 +92,7 @@ public sealed partial class InstanceCardViewModel : ObservableObject
             await _services.Instances
                 .DeleteAsync(Record.Id, moveToBackups: true, CancellationToken.None)
                 .ConfigureAwait(true);
-            _shell.ReportStatus($"{Record.Name} was moved to backups");
+            _shell.ReportStatus(Localizer.Format("L.Library.MovedToBackups", Record.Name));
             await _shell.Library.RefreshAsync().ConfigureAwait(true);
         }
         catch (Exception exception)
@@ -116,8 +117,8 @@ public sealed partial class InstanceCardViewModel : ObservableObject
                     CancellationToken.None)
                 .ConfigureAwait(true);
             StatusNote = report.IsHealthy
-                ? "Installation is healthy"
-                : $"{report.Issues.Count} problem(s) remain";
+                ? Localizer.Get("L.Instance.Healthy")
+                : Localizer.Format("L.Instance.ProblemsRemain", report.Issues.Count);
             _shell.ReportStatus(StatusNote);
         }
         catch (Exception exception)

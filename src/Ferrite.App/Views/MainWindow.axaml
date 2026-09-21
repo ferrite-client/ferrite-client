@@ -18,23 +18,23 @@
       <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="0,16">
 
         <StackPanel Grid.Row="0" Margin="20,0,20,20" Spacing="2">
-          <TextBlock Text="Ferrite" FontSize="20" FontWeight="Bold" />
-          <TextBlock Classes="faint" Text="Minecraft launcher" />
+          <TextBlock Text="{DynamicResource L.App.Name}" FontSize="20" FontWeight="Bold" />
+          <TextBlock Classes="faint" Text="{DynamicResource L.App.Tagline}" />
         </StackPanel>
 
         <StackPanel Grid.Row="1" Margin="8,0" Spacing="2">
           <ListBox SelectedIndex="{Binding SelectedPageIndex}" Background="Transparent"
                    BorderThickness="0" Padding="0">
-            <ListBoxItem Content="Library" />
-            <ListBoxItem Content="Browse" />
-            <ListBoxItem Content="Java" />
-            <ListBoxItem Content="Accounts" />
-            <ListBoxItem Content="Settings" />
+            <ListBoxItem Content="{DynamicResource L.Nav.Library}" />
+            <ListBoxItem Content="{DynamicResource L.Nav.Browse}" />
+            <ListBoxItem Content="{DynamicResource L.Nav.Java}" />
+            <ListBoxItem Content="{DynamicResource L.Nav.Accounts}" />
+            <ListBoxItem Content="{DynamicResource L.Nav.Settings}" />
           </ListBox>
         </StackPanel>
 
         <StackPanel Grid.Row="3" Margin="20,12,20,0" Spacing="4">
-          <TextBlock Classes="label" Text="ACCOUNT" />
+          <TextBlock Classes="label" Text="{DynamicResource L.Shell.Account}" />
           <TextBlock Text="{Binding ActiveAccountName}" />
           <TextBlock Classes="faint" Text="{Binding RunningInstanceName}" />
         </StackPanel>
@@ -47,7 +47,7 @@
       <Border Grid.Row="0" Padding="24,16" BorderBrush="{DynamicResource FerriteBorder}"
               BorderThickness="0,0,0,1">
         <Grid ColumnDefinitions="*,Auto">
-          <TextBlock Grid.Column="0" Classes="h1" Text="{Binding CurrentPage}" />
+          <TextBlock Grid.Column="0" Classes="h1" Text="{Binding CurrentPageTitle}" />
           <TextBlock Grid.Column="1" Classes="muted" VerticalAlignment="Center" Text="{Binding StatusText}" />
         </Grid>
       </Border>
@@ -66,7 +66,8 @@
                 IsVisible="{Binding HasError}">
           <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
             <TextBlock Grid.Column="0" Text="{Binding ErrorMessage}" />
-            <Button Grid.Column="1" Classes="ghost" Content="Dismiss" Command="{Binding DismissErrorCommand}" />
+            <Button Grid.Column="1" Classes="ghost" Content="{DynamicResource L.Common.Dismiss}"
+                    Command="{Binding DismissErrorCommand}" />
           </Grid>
         </Border>
       </Panel>

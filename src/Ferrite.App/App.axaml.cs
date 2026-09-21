@@ -3,6 +3,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Styling;
 using Ferrite.App.Services;
+using Ferrite.App.Localization;
 using Ferrite.App.ViewModels;
 using Ferrite.App.Views;
 using Ferrite.Core.Platform;
@@ -36,7 +37,12 @@ public partial class App : Application
 
             var settings = _services.Settings.LoadAsync(CancellationToken.None).GetAwaiter().GetResult();
             ApplyTheme(settings.Theme);
-            _services.Logger<App>().LogInformation("Settings loaded; theme {Theme}", settings.Theme);
+            // Interface text must be in place before the first view is constructed.
+            Localizer.Apply(this, settings.Language);
+            _services.Logger<App>().LogInformation(
+                "Settings loaded; theme {Theme}, language {Language}",
+                settings.Theme,
+                Localizer.Language);
 
             var viewModel = new MainWindowViewModel(_services);
             var window = new MainWindow { DataContext = viewModel };

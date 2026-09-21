@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.Input;
+using Ferrite.App.Localization;
 using Ferrite.Core.Content;
 using Ferrite.Core.Minecraft;
 using Ferrite.Core.Rules;
@@ -40,7 +41,10 @@ public sealed partial class InstanceDetailViewModel
                 .ExportAsync(Record, outputPath, includeSaves: false, CancellationToken.None)
                 .ConfigureAwait(true);
 
-            StatusNote = $"Exported {result.OverrideCount} file(s) to {Path.GetFileName(result.ArchivePath)}";
+            StatusNote = Localizer.Format(
+                "L.Instance.Exported",
+                result.OverrideCount,
+                Path.GetFileName(result.ArchivePath));
             _shell.ReportStatus(StatusNote);
         }
         catch (Exception exception)
@@ -73,8 +77,8 @@ public sealed partial class InstanceDetailViewModel
             Record.GameArguments = SplitArguments(GameArgumentsText);
 
             await _services.Instances.SaveAsync(Record, CancellationToken.None).ConfigureAwait(true);
-            StatusNote = "Settings saved";
-            _shell.ReportStatus($"{Name} settings saved");
+            StatusNote = Localizer.Get("L.Instance.SettingsSaved");
+            _shell.ReportStatus(StatusNote);
             await _shell.Library.RefreshAsync().ConfigureAwait(true);
         }
         catch (Exception exception)
@@ -94,8 +98,11 @@ public sealed partial class InstanceDetailViewModel
                 .VerifyAsync(Record.Id, VersionId, RuleContext.ForHost(), null, CancellationToken.None)
                 .ConfigureAwait(true);
             StatusNote = report.IsHealthy
-                ? $"Verified {report.FilesChecked} files ({ByteSize.Format(report.TotalBytes)})"
-                : $"{report.Issues.Count} file(s) missing or corrupt";
+                ? Localizer.Format(
+                    "L.Instance.Verified",
+                    report.FilesChecked,
+                    ByteSize.Format(report.TotalBytes))
+                : Localizer.Format("L.Instance.CorruptFiles", report.Issues.Count);
             _shell.ReportStatus(StatusNote);
         }
         catch (Exception exception)
@@ -124,7 +131,9 @@ public sealed partial class InstanceDetailViewModel
                     new Progress<InstallProgress>(_shell.ReportActivity),
                     CancellationToken.None)
                 .ConfigureAwait(true);
-            StatusNote = report.IsHealthy ? "Installation repaired" : $"{report.Issues.Count} problem(s) remain";
+            StatusNote = report.IsHealthy
+                ? Localizer.Get("L.Instance.Repaired")
+                : Localizer.Format("L.Instance.ProblemsRemain", report.Issues.Count);
             _shell.ReportStatus(StatusNote);
         }
         catch (Exception exception)
@@ -169,7 +178,9 @@ public sealed partial class InstanceDetailViewModel
                 installed++;
             }
 
-            StatusNote = installed == 0 ? "No mod files were added" : $"Added {installed} mod file(s)";
+            StatusNote = installed == 0
+                ? Localizer.Get("L.Instance.NoModsAdded")
+                : Localizer.Format("L.Instance.AddedMods", installed);
             await RefreshModsAsync().ConfigureAwait(true);
         }
         catch (Exception exception)

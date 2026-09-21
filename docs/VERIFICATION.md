@@ -981,3 +981,69 @@ pack is broken when it simply lacks the information.
 `instance-files-packs.png` renders the Files tab with a pack that declares `format 15` against an
 instance using format 34: the file name, its declared format, and "does not list format 34, which
 this version uses". A file that is not a pack at all is still listed, without a compatibility claim.
+
+---
+
+## V015 - English and Polish interface (2026-09-21)
+
+Environment: Windows 11 x64, .NET 10.0.5, headless renders of the real views.
+
+### V015.1 What was converted
+
+Every user-visible literal in the application was moved into a table and read back by key:
+
+- **Views:** 136 `Text`, `Content`, `Header`, and `PlaceholderText` attributes across seven views
+  now use `DynamicResource`, so they re-render when the language changes. A scan for remaining
+  capitalised literals in those attributes returns nothing.
+- **View models:** the status, warning, and empty-state messages the launcher composes itself
+  (`Settings saved`, `Installed N file(s) into X`, `Found N runtime(s)`, the activity strip, the LAN
+  search states, verification and repair results, the update and pack summaries) go through the
+  localizer with named placeholders.
+- Switching the language in Settings applies immediately, without a restart, and is persisted with
+  the rest of the settings.
+
+### V015.2 Defects the tests caught
+
+The test that checks every key against the views and the code found three real problems, all of
+which would have shipped as blank or English text in the Polish interface:
+
+- `Library` and `Browse` still appeared in the shell header, because the page title was bound to the
+  `CurrentPage` enum. It now resolves through a key, so the header reads `Biblioteka`.
+- `Ready` was a **field initializer** on the status text (`private string _statusText = "Ready";`)
+  rather than a lookup, so the first status line was always English. The tests found it because the
+  Polish render still contained `Ready`.
+- Seven keys were defined but never used, and one code path looked keys up through a conditional
+  expression the key scan could not see. The dead keys are gone and the conditional is two explicit
+  lookups.
+
+Two unused keys of my own invention (`L.Java.FieldDefault`, `L.Java.FieldArchitecture`) were also
+removed: the Java page has no such labels, and inventing them would have been a table that describes
+a design that does not exist.
+
+### V015.3 What the tests enforce
+
+`LocalizationTests` checks the properties that a translation actually needs:
+
+- Both tables define exactly the same key set, with no empty value.
+- Both languages use the same `{0}`-style placeholders for every key, so a format string cannot
+  throw or drop a value in one language.
+- More than 80% of keys differ between the languages, which catches a duplicated table.
+- Every key used in a view or in code exists in both tables, and no key is defined without a use.
+  This is the check that matters most: a missing key renders as nothing at all, with no error.
+- An unknown key falls back to the key itself rather than throwing, and an unsupported language
+  falls back to English.
+
+### V015.4 Interface
+
+`shell-polish.png` renders the real shell in Polish: `Biblioteka`, `Przeglądaj`, `Konta`,
+`Ustawienia`, the header `Biblioteka`, the status `Gotowe`, the footer `KONTO` / `Brak konta`, and
+the Library page with `Szukaj instancji`, `Importuj modpack`, `Nowa instancja`, and the Polish empty
+state. The same render asserts that `Library` no longer appears anywhere.
+
+### V015.5 Known limit
+
+Text produced inside Core — provider errors such as "CurseForge needs an API key", verification
+failures, HTTP messages — stays in English, and the parity matrix says so instead of claiming a
+fully translated product. Those strings come from the engines that produce them and are often
+embedded in exceptions; translating them would mean threading a language through every subsystem
+for the smallest part of what a user reads.

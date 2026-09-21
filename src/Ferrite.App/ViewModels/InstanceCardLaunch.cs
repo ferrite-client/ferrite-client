@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.Input;
+using Ferrite.App.Localization;
 using Ferrite.Core.Minecraft;
 
 namespace Ferrite.App.ViewModels;
@@ -34,15 +35,16 @@ public sealed partial class InstanceCardViewModel
 
             if (!result.Started || result.Process is null)
             {
-                _shell.ReportError(result.Error ?? "The instance could not be started.");
+                _shell.ReportError(result.Error ?? Localizer.Get("L.Instance.LaunchFailed"));
                 return;
             }
 
             var warning = result.Issues.FirstOrDefault(issue => !issue.IsBlocking);
-            StatusNote = warning?.Message ?? $"Running as process {result.Process.ProcessId}";
+            StatusNote = warning?.Message
+                ?? Localizer.Format("L.Instance.RunningAs", result.Process.ProcessId);
             IsRunning = true;
             _shell.RunningInstanceName = Record.Name;
-            _shell.ReportStatus($"{Record.Name} is running");
+            _shell.ReportStatus(Localizer.Format("L.Instance.Running", Record.Name));
 
             WatchExit(result.Process);
         }
@@ -65,11 +67,13 @@ public sealed partial class InstanceCardViewModel
             await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(async () =>
             {
                 IsRunning = false;
-                StatusNote = exitCode == 0 ? "Exited normally" : $"Exited with code {exitCode}";
+                StatusNote = exitCode == 0
+                    ? Localizer.Get("L.Instance.ExitNormal")
+                    : Localizer.Format("L.Instance.ExitCode", exitCode);
                 Record.LastLaunchedAt = DateTimeOffset.UtcNow;
                 Record.TotalPlayTimeSeconds += (long)process.Duration.TotalSeconds;
                 _shell.RunningInstanceName = null;
-                _shell.ReportStatus($"{Record.Name} stopped");
+            _shell.ReportStatus(Localizer.Format("L.Instance.Stopped", Record.Name));
                 await _services.Instances.SaveAsync(Record, CancellationToken.None).ConfigureAwait(true);
             });
         });

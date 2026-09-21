@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Ferrite.App.Localization;
 using Ferrite.Core.Game;
 
 namespace Ferrite.App.ViewModels;
@@ -44,7 +45,7 @@ public sealed partial class InstanceDetailViewModel
     {
         if (IsLanScanning)
         {
-            StopLanScan("LAN search stopped.");
+            StopLanScan(Localizer.Get("L.Instance.LanStopped"));
             return;
         }
 
@@ -54,12 +55,12 @@ public sealed partial class InstanceDetailViewModel
         if (!_services.LanWorlds.IsListening)
         {
             _services.LanWorlds.Changed -= OnLanWorldsChanged;
-            LanStatus = $"This machine cannot listen for LAN worlds: {_services.LanWorlds.FailureReason}";
+            LanStatus = Localizer.Format("L.Instance.LanUnavailable", _services.LanWorlds.FailureReason);
             return;
         }
 
         IsLanScanning = true;
-        LanStatus = "Searching the local network. Ask the other player to open their world to LAN.";
+        LanStatus = Localizer.Get("L.Instance.LanSearching");
         RefreshLanWorlds();
     }
 
@@ -76,10 +77,10 @@ public sealed partial class InstanceDetailViewModel
         IsLanScanning = false;
         LanWorlds.Clear();
         OnPropertyChanged(nameof(HasLanWorlds));
-        if (status is { Length: > 0 })
-        {
-            LanStatus = status;
-        }
+            if (status is { Length: > 0 })
+            {
+                LanStatus = status;
+            }
     }
 
     private void OnLanWorldsChanged()
@@ -107,7 +108,7 @@ public sealed partial class InstanceDetailViewModel
         OnPropertyChanged(nameof(HasLanWorlds));
         if (IsLanScanning && LanWorlds.Count == 0)
         {
-            LanStatus = "No LAN worlds found yet.";
+            LanStatus = Localizer.Get("L.Instance.LanNone");
         }
     }
 
@@ -119,7 +120,7 @@ public sealed partial class InstanceDetailViewModel
                 GameDirectory,
                 new ServerEntry { Name = item.Name, Address = item.Address });
             RefreshServers();
-            item.Note = "Added to this instance's server list";
+            item.Note = Localizer.Get("L.Instance.LanAdded");
             LanStatus = item.Note;
         }
         catch (Exception exception)
@@ -183,7 +184,7 @@ public sealed partial class InstanceDetailViewModel
     {
         if (string.IsNullOrWhiteSpace(NewServerAddress))
         {
-            WorldStatus = "Enter a server address first.";
+            WorldStatus = Localizer.Get("L.Instance.AddServerFirst");
             return;
         }
 
@@ -201,7 +202,7 @@ public sealed partial class InstanceDetailViewModel
             NewServerName = null;
             NewServerAddress = null;
             RefreshServers();
-            WorldStatus = "Server added";
+            WorldStatus = Localizer.Get("L.Instance.ServerAdded");
         }
         catch (Exception exception)
         {
@@ -240,7 +241,7 @@ public sealed partial class InstanceDetailViewModel
             var path = await _services.WorldsArchive
                 .BackupAsync(item.World.DirectoryPath, CancellationToken.None)
                 .ConfigureAwait(true);
-            item.Note = $"Backed up to {Path.GetFileName(path)}";
+            item.Note = Localizer.Format("L.Instance.BackedUp", Path.GetFileName(path));
             WorldStatus = item.Note;
         }
         catch (Exception exception)
@@ -254,7 +255,7 @@ public sealed partial class InstanceDetailViewModel
         try
         {
             var moved = _services.WorldsArchive.Delete(item.World.DirectoryPath);
-            WorldStatus = $"{item.Name} was moved to {Path.GetFileName(moved)}";
+            WorldStatus = Localizer.Format("L.Instance.WorldMoved", item.Name, Path.GetFileName(moved));
             await RefreshWorldsAsync().ConfigureAwait(true);
         }
         catch (Exception exception)
@@ -268,7 +269,7 @@ public sealed partial class InstanceDetailViewModel
         try
         {
             var copy = _services.WorldsArchive.Duplicate(item.World.DirectoryPath, GameDirectory, null);
-            WorldStatus = $"Duplicated to {Path.GetFileName(copy)}";
+            WorldStatus = Localizer.Format("L.Instance.WorldDuplicated", Path.GetFileName(copy));
             await RefreshWorldsAsync().ConfigureAwait(true);
         }
         catch (Exception exception)
