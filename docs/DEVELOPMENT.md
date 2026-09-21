@@ -42,7 +42,24 @@ dotnet run --project src/Ferrite.App
 ./scripts/package.ps1
 ```
 
-Produces a self-contained Windows x64 build under `artifacts/`.
+Produces both Windows x64 shapes under `artifacts/`, each with a zip beside it:
+
+| Shape | Size | Needs .NET installed |
+| --- | --- | --- |
+| `framework-dependent` | ~31 MiB, ~13 MiB zipped | Yes, the .NET 10 desktop runtime |
+| `self-contained` | ~107 MiB, ~48 MiB zipped | No |
+
+Options: `-Only framework-dependent|self-contained`, `-Runtime win-arm64`, `-Version 0.2.0`,
+`-NoArchive`, `-OutputDirectory <path>`. The script refuses to write outside the repository and
+deletes the output directory it is about to fill, so a package never mixes builds.
+
+Notes that matter for a release:
+
+- Avalonia's SkiaSharp/HarfBuzzSharp native symbol files are dropped from the publish output; they
+  are tens of megabytes and of no use to a user. Managed symbols are embedded in the assemblies
+  instead, so exceptions in a user's diagnostics bundle still carry line numbers.
+- Neither shape is code-signed. Unsigned builds show a SmartScreen warning on first run; see
+  `docs/HUMAN_ACTION_REQUIRED.md` for the certificate that would be needed.
 
 ## Conventions
 

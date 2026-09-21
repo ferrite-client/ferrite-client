@@ -713,3 +713,48 @@ instance, a Fabric build is accepted for a Fabric instance, and a resource pack 
 version it moves to, the provider, and the check result. The Content tab previously duplicated the
 Files tab's folder listings; it now has its own purpose, and the folder listings live only under
 Files.
+
+---
+
+## V011 - Windows packaging (2026-09-21)
+
+Environment: Windows 11 x64, .NET SDK 10.0.5. `FEATURE_PARITY.md` claimed `scripts/package.ps1`
+existed; it did not. Rather than amend the claim, the script was written and both shapes were built
+and run.
+
+### V011.1 Both shapes publish
+
+Command: `pwsh -File scripts/package.ps1`
+
+```
+Publishing framework-dependent (win-x64, Release)
+Publishing self-contained (win-x64, Release)
+
+framework-dependent      45 file(s)    30.7 MiB  archive 12.7 MiB
+self-contained          232 file(s)   107.3 MiB  archive 47.8 MiB
+```
+
+The first packaging attempt produced a 130.8 MiB framework-dependent build. Almost all of it was
+`libSkiaSharp.pdb` (84 MB) and `libHarfBuzzSharp.pdb` (21 MB) — native symbol files that Avalonia's
+dependencies publish and that no user needs. SkiaSharp and HarfBuzzSharp cannot be recompiled here,
+so the csproj drops those two entries from the publish output instead. Managed symbols are now
+embedded in the assemblies (`DebugType=embedded`), so a stack trace from a user's diagnostics bundle
+still carries line numbers without shipping loose PDBs.
+
+### V011.2 The packaged executables actually start
+
+Each published executable was launched with `FERRITE_HOME` pointing at an empty directory, left
+running for twelve seconds, and inspected through its own log:
+
+```
+exitedEarly=False
+Ferrite starting; version 0.1.0.0, data root ...\ferrite-packaged-46669465, secret protection os-backed
+Settings loaded; theme Dark
+Launcher ready; 0 instance(s), 0 account(s)
+```
+
+The same check passed for the self-contained build, which is the shape that has to work on a machine
+with no .NET installed. Both stayed up for the full window and were then stopped, so this is a real
+start of the packaged product rather than a successful `dotnet publish`.
+
+Neither build is code-signed; that remains an external dependency (see `HUMAN_ACTION_REQUIRED.md`).

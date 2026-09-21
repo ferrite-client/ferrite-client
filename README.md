@@ -52,6 +52,16 @@ Note: .NET 10's `dotnet test` integration does not discover xunit v3 tests here,
 `scripts/test.ps1` runs each test project through its runner entry point. See
 `docs/DEVELOPMENT.md`.
 
+## Package
+
+```powershell
+./scripts/package.ps1
+```
+
+Produces `artifacts/framework-dependent` (about 31 MiB, needs the .NET 10 desktop runtime) and
+`artifacts/self-contained` (about 107 MiB, needs nothing), each with a zip beside it. Neither is
+code-signed.
+
 ## Data locations
 
 ```

@@ -88,3 +88,27 @@ reach. Ferrite does not operate such a service and will not reuse XMCL's.
 
 **Blocked until then.** Remote LAN play. Local LAN assistance is implemented.
 Recorded as FEATURE_PARITY row M10.
+
+---
+
+## H5 - Code-signing certificate for the application
+
+**Needed.** An Authenticode (OV or EV) code-signing certificate, or a decision to ship unsigned.
+
+**Why.** Unsigned Windows executables trigger SmartScreen warnings. Ferrite's packaging produces
+unsigned builds; signing is a certificate operation, not a code change, and no certificate is
+available in this environment.
+
+**Steps.**
+
+1. Obtain a code-signing certificate (an OV or EV certificate from a public CA, or an
+   organisation-issued one).
+2. Sign both published executables, for example:
+   `signtool sign /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 /f cert.pfx Ferrite.exe`.
+3. If the build is ever repackaged, sign the executable before archiving it.
+
+**What to hand back.** Nothing is entered into Ferrite; signing happens at packaging time. The
+certificate itself must never be committed.
+
+**Blocked until then.** A download that does not warn on first run. Recorded as FEATURE_PARITY
+row A09.

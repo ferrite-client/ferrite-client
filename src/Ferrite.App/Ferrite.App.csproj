@@ -8,7 +8,21 @@
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaNameGeneratorIsEnabled>true</AvaloniaNameGeneratorIsEnabled>
+    <!-- Ship line numbers inside the assemblies instead of as loose PDB files. -->
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
+
+  <!--
+    SkiaSharp and HarfBuzzSharp publish native symbol files that are tens of megabytes and of no
+    use to a user. Managed symbols are embedded above, so keeping these would only bloat the package.
+  -->
+  <Target Name="DropNativeSymbolsFromPublish" AfterTargets="ComputeFilesToPublish">
+    <ItemGroup>
+      <ResolvedFileToPublish
+        Remove="@(ResolvedFileToPublish)"
+        Condition="'%(Filename)%(Extension)' == 'libSkiaSharp.pdb' Or '%(Filename)%(Extension)' == 'libHarfBuzzSharp.pdb'" />
+    </ItemGroup>
+  </Target>
 
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="12.1.2" />
