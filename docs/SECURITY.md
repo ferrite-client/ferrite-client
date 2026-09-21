@@ -104,3 +104,23 @@ Every path that consumes untrusted input was re-read after the feature work, wit
   loaded or executed by the launcher.
 - The launcher runs with user privileges. A defect in a path check would be a file-write primitive,
   which is why containment is centralised rather than re-implemented per call site.
+
+### 2026-09-21 - second audit: the surfaces added since the first
+
+The features added after the first audit - Feed The Beast packs, LabyMod, the local server, the world
+map and chunk editor, and the structure preview - were reviewed the same way: every value that
+arrives from outside is traced to the place it is used.
+
+| Area | Finding |
+| --- | --- |
+| FTB pack file paths | A pack's `path` and file name come from FTB's document. They are normalised and containment-checked before becoming a download target, a refused entry is reported rather than skipped, and an absolute path is refused outright. A defect was found and fixed here: the first version stripped `./` from *every* position instead of only the front, which would have rewritten `../../../x` into a harmless path instead of refusing it. Covered by tests. |
+| FTB pack file downloads | Each file is fetched with its published SHA-1 when it has one, and the launcher's own HTTPS endpoints are unchanged. FTB's files are the pack's own content, so they carry the same trust as any downloaded mod. |
+| LabyMod manifest, libraries, and version document | Fetched over TLS from LabyMod's published host, bounded by size, and parsed into typed models. The merged version profile names libraries by maven coordinates, which the launcher turns into store paths itself rather than trusting a path from the document. |
+| LabyMod version id | **Fixed.** The manifest's `commitReference` became part of the version id, which becomes a directory name under the store - a remote value steering a filesystem path. It is now checked against an identifier rule (letters, digits, dot, underscore, hyphen, no traversal segment) and refused otherwise, before anything is written. The requested Minecraft version is checked the same way. Covered by tests, including a manifest whose commit is `../../escape`. |
+| LabyMod assets | Asset names are sanitised and containment-checked before they become file names. The manifest publishes no checksum for the asset files themselves, so they are stored unverified; that limitation is recorded in `docs/VERIFICATION.md` V042.4 rather than hidden. |
+| Local server files | `server.properties` is merged rather than rewritten, so a key the user owns is preserved; the file lives in the instance's own `server` directory. The command is an argument list through the same process API as a game launch. |
+| Local server jar | Downloaded from the version document's own `downloads.server` and verified against its SHA-1 before use. |
+| Region file reads and writes | Paths are computed from a world directory the caller supplies plus integer chunk coordinates; nothing from a world file steers a path. Every region file a rewrite touches is copied into the launcher's backups first, and the world's folder name is sanitised before it is used as a backup directory name. |
+| Chunk payloads | Copied through the bounds-checked NBT reader and writer. A chunk whose NBT cannot be read is skipped rather than written back, so a corrupt chunk cannot be replaced with a truncated one. |
+| Structure files | Parsed through the same bounded NBT reader (depth 64, collection 4 MiB, array 64 MiB). The declared size is used for display only and never allocates, and a file that declares no size is refused. |
+| Client data version reads | The `version.json` entry inside a client jar is size-capped before it is parsed, and an unreadable or absent value is reported as "cannot be checked" rather than guessed. |

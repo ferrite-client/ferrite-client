@@ -93,8 +93,27 @@ public sealed class LabyModInstaller
             throw new LoaderException("LabyMod's manifest could not be read.");
         }
 
+        // The commit reference becomes part of the version id, which becomes a directory under the
+        // store, so a remote document must not be able to steer that path.
+        if (!IsSafeToken(manifest.CommitReference))
+        {
+            throw new LoaderException(
+                $"LabyMod's manifest names a commit ('{manifest.CommitReference}') that is not a usable "
+                + "identifier, so its files were not installed.");
+        }
+
         return manifest;
     }
+
+    /// <summary>
+    /// True when a remote token can be used in a file or directory name: letters, digits, dot,
+    /// underscore, and hyphen only, with no traversal segment - the same rule the launcher applies to
+    /// every other value that arrives from outside.
+    /// </summary>
+    internal static bool IsSafeToken(string? value) =>
+        value is { Length: > 0 and <= 64 }
+        && value.All(character => char.IsAsciiLetterOrDigit(character) || character is '.' or '_' or '-')
+        && !value.Contains("..", StringComparison.Ordinal);
 
     /// <summary>
     /// Writes the merged version document into the store. The published document is already complete -
@@ -108,6 +127,10 @@ public sealed class LabyModInstaller
     {
         ArgumentNullException.ThrowIfNull(manifest);
         ArgumentException.ThrowIfNullOrWhiteSpace(minecraftVersion);
+        if (!IsSafeToken(minecraftVersion))
+        {
+            throw new LoaderException($"'{minecraftVersion}' is not a Minecraft version this can install.");
+        }
 
         var entry = manifest.MinecraftVersions.FirstOrDefault(version =>
             string.Equals(version.Tag, minecraftVersion, StringComparison.OrdinalIgnoreCase));

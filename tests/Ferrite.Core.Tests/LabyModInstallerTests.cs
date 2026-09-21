@@ -185,4 +185,43 @@ public sealed class LabyModInstallerTests : IAsyncLifetime
             "1.12.2",
             TestContext.Current.CancellationToken));
     }
+
+    /// <summary>
+    /// A commit reference becomes part of the version id, which becomes a directory under the store,
+    /// so a remote document must not be able to point it at another directory.
+    /// </summary>
+    [Theory]
+    [InlineData("../../evil")]
+    [InlineData("a/b")]
+    [InlineData("a\\b")]
+    [InlineData("..")]
+    [InlineData("")]
+    [InlineData("with space")]
+    [InlineData("colon:here")]
+    public void A_commit_reference_that_could_steer_a_path_is_refused(string reference)
+    {
+        Assert.False(LabyModInstaller.IsSafeToken(reference));
+    }
+
+    [Theory]
+    [InlineData("5842ece0")]
+    [InlineData("1.2.3-beta_1")]
+    [InlineData("abcdef0123456789")]
+    public void A_plausible_commit_reference_is_accepted(string reference)
+    {
+        Assert.True(LabyModInstaller.IsSafeToken(reference));
+    }
+
+    [Fact]
+    public async Task A_manifest_with_a_path_shaped_commit_is_refused_before_anything_is_written()
+    {
+        _server.AddTextRoute(
+            "/manifest.json",
+            ManifestJson
+                .Replace("abcdef12", "../../escape", StringComparison.Ordinal)
+                .Replace("PLACEHOLDER_VERSION_URL", _server.BaseUrl + "/version.json", StringComparison.Ordinal));
+
+        await Assert.ThrowsAsync<LoaderException>(() => _installer.GetManifestAsync(
+            TestContext.Current.CancellationToken));
+    }
 }
