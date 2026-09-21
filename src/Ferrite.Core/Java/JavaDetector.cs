@@ -21,13 +21,24 @@ public sealed class JavaDetector
         _enumerator = new JavaCandidateEnumerator(paths, logger);
     }
 
-    public async Task<IReadOnlyList<JavaRuntime>> DetectAsync(CancellationToken cancellationToken)
+    /// <summary>
+    /// Finds every usable runtime. <paramref name="extraPaths"/> are probed first, so a path the user
+    /// supplied is offered even when the environment scan would not have found it.
+    /// </summary>
+    public async Task<IReadOnlyList<JavaRuntime>> DetectAsync(
+        CancellationToken cancellationToken,
+        IReadOnlyList<string>? extraPaths = null)
     {
         var comparer = OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
         var seen = new HashSet<string>(comparer);
         var results = new List<JavaRuntime>();
 
-        foreach (var (path, source) in _enumerator.EnumerateCandidates())
+        var candidates = (extraPaths ?? [])
+            .Where(path => !string.IsNullOrWhiteSpace(path))
+            .Select(path => (path, JavaRuntimeSource.UserSpecified))
+            .Concat(_enumerator.EnumerateCandidates());
+
+        foreach (var (path, source) in candidates)
         {
             cancellationToken.ThrowIfCancellationRequested();
             string full;

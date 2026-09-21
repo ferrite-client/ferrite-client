@@ -35,6 +35,13 @@ internal static class Program
                     GetOption(args, "--minecraft"),
                     GetOption(args, "--component"),
                     cancellation.Token),
+                "instance-launch" => await Scenarios.InstanceLaunchWithPinnedJavaAsync(
+                    services,
+                    versionId,
+                    seconds,
+                    GetOption(args, "--java"),
+                    args.Contains("--default", StringComparer.OrdinalIgnoreCase),
+                    cancellation.Token),
                 "manifest" => await Scenarios.ManifestAsync(services, cancellation.Token),
                 "install" => await Scenarios.InstallAsync(services, versionId, cancellation.Token),
                 "verify" => await Scenarios.VerifyAsync(services, versionId, cancellation.Token),

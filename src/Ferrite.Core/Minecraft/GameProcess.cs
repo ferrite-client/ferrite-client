@@ -20,9 +20,28 @@ public sealed class GameProcess : IDisposable
         _process = process;
         InstanceName = instanceName;
         LogFilePath = logFilePath;
+        ExecutablePath = TryReadExecutablePath(process);
     }
 
     public int ProcessId => _process.Id;
+
+    /// <summary>
+    /// The executable the game is actually running on, read from the started process. Diagnostics can
+    /// then name the runtime in use instead of repeating the one that was requested.
+    /// </summary>
+    public string? ExecutablePath { get; }
+
+    private static string? TryReadExecutablePath(Process process)
+    {
+        try
+        {
+            return process.MainModule?.FileName;
+        }
+        catch (Exception exception) when (exception is InvalidOperationException or System.ComponentModel.Win32Exception or NotSupportedException)
+        {
+            return null;
+        }
+    }
 
     public string InstanceName { get; }
 

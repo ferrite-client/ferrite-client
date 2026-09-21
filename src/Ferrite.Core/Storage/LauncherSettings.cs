@@ -29,6 +29,12 @@ public sealed class LauncherSettings
 
     public string? DefaultJavaPath { get; set; }
 
+    /// <summary>
+    /// Java executables the user added by hand. They are re-probed on every scan, so a path that
+    /// stops working is dropped from the list rather than offered as a broken choice.
+    /// </summary>
+    public List<string> CustomJavaPaths { get; set; } = [];
+
     public int? DefaultMemoryMb { get; set; }
 
     public Guid? ActiveAccountId { get; set; }

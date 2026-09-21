@@ -1393,3 +1393,78 @@ headless tests; the drop handler in `InstanceDetailView.axaml.cs` calls the same
 `InstallModFilesAsync` path these tests exercise. Removing a mod moves it to
 `backups/removed-content/<instance>/` rather than the Windows Recycle Bin, because the launcher keeps
 its own recoverable copies instead of depending on shell behaviour.
+
+---
+
+## V021 - Java selection: compatibility, the launcher default, a per-instance pin, and a user path (2026-09-21)
+
+**Environment.** Windows 11 x64; .NET SDK 10.0.201 (runtime 10.0.5). Six Java runtimes are installed:
+Adoptium 25.0.3 and Microsoft 25.0.1 on PATH and in the Minecraft launcher's runtime store, Adoptium
+21.0.10, two 17s, and Oracle 1.8.0.51. Data root `%APPDATA%\Ferrite` (installations reused from
+V001/V002, so no re-download was needed).
+
+**Harness.** `dotnet run --project tools/Ferrite.Verify -- instance-launch <version> ...`. This
+scenario goes through the product's own `InstanceLauncher` - the code path behind the Play button -
+rather than re-implementing the launch, and reports the image of the process that actually started.
+
+### V021.1 The required Java version comes from the version document
+
+Command: `Ferrite.Verify instance-launch 26.3 --java Microsoft`
+
+Result: `Version 26.3 requires Java 25`. The requirement is read from the resolved version document
+rather than assumed, which is what makes the compatibility judgement specific to the version being
+installed.
+
+### V021.2 A per-instance pin is the runtime the game runs on
+
+Command: same as V021.1.
+
+```
+Automatic choice: Eclipse Adoptium 25.0.3 X64 (C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot\bin\java.exe)
+Pinned choice:    Microsoft 25.0.1 X64 (...\java-runtime-epsilon\windows-x64\...\bin\java.exe)
+  The pin differs from the automatic choice, so the run distinguishes them.
+Pinned via:       instance
+Process image: C:\Users\wwmky\AppData\Local\Packages\...\java-runtime-epsilon\windows-x64\...\bin\java.exe
+The game's own log shows it reached the renderer (Setting user / LWJGL).
+PASS: the game ran on the pinned runtime (Microsoft 25.0.1 X64).
+```
+
+The pin was deliberately the runtime the automatic choice would not have picked, so a pass rules out
+"the pin was ignored and the best fit happened to be the same". The comparison is against the image
+of the started process, and the game's own log confirms a real start.
+
+### V021.3 A user-supplied path is probed, used, and honoured as the launcher default
+
+Command: `Ferrite.Verify instance-launch 26.3 --default --java <temp>\ferrite-user-java\bin\java.exe`
+
+A directory junction in the temp directory points at a JDK that the environment scan does not look
+at, which is what a hand-added path looks like. The run then:
+
+- probed that path the way the Java page does: `User path accepted: Microsoft 25.0.1 X64 (Java 25)`;
+- found 7 runtimes with the path supplied and 6 without it, in the same run;
+- pinned it as the launcher-wide **default** rather than on the instance
+  (`Pinned via: launcher default`), while the automatic choice was still Adoptium 25.0.3;
+- started the game, and reported the process image as the pinned path - through the junction, which
+  Windows resolves back to the real directory:
+  `PASS: the game ran on the pinned runtime (Microsoft 25.0.1 X64)`.
+
+### V021.4 Precedence and the stored list
+
+Commands: `pwsh -File scripts/test.ps1` (`JavaSelectionPrecedenceTests`, `JavaPageTests`)
+
+`JavaSelectionPrecedenceTests` pins the order - instance choice, then launcher default, then best fit
+- and covers a preference that is not installed (falls back) and an empty catalogue (selects
+nothing). `JavaPageTests` drives the Java page: a path that is not a runtime is refused with a reason
+and is not stored; a real runtime is probed, stored in settings, offered with the user-specified
+source, and still present after the settings document is read back from disk; and a stored path that
+has since been uninstalled is dropped from both the list and the file on the next scan.
+
+**Interpretation.** Verifies E04, E05, E06, E07, and B12. E05/E06/E07 were `IMPLEMENTED` before this
+entry with the launcher default and hand-added paths read by the Java page but never reaching a
+launch; that gap was found and closed here, and the fix is what the two live runs above exercise.
+
+**Limitations, stated precisely.** The pinned runs used the verification harness's placeholder
+identity (no Microsoft account exists in this environment, `HUMAN_ACTION_REQUIRED.md` H1), so they
+prove the runtime and launch pipeline, not authentication. The junction stand-in resolves to an
+installed JDK; nothing here proves behaviour for a broken or hostile executable beyond the probe
+refusing it.

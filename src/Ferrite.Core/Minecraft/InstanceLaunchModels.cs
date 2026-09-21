@@ -9,6 +9,18 @@ public sealed record InstanceLaunchRequest
 
     public LaunchAccount? Account { get; init; }
 
+    /// <summary>
+    /// The launcher-wide Java choice, used when the instance does not pin one of its own. Passed in
+    /// rather than read from settings so the launch path stays testable without a settings store.
+    /// </summary>
+    public string? DefaultJavaPath { get; init; }
+
+    /// <summary>
+    /// Java executables the user added by hand. They are probed alongside the environment scan, so a
+    /// path outside the usual locations can still be the runtime an instance launches on.
+    /// </summary>
+    public IReadOnlyList<string> CustomJavaPaths { get; init; } = [];
+
     public bool RepairBeforeLaunch { get; init; } = true;
 
     public bool JoinLastServer { get; init; }

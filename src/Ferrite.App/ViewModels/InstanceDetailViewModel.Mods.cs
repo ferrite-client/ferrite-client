@@ -6,9 +6,6 @@ using Ferrite.Core.Content;
 
 namespace Ferrite.App.ViewModels;
 
-/// <summary>A selectable filter value with the text shown for it.</summary>
-public sealed record ModFilterChoice(string Value, string Label);
-
 /// <summary>
 /// Searching, filtering, and ordering over the last mod scan. A large pack is hundreds of files, so
 /// the visible list is a view over the scan rather than a reason to touch the disk again.
@@ -21,9 +18,9 @@ public sealed partial class InstanceDetailViewModel
     private readonly List<ModMetadata> _scannedMods = [];
 
     /// <summary>Loaders present in this instance, with an entry that matches all of them.</summary>
-    public ObservableCollection<ModFilterChoice> ModLoaderChoices { get; } = [];
+    public ObservableCollection<ChoiceOption> ModLoaderChoices { get; } = [];
 
-    public IReadOnlyList<ModFilterChoice> ModSortChoices { get; } =
+    public IReadOnlyList<ChoiceOption> ModSortChoices { get; } =
     [
         new("name", Localizer.Get("L.Instance.SortName")),
         new("size", Localizer.Get("L.Instance.SortSize")),
@@ -34,10 +31,10 @@ public sealed partial class InstanceDetailViewModel
     private string _modQuery = string.Empty;
 
     [ObservableProperty]
-    private ModFilterChoice? _selectedModLoader;
+    private ChoiceOption? _selectedModLoader;
 
     [ObservableProperty]
-    private ModFilterChoice? _selectedModSort;
+    private ChoiceOption? _selectedModSort;
 
     [ObservableProperty]
     private string? _modFilterNote;
@@ -52,9 +49,9 @@ public sealed partial class InstanceDetailViewModel
 
     partial void OnModQueryChanged(string value) => ApplyModFilter();
 
-    partial void OnSelectedModLoaderChanged(ModFilterChoice? value) => ApplyModFilter();
+    partial void OnSelectedModLoaderChanged(ChoiceOption? value) => ApplyModFilter();
 
-    partial void OnSelectedModSortChanged(ModFilterChoice? value) => ApplyModFilter();
+    partial void OnSelectedModSortChanged(ChoiceOption? value) => ApplyModFilter();
 
     /// <summary>
     /// Replaces the scan behind the list and rebuilds the loader choices from what was actually
@@ -67,14 +64,14 @@ public sealed partial class InstanceDetailViewModel
 
         var previous = SelectedModLoader?.Value ?? AllLoaders;
         ModLoaderChoices.Clear();
-        ModLoaderChoices.Add(new ModFilterChoice(AllLoaders, Localizer.Get("L.Instance.ModLoaderAll")));
+        ModLoaderChoices.Add(new ChoiceOption(AllLoaders, Localizer.Get("L.Instance.ModLoaderAll")));
         foreach (var loader in mods
                      .Select(mod => mod.Loader)
                      .Where(loader => !string.IsNullOrWhiteSpace(loader))
                      .Distinct(StringComparer.OrdinalIgnoreCase)
                      .OrderBy(loader => loader, StringComparer.OrdinalIgnoreCase))
         {
-            ModLoaderChoices.Add(new ModFilterChoice(loader, loader));
+            ModLoaderChoices.Add(new ChoiceOption(loader, loader));
         }
 
         SelectedModLoader = ModLoaderChoices.FirstOrDefault(choice =>

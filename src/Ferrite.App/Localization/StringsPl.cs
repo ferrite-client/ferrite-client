@@ -35,6 +35,10 @@ internal static class StringsPl
             ["L.Activity.Finishing"] = "Kończenie...",
 
             ["L.Library.SearchInstances"] = "Szukaj instancji",
+            ["L.Library.SortRecent"] = "Ostatnio uruchamiane",
+            ["L.Library.SortName"] = "Sortuj według nazwy",
+            ["L.Library.SortVersion"] = "Sortuj według wersji Minecrafta",
+            ["L.Library.SortSize"] = "Sortuj według rozmiaru na dysku",
             ["L.Library.ImportModpack"] = "Importuj modpack",
             ["L.Library.NewInstance"] = "Nowa instancja",
             ["L.Library.Empty"] =
@@ -288,6 +292,9 @@ internal static class StringsPl
             ["L.Browse.CacheNote"] =
                 "{0} jest nieosiągalny; wyświetlane są wyniki z pamięci podręcznej ({1}).",
             ["L.Java.Found"] = "Znalezione środowiska: {0}",
+            ["L.Java.AddPath"] = "Dodaj ścieżkę do Javy",
+            ["L.Java.PathRefused"] = "{0} nie odpowiedział jak środowisko Javy.",
+            ["L.Java.PathAdded"] = "Dodano {0}.",
             ["L.Java.DefaultNow"] = "Domyślne środowisko to teraz {0}",
             ["L.Java.Provisioned"] = "Zainstalowano {0}",
             ["L.Accounts.NeedClientId"] =

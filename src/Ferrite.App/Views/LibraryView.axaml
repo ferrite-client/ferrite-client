@@ -6,10 +6,18 @@
 
   <Grid RowDefinitions="Auto,*,Auto" Margin="24">
 
-    <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12" Margin="0,0,0,16">
+    <Grid Grid.Row="0" ColumnDefinitions="*,200,Auto,Auto" ColumnSpacing="12" Margin="0,0,0,16">
         <TextBox Grid.Column="0" PlaceholderText="{DynamicResource L.Library.SearchInstances}" Text="{Binding SearchText}" />
-        <Button Grid.Column="1" Content="{DynamicResource L.Library.ImportModpack}" Click="OnImportModpackClick" />
-        <Button Grid.Column="2" Classes="primary" Content="{DynamicResource L.Library.NewInstance}"
+        <ComboBox Grid.Column="1" HorizontalAlignment="Stretch" ItemsSource="{Binding SortChoices}"
+                  SelectedItem="{Binding SelectedSort}">
+          <ComboBox.ItemTemplate>
+            <DataTemplate DataType="vm:ChoiceOption">
+              <TextBlock Text="{Binding Label}" />
+            </DataTemplate>
+          </ComboBox.ItemTemplate>
+        </ComboBox>
+        <Button Grid.Column="2" Content="{DynamicResource L.Library.ImportModpack}" Click="OnImportModpackClick" />
+        <Button Grid.Column="3" Classes="primary" Content="{DynamicResource L.Library.NewInstance}"
               Command="{Binding OpenCreateCommand}" />
     </Grid>
 

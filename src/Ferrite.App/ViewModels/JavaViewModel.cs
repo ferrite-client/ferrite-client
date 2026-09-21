@@ -66,11 +66,27 @@ public sealed partial class JavaViewModel : ObservableObject
         IsBusy = true;
         try
         {
-            var runtimes = await _services.Java.DetectAsync(CancellationToken.None).ConfigureAwait(true);
+            var runtimes = await _services.Java
+                .DetectAsync(CancellationToken.None, _services.Settings.Current.CustomJavaPaths)
+                .ConfigureAwait(true);
             Runtimes.Clear();
             foreach (var runtime in runtimes)
             {
                 Runtimes.Add(runtime);
+            }
+
+            // A custom path that stopped working is dropped rather than kept as a broken entry.
+            var usable = runtimes
+                .Where(runtime => runtime.Source == JavaRuntimeSource.UserSpecified)
+                .Select(runtime => runtime.ExecutablePath)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var kept = _services.Settings.Current.CustomJavaPaths
+                .Where(usable.Contains)
+                .ToList();
+            if (kept.Count != _services.Settings.Current.CustomJavaPaths.Count)
+            {
+                _services.Settings.Current.CustomJavaPaths = kept;
+                await _services.Settings.SaveAsync(CancellationToken.None).ConfigureAwait(true);
             }
 
             StatusNote = Localizer.Format("L.Java.Found", runtimes.Count);
@@ -106,6 +122,54 @@ public sealed partial class JavaViewModel : ObservableObject
         if (SelectedRuntime?.HomePath is { } home)
         {
             ShellOpen.Directory(home);
+        }
+    }
+
+    /// <summary>
+    /// Adds a Java executable the environment scan would not have found. The path is probed by
+    /// running it before it is accepted, and a path that does not answer is refused with a reason
+    /// rather than being stored and failing later at launch time.
+    /// </summary>
+    public async Task AddJavaPathAsync(string? executablePath)
+    {
+        if (string.IsNullOrWhiteSpace(executablePath))
+        {
+            return;
+        }
+
+        IsBusy = true;
+        try
+        {
+            var probe = await _services.Java
+                .ProbeUserSuppliedAsync(executablePath.Trim(), CancellationToken.None)
+                .ConfigureAwait(true);
+            if (probe is null)
+            {
+                StatusNote = Localizer.Format("L.Java.PathRefused", executablePath.Trim());
+                _shell.ReportError(StatusNote);
+                return;
+            }
+
+            var settings = _services.Settings.Current;
+            if (!settings.CustomJavaPaths.Contains(probe.ExecutablePath, StringComparer.OrdinalIgnoreCase))
+            {
+                settings.CustomJavaPaths.Add(probe.ExecutablePath);
+                await _services.Settings.SaveAsync(CancellationToken.None).ConfigureAwait(true);
+            }
+
+            await ScanAsync().ConfigureAwait(true);
+            SelectedRuntime = Runtimes.FirstOrDefault(runtime =>
+                string.Equals(runtime.ExecutablePath, probe.ExecutablePath, StringComparison.OrdinalIgnoreCase));
+            StatusNote = Localizer.Format("L.Java.PathAdded", probe.DisplayName);
+            _shell.ReportStatus(StatusNote);
+        }
+        catch (Exception exception)
+        {
+            _shell.ReportError(exception.Message);
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
 

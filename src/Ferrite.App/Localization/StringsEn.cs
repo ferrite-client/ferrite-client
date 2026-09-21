@@ -35,6 +35,10 @@ internal static class StringsEn
             ["L.Activity.Finishing"] = "Finishing...",
 
             ["L.Library.SearchInstances"] = "Search instances",
+            ["L.Library.SortRecent"] = "Recently played",
+            ["L.Library.SortName"] = "Sort by name",
+            ["L.Library.SortVersion"] = "Sort by Minecraft version",
+            ["L.Library.SortSize"] = "Sort by size on disk",
             ["L.Library.ImportModpack"] = "Import modpack",
             ["L.Library.NewInstance"] = "New instance",
             ["L.Library.Empty"] =
@@ -285,6 +289,9 @@ internal static class StringsEn
             ["L.Browse.CacheNote"] =
                 "{0} is unreachable; showing results cached {1}.",
             ["L.Java.Found"] = "Found {0} runtime(s)",
+            ["L.Java.AddPath"] = "Add a Java path",
+            ["L.Java.PathRefused"] = "{0} did not answer as a Java runtime.",
+            ["L.Java.PathAdded"] = "Added {0}.",
             ["L.Java.DefaultNow"] = "Default runtime is now {0}",
             ["L.Java.Provisioned"] = "Provisioned {0}",
             ["L.Accounts.NeedClientId"] =

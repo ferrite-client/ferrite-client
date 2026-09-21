@@ -61,11 +61,16 @@ public sealed partial class InstanceCardViewModel : ObservableObject
     public async Task RefreshAsync(CancellationToken cancellationToken)
     {
         var directory = _services.Paths.InstanceDirectory(Record.Id);
-        SizeText = ByteSize.Format(
-            await Task.Run(() => InstanceContentManager.GetDirectorySize(directory), cancellationToken)
-                .ConfigureAwait(true));
+        SizeBytes = await Task.Run(
+                () => InstanceContentManager.GetDirectorySize(directory),
+                cancellationToken)
+            .ConfigureAwait(true);
+        SizeText = ByteSize.Format(SizeBytes);
         IsRunning = _services.Launcher.TryGetRunning(Record.Id, out var process) && !process.HasExited;
     }
+
+    /// <summary>Bytes on disk for the whole instance, so the library can be ordered by size.</summary>
+    public long SizeBytes { get; private set; }
 
     [RelayCommand]
     private void Open() => _shell.DetailPage = new InstanceDetailViewModel(Record, _services, _shell);

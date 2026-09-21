@@ -47,6 +47,14 @@ internal sealed class VerifyServices : IDisposable
             LoggerFactory.CreateLogger<JavaProvisioner>());
         Launcher = new LaunchService(LoggerFactory.CreateLogger<LaunchService>());
         Instances = new InstanceStore(Paths, LoggerFactory.CreateLogger<InstanceStore>());
+        InstanceLauncher = new InstanceLauncher(
+            Installer,
+            Resolver,
+            Planner,
+            Java,
+            Launcher,
+            Paths,
+            LoggerFactory.CreateLogger<InstanceLauncher>());
         Settings = new SettingsStore(Paths, LoggerFactory.CreateLogger<SettingsStore>());
         Fabric = new FabricLoaderService(
             Http,
@@ -146,6 +154,9 @@ internal sealed class VerifyServices : IDisposable
     public JavaProvisioner JavaProvisioner { get; }
 
     public LaunchService Launcher { get; }
+
+    /// <summary>The product's own "press play" flow, rather than a harness re-implementation of it.</summary>
+    public InstanceLauncher InstanceLauncher { get; }
 
     public InstanceStore Instances { get; }
 

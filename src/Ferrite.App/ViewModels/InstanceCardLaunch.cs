@@ -28,6 +28,8 @@ public sealed partial class InstanceCardViewModel
                     {
                         Instance = Record,
                         Account = account,
+                        DefaultJavaPath = _services.Settings.Current.DefaultJavaPath,
+                        CustomJavaPaths = _services.Settings.Current.CustomJavaPaths,
                     },
                     new Progress<InstallProgress>(_shell.ReportActivity),
                     CancellationToken.None)

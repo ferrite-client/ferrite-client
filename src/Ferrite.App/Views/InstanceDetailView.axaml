@@ -118,7 +118,7 @@
               <ComboBox Grid.Column="1" ItemsSource="{Binding ModLoaderChoices}"
                         SelectedItem="{Binding SelectedModLoader}" HorizontalAlignment="Stretch">
                 <ComboBox.ItemTemplate>
-                  <DataTemplate DataType="vm:ModFilterChoice">
+                  <DataTemplate DataType="vm:ChoiceOption">
                     <TextBlock Text="{Binding Label}" />
                   </DataTemplate>
                 </ComboBox.ItemTemplate>
@@ -126,7 +126,7 @@
               <ComboBox Grid.Column="2" ItemsSource="{Binding ModSortChoices}"
                         SelectedItem="{Binding SelectedModSort}" HorizontalAlignment="Stretch">
                 <ComboBox.ItemTemplate>
-                  <DataTemplate DataType="vm:ModFilterChoice">
+                  <DataTemplate DataType="vm:ChoiceOption">
                     <TextBlock Text="{Binding Label}" />
                   </DataTemplate>
                 </ComboBox.ItemTemplate>

@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Ferrite.App.Localization;
 using Ferrite.App.Services;
 using Ferrite.Core.Loaders;
 using Ferrite.Core.Minecraft;
@@ -28,6 +29,7 @@ public sealed partial class LibraryViewModel : ObservableObject
             LoaderKind.NeoForge,
             LoaderKind.Forge,
         ];
+        SelectedSort = SortChoices[0];
     }
 
     public ObservableCollection<InstanceCardViewModel> Instances { get; } = [];
@@ -62,6 +64,18 @@ public sealed partial class LibraryViewModel : ObservableObject
     [ObservableProperty]
     private string _searchText = string.Empty;
 
+    /// <summary>How the instance list is ordered. Recently played is the default.</summary>
+    [ObservableProperty]
+    private ChoiceOption? _selectedSort;
+
+    public IReadOnlyList<ChoiceOption> SortChoices { get; } =
+    [
+        new("recent", Localizer.Get("L.Library.SortRecent")),
+        new("name", Localizer.Get("L.Library.SortName")),
+        new("version", Localizer.Get("L.Library.SortVersion")),
+        new("size", Localizer.Get("L.Library.SortSize")),
+    ];
+
     [ObservableProperty]
     private bool _isBusy;
 
@@ -71,12 +85,36 @@ public sealed partial class LibraryViewModel : ObservableObject
 
     public bool HasFormError => !string.IsNullOrEmpty(FormError);
 
-    public IEnumerable<InstanceCardViewModel> VisibleInstances =>
-        string.IsNullOrWhiteSpace(SearchText)
-            ? Instances
-            : Instances.Where(instance =>
-                instance.Name.Contains(SearchText, StringComparison.CurrentCultureIgnoreCase)
-                || instance.Subtitle.Contains(SearchText, StringComparison.CurrentCultureIgnoreCase));
+    /// <summary>The instances that pass the search box, in the order the user chose.</summary>
+    public IEnumerable<InstanceCardViewModel> VisibleInstances
+    {
+        get
+        {
+            IEnumerable<InstanceCardViewModel> visible = string.IsNullOrWhiteSpace(SearchText)
+                ? Instances
+                : Instances.Where(instance =>
+                    instance.Name.Contains(SearchText, StringComparison.CurrentCultureIgnoreCase)
+                    || instance.Subtitle.Contains(SearchText, StringComparison.CurrentCultureIgnoreCase)
+                    || (instance.ModpackText ?? string.Empty).Contains(
+                        SearchText,
+                        StringComparison.CurrentCultureIgnoreCase));
+
+            return (SelectedSort?.Value ?? "recent") switch
+            {
+                "name" => visible.OrderBy(
+                    instance => instance.Name,
+                    StringComparer.CurrentCultureIgnoreCase),
+                "version" => visible
+                    .OrderBy(instance => instance.Record.MinecraftVersion, StringComparer.Ordinal)
+                    .ThenBy(instance => instance.Name, StringComparer.CurrentCultureIgnoreCase),
+                "size" => visible
+                    .OrderByDescending(instance => instance.SizeBytes)
+                    .ThenBy(instance => instance.Name, StringComparer.CurrentCultureIgnoreCase),
+                _ => visible.OrderByDescending(instance =>
+                    instance.Record.LastLaunchedAt ?? instance.Record.CreatedAt),
+            };
+        }
+    }
 
     partial void OnNewLoaderChanged(LoaderKind value)
     {
@@ -91,6 +129,8 @@ public sealed partial class LibraryViewModel : ObservableObject
     partial void OnShowSnapshotsChanged(bool value) => _ = LoadVersionsAsync();
 
     partial void OnSearchTextChanged(string value) => OnPropertyChanged(nameof(VisibleInstances));
+
+    partial void OnSelectedSortChanged(ChoiceOption? value) => OnPropertyChanged(nameof(VisibleInstances));
 
     public async Task RefreshAsync()
     {

@@ -326,3 +326,24 @@ redistribute or reimplement its patcher. Reimplementing it would mean chasing a 
 transform for every game version. Running the official installer keeps the licence intact and the
 result byte-identical to what a user would get by hand; the honest label keeps the user from
 wondering what happened when a window appears.
+
+## D028 - Java precedence, and where a user-supplied path lives
+
+**Decision.** A launch picks its runtime in this order: the runtime pinned on the instance, then the
+launcher-wide default, then the best fit for the version's own requirement. Both preferences travel
+into the launch as part of `InstanceLaunchRequest` rather than being read from settings inside
+`InstanceLauncher`. A path added by hand is stored in settings and re-probed on every scan; a path
+that stops answering is dropped.
+
+**Rejected.** Reading settings directly inside the launcher (which would make the launch path
+untestable without a settings store), and treating a stored path as trusted forever.
+
+**Why.** The precedence is only correct if all three sources are considered in one place, and the
+live run in `docs/VERIFICATION.md` V021.2 pins deliberately the runtime the automatic choice would
+not have picked - otherwise a pass would also be explained by the pin being ignored. Passing the
+preferences in keeps the rule unit-testable without a JVM on the machine, which is how V021.4 covers
+a preference that is no longer installed and an empty catalogue.
+
+**Boundary.** Paths a user adds are probed by executing them, like every other candidate: the probe
+is the only gate. An executable that answers like a Java runtime but is not one would still run, and
+that is the same trust a user extends by choosing it by hand.

@@ -46,7 +46,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | B09 | Archive instance | Zip instance without deleting | VERIFIED | InstanceManagerTests |
 | B10 | Open instance folder | Shell-open the instance directory | VERIFIED | every instance card opens its folder |
 | B11 | Instance metadata editing | Name, icon, memory, resolution, JVM/game args, env vars | VERIFIED | V004 |
-| B12 | Per-instance Java selection | Bind a discovered or provisioned runtime to an instance | IMPLEMENTED | model + preflight |
+| B12 | Per-instance Java selection | Bind a discovered or provisioned runtime to an instance | VERIFIED | V021.2 |
 | B13 | Instance EULA and advanced toggles | `eula.txt` creation, demo and quick-play toggles | VERIFIED | V019.5; demo verified V001 |
 | B14 | Instance search, filter, sort | Library search across name/version/loader | IMPLEMENTED | library search box |
 | B15 | Instance disk usage | Per-instance size calculation off the UI thread | IMPLEMENTED | size on each card |
@@ -96,10 +96,10 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | E01 | Java discovery | PATH, `JAVA_HOME`, vendor dirs, launcher runtimes, managed store, registry | VERIFIED | V001.1 |
 | E02 | Java version + arch detection | `-XshowSettings:properties -version` parsed | VERIFIED | V001.1 |
 | E03 | Vendor detection | Adoptium, Microsoft, Oracle, Zulu, Corretto, ... | VERIFIED | V001.1 |
-| E04 | Compatibility evaluation | Version-document requirement, else generation table | IMPLEMENTED | tests |
-| E05 | Global default Java | Persisted launcher default | IMPLEMENTED | settings model |
-| E06 | Per-instance Java | Instance override field + preflight | IMPLEMENTED | - |
-| E07 | Custom Java path | User path validated by probing | IMPLEMENTED | - |
+| E04 | Compatibility evaluation | Version-document requirement, else generation table | VERIFIED | V021.1 |
+| E05 | Global default Java | Persisted launcher default, used when an instance names none | VERIFIED | V021.3, V021.4 |
+| E06 | Per-instance Java | Instance pin wins over the launcher default and reaches the launch | VERIFIED | V021.2, V021.4 |
+| E07 | Custom Java path | Added by hand, probed before it is accepted, dropped when it stops working | VERIFIED | V021.3, V021.4 |
 | E08 | Automatic Java provisioning | Mojang runtime catalog, file manifest, download, verify | VERIFIED | V017.1 live download of java-runtime-gamma, probed by running it, reused on a second call |
 | E09 | Runtime validation | Runs the runtime before use | VERIFIED | V001.1 |
 | E10 | JVM/RAM editor | Memory and custom JVM argument model | IMPLEMENTED | tests |
@@ -273,6 +273,12 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 ## Summary
 
 | Status | Count |
+| --- | --- |
+| NOT STARTED | 0 |
+| IN PROGRESS | 0 |
+| IMPLEMENTED | 32 |
+| VERIFIED | 125 |
+| BLOCKED EXTERNAL | 15 |
 | --- | --- |
 | NOT STARTED | 0 |
 | IN PROGRESS | 0 |

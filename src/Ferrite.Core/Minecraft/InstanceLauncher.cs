@@ -93,8 +93,10 @@ public sealed class InstanceLauncher
             .ConfigureAwait(false);
 
         var required = JavaCompatibility.RequiredMajorFor(document, versionId);
-        var runtimes = await _javaDetector.DetectAsync(cancellationToken).ConfigureAwait(false);
-        var runtime = SelectRuntime(instance, runtimes, required);
+        var runtimes = await _javaDetector
+            .DetectAsync(cancellationToken, request.CustomJavaPaths)
+            .ConfigureAwait(false);
+        var runtime = SelectRuntime(instance, request.DefaultJavaPath, runtimes, required);
         if (runtime is null)
         {
             return InstanceLaunchResult.Failed(
@@ -160,15 +162,27 @@ public sealed class InstanceLauncher
         };
     }
 
-    private static JavaRuntime? SelectRuntime(
+    /// <summary>
+    /// Picks the runtime for a launch: the instance's own choice, then the launcher-wide default,
+    /// then the best fit for the version. Internal rather than public so the precedence can be tested
+    /// without a real JVM on the machine.
+    /// </summary>
+    internal static JavaRuntime? SelectRuntime(
         InstanceRecord instance,
+        string? defaultJavaPath,
         IReadOnlyList<JavaRuntime> runtimes,
         int? required)
     {
-        if (!string.IsNullOrEmpty(instance.JavaPath))
+        // The instance's own choice wins, then the launcher-wide default, then the best fit.
+        foreach (var preferred in new[] { instance.JavaPath, defaultJavaPath })
         {
+            if (string.IsNullOrEmpty(preferred))
+            {
+                continue;
+            }
+
             var configured = runtimes.FirstOrDefault(runtime =>
-                string.Equals(runtime.ExecutablePath, instance.JavaPath, StringComparison.OrdinalIgnoreCase));
+                string.Equals(runtime.ExecutablePath, preferred, StringComparison.OrdinalIgnoreCase));
             if (configured is not null)
             {
                 return configured;

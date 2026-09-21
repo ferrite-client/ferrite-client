@@ -6,11 +6,12 @@
 
   <Grid RowDefinitions="Auto,*,Auto" Margin="24">
 
-    <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10" Margin="0,0,0,16">
+    <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="10" Margin="0,0,0,16">
       <TextBlock Grid.Column="0" Classes="muted" VerticalAlignment="Center"
                      Text="{DynamicResource L.Java.Hint}" />
         <Button Grid.Column="1" Content="{DynamicResource L.Java.Rescan}" Command="{Binding ScanCommand}" />
-        <Button Grid.Column="2" Classes="primary" Content="{DynamicResource L.Java.UseAsDefault}" Command="{Binding SetDefaultCommand}" />
+        <Button Grid.Column="2" Content="{DynamicResource L.Java.AddPath}" Click="OnAddJavaPathClick" />
+        <Button Grid.Column="3" Classes="primary" Content="{DynamicResource L.Java.UseAsDefault}" Command="{Binding SetDefaultCommand}" />
     </Grid>
 
     <ScrollViewer Grid.Row="1">
