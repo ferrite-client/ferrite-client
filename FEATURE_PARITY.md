@@ -266,7 +266,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | O09 | Update feed | Requires externally hosted infrastructure | BLOCKED EXTERNAL | `HUMAN_ACTION_REQUIRED.md` H3 |
 | O10 | Localisation | English and Polish, switchable at runtime; every label, button, empty state, and launcher-composed message comes from the table | VERIFIED | V015. Message text produced by Core (provider errors, verification results) stays English; see `docs/ARCHITECTURE.md` section 16 |
 | O11 | Accessibility | Contrast, control names, and visible focus, all checked mechanically | VERIFIED | V028 |
-| O12 | Quick actions | Find an instance or run a command from anywhere in the app | NOT STARTED | XMCL feature catalogue 20 |
+| O12 | Quick actions | A palette over the pages and the library, opened from the header or `Ctrl+K` | VERIFIED | V036 |
 
 ## P. Cross-cutting quality
 
@@ -287,8 +287,8 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 
 | Status | Count |
 | --- | --- |
-| NOT STARTED | 11 |
+| NOT STARTED | 10 |
 | IN PROGRESS | 0 |
 | IMPLEMENTED | 0 |
-| VERIFIED | 156 |
+| VERIFIED | 157 |
 | BLOCKED EXTERNAL | 18 |

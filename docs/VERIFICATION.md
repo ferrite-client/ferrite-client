@@ -2226,3 +2226,40 @@ placeholder-mismatched key, and they pass.
 **Limitations, stated precisely.** Groups match on substrings of the mod's name or file name only;
 there is no expression language, no per-group ordering, and no cross-instance group sharing. A mod
 can be in several groups at once, which is a property of the rule rather than a stored membership.
+
+## V036 - Quick actions (2026-09-21)
+
+Commands: `QuickActionTests` (App), and the whole suite (`334` Core tests, `75` App tests, all
+passing).
+
+XMCL's catalogue has "Quick Action - find instances and commands without leaving the page you are
+working on. Launch or create an instance". The first inventory did not list it. Ferrite now has a
+palette over the pages and the library.
+
+### V036.1 The list is built from live state
+
+The palette is rebuilt from the current library whenever it opens and whenever the query changes, so
+it cannot offer an instance that was deleted after the palette was first opened. Page navigation and
+"New instance" come first so they stay reachable while the query is being typed; each instance
+contributes an "Open" action and, when its card is not already running, a "Launch" action that runs
+the same command the library card does rather than a second launch path.
+
+### V036.2 What the tests pin
+
+The App tests open the palette, assert that the page commands and the per-instance commands are
+present, and that typing a query narrows the list to matching titles (and reports an empty result
+instead of an empty-looking palette). Filtering is over titles, so "tech" finds both "Open Tech
+pack" and "Launch Tech pack". Choosing a result runs it and closes the palette: choosing a page
+navigates to that page, and choosing "Open <instance>" goes to the library with that instance's
+detail page open. Closing clears the query so the next open starts empty.
+
+### V036.3 The interface
+
+The shell header carries a `Quick actions` control (the low-emphasis chip class), and `Ctrl+K` opens
+the same palette from anywhere. The palette is a single field over a scrollable result list; each
+result is a real button with the item's title as its accessible name, so keyboard and screen-reader
+use work, and the header hint does not describe the shortcut in visible text. `Escape` closes it.
+Every new label exists in English and Polish; the localisation tests pass.
+
+**Limitations, stated precisely.** The palette matches on substrings of command and instance titles;
+it does not search mods, versions, or settings, and it does not rank results by recency.

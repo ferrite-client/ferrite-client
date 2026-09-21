@@ -9,6 +9,11 @@
         MinWidth="1024" MinHeight="680"
         WindowStartupLocation="CenterScreen">
 
+  <Window.KeyBindings>
+    <KeyBinding Gesture="Ctrl+K" Command="{Binding OpenQuickActionsCommand}" />
+    <KeyBinding Gesture="Escape" Command="{Binding CloseQuickActionsCommand}" />
+  </Window.KeyBindings>
+
   <Grid ColumnDefinitions="228,*">
 
     <Border Grid.Column="0"
@@ -46,9 +51,12 @@
 
       <Border Grid.Row="0" Padding="24,16" BorderBrush="{DynamicResource FerriteBorder}"
               BorderThickness="0,0,0,1">
-        <Grid ColumnDefinitions="*,Auto">
+        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="16">
           <TextBlock Grid.Column="0" Classes="h1" Text="{Binding CurrentPageTitle}" />
-          <TextBlock Grid.Column="1" Classes="muted" VerticalAlignment="Center" Text="{Binding StatusText}" />
+          <Button Grid.Column="1" Classes="chip" VerticalAlignment="Center"
+                  Content="{DynamicResource L.Shell.QuickActions}"
+                  Command="{Binding OpenQuickActionsCommand}" />
+          <TextBlock Grid.Column="2" Classes="muted" VerticalAlignment="Center" Text="{Binding StatusText}" />
         </Grid>
       </Border>
 
@@ -69,6 +77,41 @@
             <Button Grid.Column="1" Classes="ghost" Content="{DynamicResource L.Common.Dismiss}"
                     Command="{Binding DismissErrorCommand}" />
           </Grid>
+        </Border>
+
+        <!-- Quick actions -->
+        <Border VerticalAlignment="Top" HorizontalAlignment="Center" Margin="24" Width="540"
+                Padding="12" CornerRadius="8" Background="{DynamicResource FerriteSurfaceRaised}"
+                BorderBrush="{DynamicResource FerriteBorderStrong}" BorderThickness="1"
+                IsVisible="{Binding IsQuickActionsOpen}">
+          <StackPanel Spacing="10">
+            <TextBox Text="{Binding QuickQuery}"
+                     PlaceholderText="{DynamicResource L.Shell.QuickActionsPlaceholder}"
+                     AutomationProperties.Name="{DynamicResource L.Shell.QuickActions}" />
+            <TextBlock Classes="muted" Text="{DynamicResource L.Quick.NoMatches}"
+                       IsVisible="{Binding HasNoQuickResults}" />
+            <ScrollViewer MaxHeight="340">
+              <ItemsControl ItemsSource="{Binding QuickResults}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="vm:QuickActionItem">
+                    <Button Classes="ghost" HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Left" Padding="10,6"
+                            AutomationProperties.Name="{Binding Title}"
+                            Command="{Binding Command}">
+                      <StackPanel Spacing="2">
+                        <TextBlock Text="{Binding Title}" />
+                        <TextBlock Classes="faint" Text="{Binding Detail}"
+                                   IsVisible="{Binding HasDetail}" />
+                      </StackPanel>
+                    </Button>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </ScrollViewer>
+            <Button Classes="ghost" HorizontalAlignment="Right"
+                    Content="{DynamicResource L.Common.Cancel}"
+                    Command="{Binding CloseQuickActionsCommand}" />
+          </StackPanel>
         </Border>
       </Panel>
 
