@@ -118,7 +118,7 @@ public sealed partial class InstanceDetailViewModel
                 mod,
                 _services,
                 () => _ = RefreshModsAsync(),
-                ModBackupDirectory,
+                ContentBackupDirectory,
                 OnModSelectionChanged));
         }
 
@@ -134,8 +134,11 @@ public sealed partial class InstanceDetailViewModel
         OnPropertyChanged(nameof(HasSelectedModSummary));
     }
 
-    /// <summary>Where a removed mod is kept, per instance, so a removal is still recoverable.</summary>
-    internal string ModBackupDirectory =>
+    /// <summary>
+    /// Where content removed from this instance is kept: mods, packs, and datapacks all land here, so
+    /// a removal is still recoverable.
+    /// </summary>
+    public string ContentBackupDirectory =>
         Path.Combine(_services.Paths.BackupsDirectory, "removed-content", Record.Id.ToString("N"));
 
     /// <summary>Selected mods, in the order they are shown. Empty when nothing is ticked.</summary>

@@ -1468,3 +1468,68 @@ identity (no Microsoft account exists in this environment, `HUMAN_ACTION_REQUIRE
 prove the runtime and launch pipeline, not authentication. The junction stand-in resolves to an
 installed JDK; nothing here proves behaviour for a broken or hostile executable beyond the probe
 refusing it.
+
+---
+
+## V022 - Instance content: packs, datapacks, screenshots, and world icons (2026-09-21)
+
+**Environment.** Windows 11 x64; .NET SDK 10.0.201 (runtime 10.0.5). Everything runs against a real
+temporary data root with real zip archives, a real folder pack, real PNGs from the image encoder, and
+a real `level.dat` written with the launcher's own NBT writer.
+
+**Why this entry exists.** The Files tab listed resource packs, shader packs, and screenshots as
+read-only file names, there was no datapack surface at all, and the row claiming pack
+enable/disable/delete was describing actions that did not exist. This entry is the evidence that the
+actions now exist and the listing is complete.
+
+### V022.1 Resource packs and shader packs
+
+Commands: `InstanceContentTests.Packs_are_listed_with_their_formats_and_can_be_disabled_and_removed`
+and the render test `ShellRenderingTests.Instance_files_tab_renders_packs_datapacks_and_screenshots`.
+
+A stand-in client jar carrying `pack_version` is written into the version's store, so compatibility is
+judged against a version rather than skipped. Against the instance's format 34:
+
+- `matching.zip` (format 34) is listed as compatible; `outdated.zip` (format 15) is listed and marked
+  as a mismatch with the format it declares, which is the case the game silently ignores;
+- a resource pack that ships as a **folder** is a listed entry like any other;
+- disabling the folder pack renames the directory to `folder-pack.disabled` and the rescan reports it
+  as disabled; re-enabling restores the original name;
+- removing `outdated.zip` takes it out of `resourcepacks` and leaves the bytes in
+  `backups/removed-content/<instance>/`;
+- the shader pack appears in its own list.
+
+The render test then draws the real tab: the pack names, the shader pack, the screenshot, and the
+section labels are all in the rendered tree, together with the Enable/Disable, Open folder, and
+Remove actions on each entry.
+
+### V022.2 Datapacks, and world icons
+
+Command: `InstanceContentTests.Datapacks_are_listed_per_world_and_a_world_icon_is_decoded`
+
+A world is built from a real `level.dat` (name, game type, last played, seed, version), with an
+`icon.png` and a datapack zip declaring format 48.
+
+- The world's `icon.png` decodes onto the card (`HasIconBitmap` and a non-zero decoded width);
+- the datapacks are listed **under that world**, not as instance-wide content, and
+  `HasWorldDatapacks` reports whether any world has one;
+- disabling the datapack renames it inside the world, and removing it moves it to the launcher's
+  backups and leaves the world with no datapacks.
+
+### V022.3 Screenshot gallery
+
+Command: `InstanceContentTests.Screenshots_are_listed_with_a_decoded_thumbnail`
+
+A 640x360 PNG written by the image encoder is decoded to a bounded thumbnail (width is at most 320),
+so a gallery does not hold full-resolution images in memory. A non-image file dropped into the
+folder is still listed, with no thumbnail and the reason in its note, rather than breaking the
+gallery.
+
+**Limitations, stated precisely.**
+
+- Resource pack **order** is not settable from the launcher. Which packs are active, and in what
+  order, is stored by the game in `options.txt`; a launcher that rewrites that file while the game
+  may be running is how pack selections get lost, so the row says what is actually provided:
+  listing, enable/disable, and removal. The in-game list remains the place to order packs.
+- Thumbnails are decoded on demand when the Files tab opens. A folder with thousands of screenshots
+  would spend time decoding them; a lazier paging scheme is not implemented.

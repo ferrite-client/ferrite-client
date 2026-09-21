@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Avalonia.Media.Imaging;
 using Ferrite.Core.Game;
 using Ferrite.Core.Util;
 
@@ -35,6 +36,35 @@ public sealed partial class WorldItemViewModel : ObservableObject
     public bool HasIcon => World.HasIcon;
 
     public string? IconPath => World.IconPath;
+
+    /// <summary>The world's own <c>icon.png</c>, decoded small for the card.</summary>
+    [ObservableProperty]
+    private Bitmap? _iconBitmap;
+
+    public bool HasIconBitmap => IconBitmap is not null;
+
+    /// <summary>
+    /// Decodes the world icon. A missing or unreadable icon leaves the card without one rather than
+    /// failing the whole list.
+    /// </summary>
+    public void LoadIcon()
+    {
+        if (IconPath is not { Length: > 0 } path || !File.Exists(path))
+        {
+            return;
+        }
+
+        try
+        {
+            using var stream = File.OpenRead(path);
+            IconBitmap = Bitmap.DecodeToWidth(stream, 64);
+            OnPropertyChanged(nameof(HasIconBitmap));
+        }
+        catch (Exception)
+        {
+            IconBitmap = null;
+        }
+    }
 
     public string SeedText => World.Seed is { } seed ? $"seed {seed}" : "seed unknown";
 

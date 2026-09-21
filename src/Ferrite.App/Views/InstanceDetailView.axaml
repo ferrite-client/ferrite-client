@@ -249,14 +249,17 @@
               <ItemsControl.ItemTemplate>
                 <DataTemplate DataType="vm:WorldItemViewModel">
                   <Border Classes="card" Margin="0,0,0,8">
-                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
-                      <StackPanel Grid.Column="0" Spacing="2">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="16">
+                      <Image Grid.Column="0" Source="{Binding IconBitmap}" Width="48" Height="48"
+                             Stretch="UniformToFill" VerticalAlignment="Top"
+                             IsVisible="{Binding HasIconBitmap}" />
+                      <StackPanel Grid.Column="1" Spacing="2">
                         <TextBlock Classes="h2" Text="{Binding Name}" />
                         <TextBlock Classes="muted" Text="{Binding DetailText}" />
                         <TextBlock Classes="faint" Text="{Binding SeedText}" />
                         <TextBlock Classes="faint" Text="{Binding Note}" />
                       </StackPanel>
-                      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                      <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                 <Button Content="{DynamicResource L.Instance.Backup}" Command="{Binding BackupCommand}" />
                 <Button Content="{DynamicResource L.Instance.Duplicate}" Command="{Binding DuplicateCommand}" />
                 <Button Content="{DynamicResource L.Common.Folder}" Command="{Binding OpenFolderCommand}" />
@@ -347,13 +350,29 @@
               <TextBlock Classes="label" Text="{DynamicResource L.Instance.ResourcePacks}" />
               <ItemsControl ItemsSource="{Binding ResourcePacks}">
                 <ItemsControl.ItemTemplate>
-                  <DataTemplate>
-                    <StackPanel Spacing="2" Margin="0,0,0,6">
-                      <TextBlock Text="{Binding FileName}" />
-                      <TextBlock Classes="faint" Text="{Binding PackFormatText}" />
-                      <TextBlock Classes="faint" TextWrapping="Wrap"
-                                 Text="{Binding CompatibilityText}" />
-                    </StackPanel>
+                  <DataTemplate DataType="vm:InstanceContentItemViewModel">
+                    <Border Classes="card" Margin="0,0,0,8">
+                      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                        <StackPanel Grid.Column="0" Spacing="2">
+                          <TextBlock Text="{Binding FileName}" />
+                          <StackPanel Orientation="Horizontal" Spacing="12">
+                            <TextBlock Classes="faint" Text="{Binding PackFormatText}" IsVisible="{Binding HasPackFormat}" />
+                            <TextBlock Classes="faint" Text="{Binding SizeText}" />
+                          </StackPanel>
+                          <TextBlock Classes="faint" TextWrapping="Wrap"
+                                     Text="{Binding CompatibilityText}" IsVisible="{Binding HasCompatibility}" />
+                          <TextBlock Classes="faint" Text="{Binding Note}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                          <Button Content="{DynamicResource L.Instance.Disable}" IsVisible="{Binding IsEnabled}"
+                                  Command="{Binding ToggleCommand}" />
+                          <Button Content="{DynamicResource L.Instance.Enable}" IsVisible="{Binding !IsEnabled}"
+                                  Command="{Binding ToggleCommand}" />
+                          <Button Content="{DynamicResource L.Common.OpenFolder}" Command="{Binding OpenFolderCommand}" />
+                          <Button Classes="danger" Content="{DynamicResource L.Common.Remove}" Command="{Binding RemoveCommand}" />
+                        </StackPanel>
+                      </Grid>
+                    </Border>
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
@@ -364,8 +383,24 @@
               <TextBlock Classes="label" Text="{DynamicResource L.Instance.ShaderPacks}" />
               <ItemsControl ItemsSource="{Binding ShaderPacks}">
                 <ItemsControl.ItemTemplate>
-                  <DataTemplate>
-                    <TextBlock Text="{Binding FileName}" />
+                  <DataTemplate DataType="vm:InstanceContentItemViewModel">
+                    <Border Classes="card" Margin="0,0,0,8">
+                      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                        <StackPanel Grid.Column="0" Spacing="2">
+                          <TextBlock Text="{Binding FileName}" />
+                          <TextBlock Classes="faint" Text="{Binding SizeText}" />
+                          <TextBlock Classes="faint" Text="{Binding Note}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                          <Button Content="{DynamicResource L.Instance.Disable}" IsVisible="{Binding IsEnabled}"
+                                  Command="{Binding ToggleCommand}" />
+                          <Button Content="{DynamicResource L.Instance.Enable}" IsVisible="{Binding !IsEnabled}"
+                                  Command="{Binding ToggleCommand}" />
+                          <Button Content="{DynamicResource L.Common.OpenFolder}" Command="{Binding OpenFolderCommand}" />
+                          <Button Classes="danger" Content="{DynamicResource L.Common.Remove}" Command="{Binding RemoveCommand}" />
+                        </StackPanel>
+                      </Grid>
+                    </Border>
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
@@ -373,11 +408,71 @@
             </StackPanel>
 
             <StackPanel Spacing="6">
+              <TextBlock Classes="label" Text="{DynamicResource L.Instance.Datapacks}" />
+              <ItemsControl ItemsSource="{Binding WorldDatapacks}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="vm:WorldDatapacksViewModel">
+                    <StackPanel Spacing="4" Margin="0,0,0,12">
+                      <TextBlock Classes="muted" Text="{Binding WorldName}" />
+                      <ItemsControl ItemsSource="{Binding Datapacks}">
+                        <ItemsControl.ItemTemplate>
+                          <DataTemplate DataType="vm:InstanceContentItemViewModel">
+                            <Border Classes="card" Margin="0,0,0,8">
+                              <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                                <StackPanel Grid.Column="0" Spacing="2">
+                                  <TextBlock Text="{Binding FileName}" />
+                                  <StackPanel Orientation="Horizontal" Spacing="12">
+                                    <TextBlock Classes="faint" Text="{Binding PackFormatText}" IsVisible="{Binding HasPackFormat}" />
+                                    <TextBlock Classes="faint" Text="{Binding SizeText}" />
+                                  </StackPanel>
+                                  <TextBlock Classes="faint" TextWrapping="Wrap"
+                                             Text="{Binding CompatibilityText}" IsVisible="{Binding HasCompatibility}" />
+                                  <TextBlock Classes="faint" Text="{Binding Note}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                  <Button Content="{DynamicResource L.Instance.Disable}" IsVisible="{Binding IsEnabled}"
+                                          Command="{Binding ToggleCommand}" />
+                                  <Button Content="{DynamicResource L.Instance.Enable}" IsVisible="{Binding !IsEnabled}"
+                                          Command="{Binding ToggleCommand}" />
+                                  <Button Content="{DynamicResource L.Common.OpenFolder}" Command="{Binding OpenFolderCommand}" />
+                                  <Button Classes="danger" Content="{DynamicResource L.Common.Remove}" Command="{Binding RemoveCommand}" />
+                                </StackPanel>
+                              </Grid>
+                            </Border>
+                          </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                      </ItemsControl>
+                      <TextBlock Classes="faint" Text="{DynamicResource L.Instance.NoDatapacks}"
+                                 IsVisible="{Binding !HasDatapacks}" />
+                    </StackPanel>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <TextBlock Classes="faint" Text="{DynamicResource L.Instance.NoWorldsForDatapacks}"
+                         IsVisible="{Binding !HasWorldDatapacks}" />
+            </StackPanel>
+
+            <StackPanel Spacing="6">
               <TextBlock Classes="label" Text="{DynamicResource L.Instance.Screenshots}" />
               <ItemsControl ItemsSource="{Binding Screenshots}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <WrapPanel />
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
-                  <DataTemplate>
-                    <TextBlock Text="{Binding FileName}" />
+                  <DataTemplate DataType="vm:ScreenshotItemViewModel">
+                    <Border Classes="card" Width="220" Margin="0,0,10,10">
+                      <StackPanel Spacing="4">
+                        <Image Source="{Binding Thumbnail}" Height="120" Stretch="Uniform"
+                               IsVisible="{Binding HasThumbnail}" />
+                        <TextBlock Text="{Binding FileName}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Classes="faint" Text="{Binding DetailText}" />
+                        <TextBlock Classes="faint" Text="{Binding Note}" />
+                        <Button Content="{DynamicResource L.Common.OpenFile}" HorizontalAlignment="Left"
+                                Command="{Binding OpenFolderCommand}" />
+                      </StackPanel>
+                    </Border>
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>

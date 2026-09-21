@@ -169,10 +169,10 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | I07 | Mod search/filter/sort | Query over name/file/version/loader/dependency, loader filter, name/size/loader order | VERIFIED | V020.1 |
 | I08 | Dependency display | Declared dependencies and conflicts | VERIFIED | V003.2 dependency list |
 | I09 | Update detection | Compare installed content against the providers that supplied it | VERIFIED | V010; instance Updates tab |
-| I10 | Resource pack management | List, enable/disable, delete, reorder | IMPLEMENTED | V004 content tab |
-| I11 | Shader pack management | List, enable/disable, delete | IMPLEMENTED | V004 content tab |
-| I12 | Datapack management | Per-world datapack listing | IMPLEMENTED | datapack folder listed as content |
-| I13 | Screenshot gallery | Browse instance screenshots | IMPLEMENTED | V004 content tab |
+| I10 | Resource pack management | Listed with declared formats and compatibility, enable/disable by rename, removal to backups | VERIFIED | V022.1; order stays the game's own `options.txt` setting |
+| I11 | Shader pack management | Listed, enable/disable, removal to backups | VERIFIED | V022.1 |
+| I12 | Datapack management | Per-world listing, enable/disable, removal to backups | VERIFIED | V022.2 |
+| I13 | Screenshot gallery | Gallery with decoded thumbnails and open-file | VERIFIED | V022.3 |
 | I14 | Content-pack metadata parsing | `pack.mcmeta` formats read and compared with the instance's own format from its client file | VERIFIED | V014 |
 
 ## J. Modrinth integration
@@ -219,7 +219,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | --- | --- | --- | --- | --- |
 | M01 | NBT reader | Bounds-checked read-only NBT (gzip + raw) | VERIFIED | V006.1, tests |
 | M02 | World listing | `level.dat` metadata | VERIFIED | V006.1 |
-| M03 | World icon extraction | Render `icon.png` thumbnails | IMPLEMENTED | icon path surfaced in the UI |
+| M03 | World icon extraction | Render `icon.png` thumbnails | VERIFIED | V022.2 |
 | M04 | World backup / restore | Zip, restore, verify | VERIFIED | V006.2, tests |
 | M05 | World delete / duplicate / export | Safe destructive operations | VERIFIED | delete/duplicate tests |
 | M06 | `servers.dat` management | Read, edit, add, remove | VERIFIED | server list round trip tests |
@@ -273,6 +273,12 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 ## Summary
 
 | Status | Count |
+| --- | --- |
+| NOT STARTED | 0 |
+| IN PROGRESS | 0 |
+| IMPLEMENTED | 27 |
+| VERIFIED | 130 |
+| BLOCKED EXTERNAL | 15 |
 | --- | --- |
 | NOT STARTED | 0 |
 | IN PROGRESS | 0 |

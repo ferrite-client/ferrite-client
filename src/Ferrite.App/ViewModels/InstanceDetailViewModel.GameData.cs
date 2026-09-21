@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Ferrite.App.Localization;
+using Ferrite.Core.Content;
 using Ferrite.Core.Game;
 
 namespace Ferrite.App.ViewModels;
@@ -143,15 +144,41 @@ public sealed partial class InstanceDetailViewModel
             Worlds.Clear();
             foreach (var world in worlds)
             {
-                Worlds.Add(new WorldItemViewModel(world, BackupWorldAsync, DeleteWorldAsync, DuplicateWorldAsync));
+                var item = new WorldItemViewModel(world, BackupWorldAsync, DeleteWorldAsync, DuplicateWorldAsync);
+                item.LoadIcon();
+                Worlds.Add(item);
             }
 
+            RefreshWorldDatapacks();
             OnPropertyChanged(nameof(HasWorlds));
         }
         catch (Exception exception)
         {
             WorldStatus = exception.Message;
         }
+    }
+
+    public bool HasWorldDatapacks => WorldDatapacks.Any(group => group.HasDatapacks);
+
+    /// <summary>
+    /// Lists each world's datapacks. They sit inside the world rather than the instance, so this runs
+    /// after the world list is known and again after a datapack is enabled, disabled, or removed.
+    /// </summary>
+    private void RefreshWorldDatapacks()
+    {
+        var formats = _services.PackFormats.Read(Record.MinecraftVersion);
+        WorldDatapacks.Clear();
+        foreach (var world in Worlds)
+        {
+            WorldDatapacks.Add(new WorldDatapacksViewModel(
+                world.Name,
+                world.World.DirectoryPath,
+                InstanceContentManager.ListPacks(world.World.DirectoryPath, "datapacks", formats?.Data),
+                ContentBackupDirectory,
+                RefreshWorldDatapacks));
+        }
+
+        OnPropertyChanged(nameof(HasWorldDatapacks));
     }
 
     public void RefreshServers()

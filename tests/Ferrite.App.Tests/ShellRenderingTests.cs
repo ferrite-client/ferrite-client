@@ -187,15 +187,18 @@ public sealed class ShellRenderingTests : IDisposable
 
         var shell = new MainWindowViewModel(_services);
         var viewModel = new InstanceDetailViewModel(record, _services, shell);
-        viewModel.ResourcePacks.Add(new ContentFileEntry(
-            @"C:\packs\old-pack.zip",
-            "old-pack.zip",
-            1024,
-            true,
-            DateTimeOffset.UtcNow,
-            "format 15",
-            "does not list format 34, which this version uses",
-            IsPackMismatch: true));
+        viewModel.ResourcePacks.Add(new InstanceContentItemViewModel(
+            new ContentFileEntry(
+                @"C:\packs\old-pack.zip",
+                "old-pack.zip",
+                1024,
+                true,
+                DateTimeOffset.UtcNow,
+                "format 15",
+                "does not list format 34, which this version uses",
+                IsPackMismatch: true),
+            viewModel.ContentBackupDirectory,
+            () => { }));
 
         var window = new Window
         {
@@ -321,6 +324,64 @@ public sealed class ShellRenderingTests : IDisposable
         var frame = window.CaptureRenderedFrame();
         Assert.NotNull(frame);
         Save(frame!, "shell-minimum");
+    }
+
+    /// <summary>
+    /// The Files tab has to render the packs, the per-world datapacks, and the screenshot gallery
+    /// with real files behind them, including the actions on each entry.
+    /// </summary>
+    [AvaloniaFact]
+    public async Task Instance_files_tab_renders_packs_datapacks_and_screenshots()
+    {
+        var record = _services.Instances
+            .CreateAsync(
+                new InstanceRecord
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Content tab instance",
+                    MinecraftVersion = "1.21.1",
+                },
+                CancellationToken.None)
+            .GetAwaiter()
+            .GetResult();
+        var gameDirectory = _services.Paths.InstanceGameDirectory(record.Id);
+        TestAssets.WritePackZip(
+            Path.Combine(gameDirectory, "resourcepacks", "faithful.zip"),
+            34,
+            "faithful");
+        TestAssets.WritePackZip(
+            Path.Combine(gameDirectory, "shaderpacks", "complementary.zip"),
+            34,
+            "complementary");
+        TestAssets.WritePng(Path.Combine(gameDirectory, "screenshots", "2026-01-01_12.00.00.png"), 320, 180);
+
+        var shell = new MainWindowViewModel(_services);
+        var viewModel = new InstanceDetailViewModel(record, _services, shell);
+        await viewModel.RefreshContentAsync();
+
+        var window = new Window
+        {
+            Content = new InstanceDetailView { DataContext = viewModel },
+            Width = 1200,
+            Height = 900,
+        };
+        window.Show();
+
+        var tabs = window.GetVisualDescendants().OfType<TabControl>().First();
+        tabs.SelectedIndex = 5;
+
+        var frame = window.CaptureRenderedFrame();
+        Assert.NotNull(frame);
+
+        var texts = Texts(window);
+        Assert.Contains("faithful.zip", texts);
+        Assert.Contains("complementary.zip", texts);
+        Assert.Contains("2026-01-01_12.00.00.png", texts);
+        Assert.Contains("RESOURCE PACKS", texts);
+        Assert.Contains("DATAPACKS", texts);
+        Assert.Contains("SCREENSHOTS", texts);
+
+        Save(frame!, "instance-files-content");
     }
 
     /// <summary>

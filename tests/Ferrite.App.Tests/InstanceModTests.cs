@@ -169,7 +169,7 @@ public sealed class InstanceModTests : IDisposable
         Assert.Equal("lithium.jar", Assert.Single(viewModel.Mods).FileName);
 
         // Removal keeps the file: it moves to the launcher's backups folder rather than vanishing.
-        var backup = Assert.Single(Directory.EnumerateFiles(viewModel.ModBackupDirectory));
+        var backup = Assert.Single(Directory.EnumerateFiles(viewModel.ContentBackupDirectory));
         Assert.EndsWith("sodium.jar", backup, StringComparison.Ordinal);
         Assert.Equal(File.ReadAllBytes(dropped), File.ReadAllBytes(backup));
     }
@@ -221,7 +221,7 @@ public sealed class InstanceModTests : IDisposable
         Assert.Equal(2, viewModel.Mods.Count);
         Assert.EndsWith(
             "alpha.jar",
-            Assert.Single(Directory.EnumerateFiles(viewModel.ModBackupDirectory)),
+            Assert.Single(Directory.EnumerateFiles(viewModel.ContentBackupDirectory)),
             StringComparison.Ordinal);
     }
 

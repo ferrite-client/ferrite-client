@@ -29,13 +29,15 @@ public sealed class InstanceContentManager
         }
 
         var entries = new List<ContentFileEntry>();
-        foreach (var file in Directory.EnumerateFiles(path))
+        foreach (var item in Directory.EnumerateFileSystemEntries(path))
         {
-            var info = new FileInfo(file);
+            // A resource pack or datapack may ship as a folder rather than a zip, so both are listed.
+            var isDirectory = Directory.Exists(item);
+            var info = new FileInfo(item);
             entries.Add(new ContentFileEntry(
-                file,
+                item,
                 info.Name,
-                info.Length,
+                isDirectory ? GetDirectorySize(item) : info.Length,
                 !info.Name.EndsWith(DisabledSuffix, StringComparison.OrdinalIgnoreCase),
                 info.LastWriteTimeUtc));
         }
@@ -85,29 +87,41 @@ public sealed class InstanceContentManager
     /// Enables or disables a content file by renaming it, returning the new path so callers can
     /// update selection state.
     /// </summary>
-    public static string SetEnabled(string filePath, bool enabled)
+    /// <summary>
+    /// Enables or disables a piece of content by renaming it, so nothing is rewritten. Works for a
+    /// file (a mod jar, a pack zip) and for a directory (a resource pack that ships as a folder).
+    /// </summary>
+    public static string SetEnabled(string path, bool enabled)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
-        var directory = Path.GetDirectoryName(filePath)
-            ?? throw new ArgumentException("The file has no directory.", nameof(filePath));
-        var fileName = Path.GetFileName(filePath);
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        var directory = Path.GetDirectoryName(path)
+            ?? throw new ArgumentException("The content has no directory.", nameof(path));
+        var fileName = Path.GetFileName(path);
         var isDisabled = fileName.EndsWith(DisabledSuffix, StringComparison.OrdinalIgnoreCase);
 
         if (enabled == !isDisabled)
         {
-            return filePath;
+            return path;
         }
 
         var target = enabled
             ? Path.Combine(directory, fileName[..^DisabledSuffix.Length])
             : Path.Combine(directory, fileName + DisabledSuffix);
 
-        if (File.Exists(target))
+        if (File.Exists(target) || Directory.Exists(target))
         {
             throw new IOException($"Cannot rename to '{Path.GetFileName(target)}' because it already exists.");
         }
 
-        File.Move(filePath, target);
+        if (Directory.Exists(path))
+        {
+            Directory.Move(path, target);
+        }
+        else
+        {
+            File.Move(path, target);
+        }
+
         return target;
     }
 
@@ -124,32 +138,41 @@ public sealed class InstanceContentManager
     /// user dropped in is their file, so removing it from the instance keeps a copy rather than
     /// destroying it. Returns where the file went, or null when there was nothing to move.
     /// </summary>
-    public static string? RemoveToBackup(string filePath, string backupDirectory)
+    public static string? RemoveToBackup(string path, string backupDirectory)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
         ArgumentException.ThrowIfNullOrWhiteSpace(backupDirectory);
 
-        if (!File.Exists(filePath))
+        var isDirectory = Directory.Exists(path);
+        if (!isDirectory && !File.Exists(path))
         {
             return null;
         }
 
         Directory.CreateDirectory(backupDirectory);
-        var fileName = Path.GetFileName(filePath);
+        var fileName = Path.GetFileName(path);
         var target = Path.Combine(
             backupDirectory,
             $"{DateTime.UtcNow:yyyyMMdd-HHmmss}-{PathSafety.SanitizeFileName(fileName)}");
 
         // Two removals inside the same second must not overwrite one another.
         var unique = target;
-        for (var index = 1; File.Exists(unique); index++)
+        for (var index = 1; File.Exists(unique) || Directory.Exists(unique); index++)
         {
             unique = Path.Combine(
                 backupDirectory,
                 $"{Path.GetFileNameWithoutExtension(target)}-{index}{Path.GetExtension(target)}");
         }
 
-        File.Move(filePath, unique);
+        if (isDirectory)
+        {
+            Directory.Move(path, unique);
+        }
+        else
+        {
+            File.Move(path, unique);
+        }
+
         return unique;
     }
 

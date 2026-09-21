@@ -47,11 +47,14 @@ public sealed partial class InstanceDetailViewModel : ObservableObject
 
     public ObservableCollection<ModItemViewModel> Mods { get; } = [];
 
-    public ObservableCollection<ContentFileEntry> ResourcePacks { get; } = [];
+    public ObservableCollection<InstanceContentItemViewModel> ResourcePacks { get; } = [];
 
-    public ObservableCollection<ContentFileEntry> ShaderPacks { get; } = [];
+    public ObservableCollection<InstanceContentItemViewModel> ShaderPacks { get; } = [];
 
-    public ObservableCollection<ContentFileEntry> Screenshots { get; } = [];
+    /// <summary>The datapacks of each saved world, in world order.</summary>
+    public ObservableCollection<WorldDatapacksViewModel> WorldDatapacks { get; } = [];
+
+    public ObservableCollection<ScreenshotItemViewModel> Screenshots { get; } = [];
 
     public ObservableCollection<JavaRuntime> JavaRuntimes { get; } = [];
 
@@ -116,6 +119,16 @@ public sealed partial class InstanceDetailViewModel : ObservableObject
 
     public bool HasScreenshots => Screenshots.Count > 0;
 
+    /// <summary>
+    /// Rebuilds the packs, the per-world datapacks, and the screenshot gallery. Called after the
+    /// view model opens and after a content item is enabled, disabled, or removed.
+    /// </summary>
+    public async Task RefreshContentAsync()
+    {
+        RefreshFolders();
+        await RefreshWorldsAsync().ConfigureAwait(true);
+    }
+
     public async Task InitializeAsync()
     {
         await LoadJavaRuntimesAsync().ConfigureAwait(true);
@@ -168,20 +181,34 @@ public sealed partial class InstanceDetailViewModel : ObservableObject
         // Pack formats come from the version's own client file, so an unknown version stays unknown
         // rather than being guessed from a table that would drift.
         var formats = _services.PackFormats.Read(Record.MinecraftVersion);
-        Replace(ResourcePacks, InstanceContentManager.ListPacks(GameDirectory, "resourcepacks", formats?.Resource));
-        Replace(ShaderPacks, InstanceContentManager.ListPacks(GameDirectory, "shaderpacks", null));
-        Replace(Screenshots, InstanceContentManager.ListFolder(GameDirectory, "screenshots"));
+        Replace(
+            ResourcePacks,
+            InstanceContentManager.ListPacks(GameDirectory, "resourcepacks", formats?.Resource));
+        Replace(
+            ShaderPacks,
+            InstanceContentManager.ListPacks(GameDirectory, "shaderpacks", null));
+
+        Screenshots.Clear();
+        foreach (var screenshot in InstanceContentManager.ListFolder(GameDirectory, "screenshots"))
+        {
+            var item = new ScreenshotItemViewModel(screenshot);
+            item.LoadThumbnail();
+            Screenshots.Add(item);
+        }
+
         OnPropertyChanged(nameof(HasResourcePacks));
         OnPropertyChanged(nameof(HasShaderPacks));
         OnPropertyChanged(nameof(HasScreenshots));
     }
 
-    private static void Replace(ObservableCollection<ContentFileEntry> target, IReadOnlyList<ContentFileEntry> items)
+    private void Replace(
+        ObservableCollection<InstanceContentItemViewModel> target,
+        IReadOnlyList<ContentFileEntry> items)
     {
         target.Clear();
         foreach (var item in items)
         {
-            target.Add(item);
+            target.Add(new InstanceContentItemViewModel(item, ContentBackupDirectory, RefreshFolders));
         }
     }
 
