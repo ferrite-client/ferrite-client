@@ -33,6 +33,8 @@
       <StackPanel Spacing="2">
         <TextBlock Classes="muted" TextWrapping="Wrap" Text="{Binding StatusNote}"
                    IsVisible="{Binding StatusNote, Converter={x:Static ObjectConverters.IsNotNull}}" />
+        <TextBlock Classes="faint" TextWrapping="Wrap" Text="{Binding CacheNote}"
+                   IsVisible="{Binding CacheNote, Converter={x:Static ObjectConverters.IsNotNull}}" />
         <TextBlock Classes="faint" TextWrapping="Wrap" Text="{Binding ProviderNote}"
                    IsVisible="{Binding ProviderNote, Converter={x:Static ObjectConverters.IsNotNull}}" />
       </StackPanel>

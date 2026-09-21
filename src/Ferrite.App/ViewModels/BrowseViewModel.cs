@@ -84,6 +84,10 @@ public sealed partial class BrowseViewModel : ObservableObject
     [ObservableProperty]
     private string? _resultSummary;
 
+    /// <summary>Set when the last response came from the cache instead of the network.</summary>
+    [ObservableProperty]
+    private string? _cacheNote;
+
     public IContentProvider ActiveProvider => _services.ContentProviders
         .FirstOrDefault(provider => provider.Name == (SelectedProvider?.Name ?? string.Empty))
         ?? _services.ContentProviders[0];
@@ -108,6 +112,7 @@ public sealed partial class BrowseViewModel : ObservableObject
         SelectedResult = null;
         SelectedVersion = null;
         ResultSummary = null;
+        CacheNote = null;
         StatusNote = null;
         OnPropertyChanged(nameof(HasResults));
         _ = SearchAsync();
@@ -192,6 +197,7 @@ public sealed partial class BrowseViewModel : ObservableObject
             }
 
             ResultSummary = $"{result.TotalHits:N0} results";
+            RefreshCacheNote();
             OnPropertyChanged(nameof(HasResults));
             SelectedResult = Results.FirstOrDefault();
         }
@@ -229,6 +235,7 @@ public sealed partial class BrowseViewModel : ObservableObject
             }
 
             SelectedVersion = provider.SelectBestVersion(versions, gameVersion, loader);
+            RefreshCacheNote();
             if (SelectedVersion is null && versions.Count > 0)
             {
                 StatusNote = $"No {project.Title} version matches this instance's game version or loader.";
@@ -238,5 +245,17 @@ public sealed partial class BrowseViewModel : ObservableObject
         {
             StatusNote = exception.Message;
         }
+    }
+
+    /// <summary>
+    /// Says so when a provider answered from the cache. A stale result presented as live would be
+    /// worse than an empty list, because the user would trust it.
+    /// </summary>
+    private void RefreshCacheNote()
+    {
+        CacheNote = ActiveProvider is CachedContentProvider { LastCacheHit: { } hit } cached
+            ? $"{ContentProviderNames.DisplayNameFor(cached.Name)} is unreachable; showing results cached "
+                + $"{hit.AgeText}."
+            : null;
     }
 }

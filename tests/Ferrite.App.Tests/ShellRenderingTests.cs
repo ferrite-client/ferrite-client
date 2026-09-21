@@ -6,10 +6,12 @@ using Avalonia.VisualTree;
 using Ferrite.App.Services;
 using Ferrite.App.ViewModels;
 using Ferrite.App.Views;
+using Ferrite.Core.Content;
 using Ferrite.Core.Minecraft;
 using Ferrite.Core.Platform;
 using Ferrite.Core.Storage;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Ferrite.App.Tests;
 
@@ -199,6 +201,80 @@ public sealed class ShellRenderingTests : IDisposable
         Assert.Contains("No operations recorded yet.", texts);
 
         Save(frame!, "settings-diagnostics");
+    }
+
+    /// <summary>
+    /// With the provider unreachable and a populated cache, the browser must show the cached results
+    /// and say where they came from.
+    /// </summary>
+    [AvaloniaFact]
+    public async Task Browse_page_reports_results_served_from_the_cache()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "ferrite-ui-cache-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(root);
+        var paths = AppPaths.ForRoot(root);
+        var loggerFactory = LoggerFactory.Create(builder => builder.SetMinimumLevel(LogLevel.Warning));
+
+        // Nothing listens on port 1, so the provider cannot be reached at all.
+        using var services = new AppServices(loggerFactory, paths, "http://127.0.0.1:1/v2");
+
+        var cache = new ContentCache(paths.CacheDirectory, NullLogger<ContentCache>.Instance);
+        var key = ContentCache.KeyFor(
+            ModrinthClient.ProviderName,
+            "search",
+            string.Empty,
+            ContentProjectType.Mod,
+            null,
+            null,
+            30,
+            0,
+            "relevance");
+        cache.Write(
+            key,
+            new ContentSearchResult(
+                1,
+                0,
+                30,
+                [
+                    new ContentSummary(
+                        ModrinthClient.ProviderName,
+                        "AANobbMI",
+                        "sodium",
+                        "Sodium",
+                        "Rendering engine",
+                        ContentProjectType.Mod,
+                        42,
+                        null,
+                        "jellysquid3",
+                        [],
+                        null),
+                ]));
+
+        var shell = new MainWindowViewModel(services);
+        var viewModel = new BrowseViewModel(services, shell);
+        await viewModel.InitializeAsync().ConfigureAwait(true);
+
+        Assert.Single(viewModel.Results);
+        Assert.Contains("cached", viewModel.CacheNote, StringComparison.OrdinalIgnoreCase);
+
+        var window = new Window
+        {
+            Content = new BrowseView { DataContext = viewModel },
+            Width = 1200,
+            Height = 800,
+        };
+        window.Show();
+        var frame = window.CaptureRenderedFrame();
+        Assert.NotNull(frame);
+        Save(frame!, "browse-offline-cache");
+
+        try
+        {
+            Directory.Delete(root, recursive: true);
+        }
+        catch (IOException)
+        {
+        }
     }
 
     /// <summary>

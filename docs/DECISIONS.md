@@ -193,3 +193,18 @@ victim rather than the cause.
 diagnosis sends users to the wrong issue tracker and burns their trust the first time it is
 wrong. The negative result is reported too: an obfuscated 1.8.8 report matched none of the 48
 installed Fabric mods, and the analyzer says so rather than picking the closest name.
+
+## D019 - Network first, cache only on connectivity failures
+
+**Decision.** `CachedContentProvider` serves cached metadata only when the request failed at the
+transport level or with 408/429/5xx. A 404, a malformed body, or a rejected API key is returned to
+the caller as an error.
+
+**Rejected.** "Serve stale if anything fails" and "cache-first with a TTL". The first hides real
+answers, including the difference between "this mod was deleted" and "you are offline". The second
+shows old data while the network is fine, which is worse than a short wait for a launcher whose whole
+job is to fetch current metadata.
+
+**Why.** The point of the cache is that going offline does not break browsing, not that it becomes
+the primary source. The UI states the age of what it is showing, so the user can tell a live answer
+from a remembered one.

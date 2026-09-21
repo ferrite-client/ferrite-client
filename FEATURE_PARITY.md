@@ -27,7 +27,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | A05 | Crash-safe settings persistence | Atomic JSON write, schema version, migration, backup on damage | IMPLEMENTED | tests |
 | A06 | Storage layout separation | config / data / store / instances / cache / logs / tmp / backups | VERIFIED | V001 |
 | A07 | Nullable-clean, warning-free build | `TreatWarningsAsErrors`, analyzer-clean | VERIFIED | V001 |
-| A08 | Automated test suite | xUnit projects `Ferrite.Core.Tests` and `Ferrite.App.Tests` | VERIFIED | 160 tests (2026-09-21) |
+| A08 | Automated test suite | xUnit projects `Ferrite.Core.Tests` and `Ferrite.App.Tests` | VERIFIED | 167 tests (2026-09-21) |
 | A09 | Windows packaging | Framework-dependent + self-contained publish profiles | NOT STARTED | - |
 | A10 | Clean-checkout build script | `scripts/build.ps1`, `test.ps1`, `package.ps1` | VERIFIED | scripts/build.ps1, test.ps1, verify-live.ps1 |
 
@@ -189,7 +189,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | J08 | Update installed content | Match installed files to versions | NOT STARTED | - |
 | J09 | Compatibility guarantee | Never install an incompatible version | VERIFIED | V003.1, V003.2 |
 | J10 | Modpack browsing | Modpack projects install as a new instance through the modpack installers | IMPLEMENTED | browser dispatch to MrpackInstaller / CurseForgePackInstaller; live install of a pack project not yet run from the UI |
-| J11 | Offline/cached metadata | Cached results with a clear offline state | NOT STARTED | - |
+| J11 | Offline/cached metadata | Network-first cache; a failed call serves cached data and says how old it is | VERIFIED | V009 |
 
 ## K. CurseForge integration
 
@@ -273,6 +273,12 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 ## Summary
 
 | Status | Count |
+| --- | --- |
+| NOT STARTED | 8 |
+| IN PROGRESS | 0 |
+| IMPLEMENTED | 63 |
+| VERIFIED | 96 |
+| BLOCKED EXTERNAL | 5 |
 | --- | --- |
 | NOT STARTED | 9 |
 | IN PROGRESS | 0 |

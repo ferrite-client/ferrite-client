@@ -174,3 +174,16 @@ extraction path is checked for containment inside the intended destination.
   the analysis of the newest crash. Entry names are chosen by the exporter, so a hostile file name
   inside an instance cannot escape the archive, and every text entry passes through
   `SecretRedactor` before it is written.
+
+## 11. Offline behaviour
+
+- `CachedContentProvider` wraps each provider: network first, cache on failure. A successful answer
+  refreshes the entry; a transport failure, timeout, or 408/429/5xx serves the cached copy and
+  records it in `LastCacheHit`, which the browser turns into "unreachable; showing results cached
+  X ago". A 404 or a rejected API key surfaces as an error, because hiding a real answer behind
+  stale data would be a lie.
+- `ContentCache` stores one JSON envelope per provider/operation/argument combination under
+  `data/cache/content`, tagged with the time it was written. Writes are atomic and best effort: a
+  cache that cannot be written must never fail a search.
+- The cache is per request shape, not per HTTP call, so the same key produced by different arrival
+  paths still hits, and a query with different filters cannot be answered by an unrelated entry.

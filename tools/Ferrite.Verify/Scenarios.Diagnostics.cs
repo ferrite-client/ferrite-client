@@ -1,12 +1,69 @@
 using Ferrite.Core.Content;
 using Ferrite.Core.Diagnostics;
 using Ferrite.Core.Util;
+using Microsoft.Extensions.Logging;
 
 namespace Ferrite.Verify;
 
 /// <summary>Crash report analysis and the support bundle.</summary>
 internal static partial class Scenarios
 {
+    /// <summary>
+    /// Proves the offline fallback end to end: fetch a real search, then repeat it through a client
+    /// pointed at a host that cannot answer and confirm the cached payload comes back.
+    /// </summary>
+    public static async Task<int> ContentCacheAsync(
+        VerifyServices services,
+        string query,
+        CancellationToken cancellationToken)
+    {
+        var cache = new ContentCache(services.Paths.CacheDirectory, services.LoggerFactory.CreateLogger<ContentCache>());
+        var online = new CachedContentProvider(
+            new Ferrite.Core.Content.ModrinthClient(
+                services.Http,
+                services.LoggerFactory.CreateLogger<ModrinthClient>()),
+            cache,
+            services.LoggerFactory.CreateLogger<CachedContentProvider>());
+
+        var live = await online
+            .SearchAsync(new ContentSearchQuery(query, Limit: 5), cancellationToken)
+            .ConfigureAwait(false);
+        Console.WriteLine($"Live search: {live.TotalHits:N0} hits, {live.Hits.Count} returned");
+        if (live.Hits.Count == 0)
+        {
+            Console.WriteLine("Nothing was returned, so there is nothing to cache.");
+            return 3;
+        }
+
+        Console.WriteLine($"  cached: {live.Hits[0].Title}");
+        Console.WriteLine($"  cache dir: {Path.Combine(services.Paths.CacheDirectory, "content")}");
+
+        // Nothing listens on port 1, so this client cannot reach the service at all.
+        var offline = new CachedContentProvider(
+            new Ferrite.Core.Content.ModrinthClient(
+                services.Http,
+                services.LoggerFactory.CreateLogger<ModrinthClient>(),
+                "http://127.0.0.1:1/v2"),
+            cache,
+            services.LoggerFactory.CreateLogger<CachedContentProvider>());
+
+        try
+        {
+            var cached = await offline
+                .SearchAsync(new ContentSearchQuery(query, Limit: 5), cancellationToken)
+                .ConfigureAwait(false);
+            Console.WriteLine(
+                $"Offline search: {cached.Hits.Count} hit(s) from cache {offline.LastCacheHit?.AgeText}");
+            Console.WriteLine($"  first hit: {cached.Hits[0].Title}");
+            return cached.Hits.Count > 0 && offline.LastCacheHit is not null ? 0 : 3;
+        }
+        catch (ContentProviderException exception)
+        {
+            Console.WriteLine($"Offline search failed: {exception.Message}");
+            return 3;
+        }
+    }
+
     /// <summary>
     /// Parses a real crash report and reports what it says and which installed mods its stack trace
     /// touches. Defaults to the newest report in the local Minecraft installation.

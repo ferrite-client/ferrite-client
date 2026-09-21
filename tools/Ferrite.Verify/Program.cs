@@ -77,6 +77,7 @@ internal static class Program
                     GetOption(args, "--instance"),
                     GetOption(args, "--out"),
                     cancellation.Token),
+                "cache" => await Scenarios.ContentCacheAsync(services, versionId, cancellation.Token),
                 "fabric" => await Scenarios.InstallLoaderAsync(
                     services,
                     LoaderKind.Fabric,

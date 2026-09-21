@@ -21,7 +21,10 @@ public sealed class AppServices : IDisposable
 {
     private readonly ILoggerFactory _loggerFactory;
 
-    public AppServices(ILoggerFactory loggerFactory, AppPaths paths)
+    /// <param name="modrinthApiBase">
+    /// Overrides the Modrinth endpoint. Used by tests that need a provider which cannot be reached.
+    /// </param>
+    public AppServices(ILoggerFactory loggerFactory, AppPaths paths, string? modrinthApiBase = null)
     {
         _loggerFactory = loggerFactory;
         Paths = paths;
@@ -70,13 +73,24 @@ public sealed class AppServices : IDisposable
             paths,
             loggerFactory.CreateLogger<ForgeLoaderService>(),
             loggerFactory);
-        Modrinth = new ModrinthClient(Http, loggerFactory.CreateLogger<ModrinthClient>());
+        Cache = new ContentCache(paths.CacheDirectory, loggerFactory.CreateLogger<ContentCache>());
+        Modrinth = new CachedContentProvider(
+            new ModrinthClient(
+                Http,
+                loggerFactory.CreateLogger<ModrinthClient>(),
+                modrinthApiBase ?? ModrinthClient.ApiBase),
+            Cache,
+            loggerFactory.CreateLogger<CachedContentProvider>());
         Content = new ContentInstaller(Modrinth, Downloads, loggerFactory.CreateLogger<ContentInstaller>());
         Credentials = new ProviderCredentialStore(secrets);
-        CurseForge = new CurseForgeClient(
+        CurseForgeApi = new CurseForgeClient(
             Http,
             loggerFactory.CreateLogger<CurseForgeClient>(),
             () => Credentials.CurseForgeApiKey);
+        CurseForge = new CachedContentProvider(
+            CurseForgeApi,
+            Cache,
+            loggerFactory.CreateLogger<CachedContentProvider>());
         CurseForgeContent = new ContentInstaller(
             CurseForge,
             Downloads,
@@ -94,7 +108,7 @@ public sealed class AppServices : IDisposable
             loggerFactory.CreateLogger<MrpackInstaller>());
         ModpackExporter = new ModpackExporter(paths, loggerFactory.CreateLogger<ModpackExporter>());
         CurseForgePacks = new CurseForgePackInstaller(
-            CurseForge,
+            CurseForgeApi,
             Downloads,
             Instances,
             Fabric,
@@ -154,13 +168,21 @@ public sealed class AppServices : IDisposable
 
     public ForgeLoaderService Forge { get; }
 
-    public ModrinthClient Modrinth { get; }
+    public ContentCache Cache { get; }
+
+    public CachedContentProvider Modrinth { get; }
 
     public ContentInstaller Content { get; }
 
     public ProviderCredentialStore Credentials { get; }
 
-    public CurseForgeClient CurseForge { get; }
+    public CachedContentProvider CurseForge { get; }
+
+    /// <summary>
+    /// The unwrapped client. Modpack manifests need its bulk file resolution, which is CurseForge
+    /// specific and therefore not part of the provider contract.
+    /// </summary>
+    public CurseForgeClient CurseForgeApi { get; }
 
     public ContentInstaller CurseForgeContent { get; }
 

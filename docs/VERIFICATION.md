@@ -582,3 +582,53 @@ The real views were rendered headlessly and inspected as images:
 - `settings-diagnostics.png` — Settings gained a *Diagnostics* section with the recent operation
   list (including its empty state), a notes field for the user's own description, and the bundle
   export action.
+
+---
+
+## V009 - Offline metadata cache (2026-09-21)
+
+Environment: Windows 11 x64, .NET 10.0.5, live Modrinth for the successful half of the scenario.
+
+### V009.1 Live fetch, then the same query with the service unreachable
+
+Command: `Ferrite.Verify cache sodium`
+
+```
+Live search: 351 hits, 5 returned
+  cached: Sodium
+  cache dir: <root>\data\cache\content
+[info] CachedContentProvider: modrinth served modrinth-search-2102ef6d2d13f8a1 from cache
+       (age 00:00:11.2804602) after No connection could be made because the target machine
+       actively refused it. (127.0.0.1:1)
+Offline search: 5 hit(s) from cache just now
+  first hit: Sodium
+```
+
+The second call goes through a client whose endpoint cannot accept connections, and the real
+Modrinth payload comes back from disk with its age. This is the whole feature: a search that would
+otherwise produce an empty list produces usable results and a truthful label.
+
+### V009.2 What does not fall back to the cache
+
+`ContentCacheTests` covers the boundary deliberately:
+
+- A 404 is a real answer and surfaces as `HttpException`; the cached success is not substituted.
+- A different query is a different cache key, so it reports "could not be reached and nothing is
+  cached" instead of serving an unrelated result set.
+- A damaged cache file is ignored rather than throwing.
+- Keys separate providers and arguments, and are stable for identical requests.
+
+Only transport failures, timeouts, and 408/429/5xx fall back. Hiding a 404 or a rejected API key
+behind stale data would tell the user something untrue about the world.
+
+### V009.3 Interface: the offline state is visible
+
+Command: `FERRITE_UI_SHOTS=<dir> dotnet run --project tests/Ferrite.App.Tests`
+
+`browse-offline-cache.png` renders the real browser with the provider pointed at a closed port and
+a pre-populated cache: the result list shows Sodium, and below the filter row it reads
+"Modrinth is unreachable; showing results cached just now." The render pass asserts both the single
+result and the note, so a regression that silently drops the explanation fails the test.
+
+`AppServices` gained an optional Modrinth endpoint parameter so this state is reachable in a test
+without touching the network stack, which is also useful for pointing Ferrite at a mirror.
