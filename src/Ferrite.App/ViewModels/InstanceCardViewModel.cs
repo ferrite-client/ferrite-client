@@ -73,6 +73,12 @@ public sealed partial class InstanceCardViewModel : ObservableObject
     private void OpenFolder() => ShellOpen.Directory(_services.Paths.InstanceGameDirectory(Record.Id));
 
     [RelayCommand]
+    private void Rename() => _shell.Library.BeginRename(this);
+
+    [RelayCommand]
+    private void Clone() => _shell.Library.BeginClone(this);
+
+    [RelayCommand]
     private async Task StopAsync() =>
         await _services.Launcher.StopAsync(Record.Id, TimeSpan.FromSeconds(15), CancellationToken.None)
             .ConfigureAwait(true);

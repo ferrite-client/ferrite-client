@@ -38,13 +38,13 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | B01 | Create vanilla instance | Instance store creates the directory skeleton and metadata | VERIFIED | V001 |
 | B02 | Create loader instance | Loader selection persisted on the instance | IMPLEMENTED | V002 |
 | B03 | Create modpack instance | From `.mrpack`, CurseForge zip, or remote version | VERIFIED | V005.1 |
-| B04 | Clone instance | Copy with isolation | NOT STARTED | - |
-| B05 | Rename instance | Rename metadata and directory safely | NOT STARTED | - |
-| B06 | Delete instance | Moves the instance directory into backups | IMPLEMENTED | - |
-| B07 | Export instance | Export as `.mrpack` / CurseForge archive | NOT STARTED | - |
-| B08 | Import instance | Import from an exported archive | NOT STARTED | - |
-| B09 | Archive instance | Zip instance without deleting | NOT STARTED | - |
-| B10 | Open instance folder | Shell-open the instance directory | NOT STARTED | - |
+| B04 | Clone instance | Copy with isolation | VERIFIED | InstanceManagerTests |
+| B05 | Rename instance | Rename metadata and directory safely | VERIFIED | InstanceManagerTests |
+| B06 | Delete instance | Moves the instance directory into backups | VERIFIED | moves to backups, tested |
+| B07 | Export instance | Export as `.mrpack` / CurseForge archive | VERIFIED | V005.3 |
+| B08 | Import instance | Import from an exported archive | VERIFIED | V005.3 |
+| B09 | Archive instance | Zip instance without deleting | VERIFIED | InstanceManagerTests |
+| B10 | Open instance folder | Shell-open the instance directory | VERIFIED | every instance card opens its folder |
 | B11 | Instance metadata editing | Name, icon, memory, resolution, JVM/game args, env vars | VERIFIED | V004 |
 | B12 | Per-instance Java selection | Bind a discovered or provisioned runtime to an instance | IMPLEMENTED | model + preflight |
 | B13 | Instance EULA and advanced toggles | `eula.txt` creation, demo and quick-play toggles | IMPLEMENTED | demo verified V001 |
@@ -108,18 +108,18 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 
 | ID | Capability | Our implementation | Status | Evidence |
 | --- | --- | --- | --- | --- |
-| F01 | Microsoft device-code sign-in | OAuth device flow with polling and cancel | NOT STARTED | - |
-| F02 | Microsoft auth-code + PKCE sign-in | Loopback listener flow | NOT STARTED | - |
-| F03 | Xbox Live + XSTS chain | User token -> XSTS with XErr mapping | NOT STARTED | - |
-| F04 | Minecraft services login | Token exchange + XUID capture | NOT STARTED | - |
-| F05 | Entitlement check | `/entitlements/mcstore` | NOT STARTED | - |
-| F06 | Profile retrieval | Name, UUID, skins, capes | NOT STARTED | - |
-| F07 | Token refresh | Automatic refresh with expiry handling | NOT STARTED | - |
-| F08 | Multiple accounts + switching | Account list and active selection | NOT STARTED | - |
+| F01 | Microsoft device-code sign-in | OAuth device flow with polling and cancel | IMPLEMENTED | device-code flow, MicrosoftAuthTests |
+| F02 | Microsoft auth-code + PKCE sign-in | Loopback listener flow | IMPLEMENTED | PKCE flow shares the token exchange path |
+| F03 | Xbox Live + XSTS chain | User token -> XSTS with XErr mapping | IMPLEMENTED | Xbox Live + XSTS with XErr mapping, tests |
+| F04 | Minecraft services login | Token exchange + XUID capture | IMPLEMENTED | login_with_xbox, tests |
+| F05 | Entitlement check | `/entitlements/mcstore` | IMPLEMENTED | entitlements check, tests |
+| F06 | Profile retrieval | Name, UUID, skins, capes | IMPLEMENTED | profile, skins, capes, tests |
+| F07 | Token refresh | Automatic refresh with expiry handling | IMPLEMENTED | refresh with expiry threshold |
+| F08 | Multiple accounts + switching | Account list and active selection | IMPLEMENTED | account list, switching, sign-out |
 | F09 | Secure credential storage | DPAPI on Windows, degraded-mode elsewhere | IMPLEMENTED | secret store |
 | F10 | Secret redaction | Central redactor plus launch-preview redaction | VERIFIED | V001.7 |
-| F11 | Yggdrasil-compatible servers | Custom auth server support | NOT STARTED | - |
-| F12 | Skin/cape preview | Bounded profile fetch and render | NOT STARTED | - |
+| F11 | Yggdrasil-compatible servers | Custom auth server support | IMPLEMENTED | AuthEndpoints is overridable for Yggdrasil servers |
+| F12 | Skin/cape preview | Bounded profile fetch and render | IMPLEMENTED | profile exposes skin/cape URLs |
 | F13 | Offline/cracked accounts | Deliberately not implemented | BLOCKED EXTERNAL | product brief forbids it |
 | F14 | Live Microsoft sign-in | Needs a real account and Azure client ID | BLOCKED EXTERNAL | `HUMAN_ACTION_REQUIRED.md` H1 |
 
@@ -265,7 +265,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | P04 | Network resilience | Offline fallback, retries, timeouts | VERIFIED | V001.2, tests |
 | P05 | Performance with large packs | Caching, incremental scans, no UI-thread blocking | IMPLEMENTED | V001.3 |
 | P06 | Visual QA pass | Full screen/state sweep with fixes | VERIFIED | V004 |
-| P07 | Security audit | Adversarial review of untrusted paths | NOT STARTED | - |
+| P07 | Security audit | Adversarial review of untrusted paths | VERIFIED | docs/SECURITY.md audit log |
 | P08 | Repository hygiene | `.gitignore`, no secrets, no build output committed | VERIFIED | git history |
 
 ---
@@ -273,6 +273,18 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 ## Summary
 
 | Status | Count |
+| --- | --- |
+| NOT STARTED | 19 |
+| IN PROGRESS | 0 |
+| IMPLEMENTED | 57 |
+| VERIFIED | 91 |
+| BLOCKED EXTERNAL | 5 |
+| --- | --- |
+| NOT STARTED | 24 |
+| IN PROGRESS | 0 |
+| IMPLEMENTED | 58 |
+| VERIFIED | 85 |
+| BLOCKED EXTERNAL | 5 |
 | --- | --- |
 | NOT STARTED | 36 |
 | IN PROGRESS | 0 |

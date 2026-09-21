@@ -37,6 +37,8 @@
                           Command="{Binding PlayCommand}" />
                   <Button Content="Stop" IsVisible="{Binding IsRunning}" Command="{Binding StopCommand}" />
                   <Button Content="Manage" Command="{Binding OpenCommand}" />
+                  <Button Content="Rename" Command="{Binding RenameCommand}" />
+                  <Button Content="Clone" Command="{Binding CloneCommand}" />
                   <Button Content="Folder" Command="{Binding OpenFolderCommand}" />
                   <Button Content="Repair" Command="{Binding RepairCommand}" />
                   <Button Content="Delete" Classes="danger" Command="{Binding DeleteCommand}" />
@@ -53,6 +55,38 @@
                Text="No instances yet. Create one to install Minecraft, optionally with a mod loader." />
 
     <TextBlock Grid.Row="2" Classes="muted" Text="{Binding ModpackStatus}" />
+
+    <!-- Rename prompt -->
+    <Border Grid.Row="0" Grid.RowSpan="3" Margin="-24" Padding="24"
+            Background="{DynamicResource FerriteSurface}" IsVisible="{Binding IsRenaming}">
+      <Border Classes="card" MaxWidth="440" VerticalAlignment="Center" HorizontalAlignment="Center">
+        <StackPanel Spacing="12">
+          <TextBlock Classes="h2" Text="Rename instance" />
+          <TextBox Text="{Binding RenameName}" />
+          <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+            <Button Content="Cancel" Command="{Binding CancelRenameCommand}" />
+            <Button Classes="primary" Content="Rename" Command="{Binding ConfirmRenameCommand}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </Border>
+
+    <!-- Clone prompt -->
+    <Border Grid.Row="0" Grid.RowSpan="3" Margin="-24" Padding="24"
+            Background="{DynamicResource FerriteSurface}" IsVisible="{Binding IsCloning}">
+      <Border Classes="card" MaxWidth="440" VerticalAlignment="Center" HorizontalAlignment="Center">
+        <StackPanel Spacing="12">
+          <TextBlock Classes="h2" Text="Clone instance" />
+          <TextBlock Classes="muted"
+                     Text="The clone copies this instance's mods, configs, and settings into an independent instance." />
+          <TextBox Text="{Binding CloneName}" />
+          <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+            <Button Content="Cancel" Command="{Binding CancelCloneCommand}" />
+            <Button Classes="primary" Content="Clone" Command="{Binding ConfirmCloneCommand}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </Border>
 
     <!-- Creation form -->
     <Border Grid.Row="0" Grid.RowSpan="3" Margin="-24" Padding="24"

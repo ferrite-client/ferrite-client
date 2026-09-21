@@ -41,6 +41,10 @@ public sealed class AppServices : IDisposable
             loggerFactory.CreateLogger<MinecraftInstaller>());
         Launcher = new LaunchService(loggerFactory.CreateLogger<LaunchService>());
         Instances = new InstanceStore(paths, loggerFactory.CreateLogger<InstanceStore>());
+        InstanceManager = new InstanceManager(
+            Instances,
+            paths,
+            loggerFactory.CreateLogger<InstanceManager>());
         Java = new JavaDetector(paths, loggerFactory.CreateLogger<JavaDetector>());
         InstanceLauncher = new InstanceLauncher(
             Installer,
@@ -108,6 +112,8 @@ public sealed class AppServices : IDisposable
     public InstanceLauncher InstanceLauncher { get; }
 
     public InstanceStore Instances { get; }
+
+    public InstanceManager InstanceManager { get; }
 
     public JavaDetector Java { get; }
 
