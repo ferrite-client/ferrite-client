@@ -179,16 +179,16 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 
 | ID | Capability | Our implementation | Status | Evidence |
 | --- | --- | --- | --- | --- |
-| J01 | Search with facets | Query, project type, category, loader, version | IMPLEMENTED | facets in client and UI |
-| J02 | Tag vocabularies | game_version, loader, category, project_type | IMPLEMENTED | tag endpoints in client |
-| J03 | Project details | Description, body, gallery, license, authors | IMPLEMENTED | project lookup |
+| J01 | Search with facets | Query, content type, category, version, loader, and order, all offered as choices | VERIFIED | V025.1 |
+| J02 | Tag vocabularies | category, loader, and game_version read from the provider and offered as facets | VERIFIED | V025.1; `ModrinthClientTests` |
+| J03 | Project details | Description, body, licence, authors, categories, versions, loaders, links, gallery | VERIFIED | V025.2 |
 | J04 | Version listing | Per-project versions with filters | VERIFIED | V003.1 |
-| J05 | Changelog display | Markdown-rendered changelog | IMPLEMENTED | changelog pane |
+| J05 | Changelog display | The selected version's changelog, with an explicit empty state | VERIFIED | V025.2; shown as text, not rendered as markdown |
 | J06 | Dependency resolution | Required first, optional opt-in, cycle guard | VERIFIED | V003.2 |
 | J07 | Install into instance | Correct subfolder per project type | VERIFIED | V003.2 |
 | J08 | Update installed content | Launcher-installed files are tracked by provider/project/version and updated in place | VERIFIED | V010 |
 | J09 | Compatibility guarantee | Never install an incompatible version | VERIFIED | V003.1, V003.2 |
-| J10 | Modpack browsing | Modpack projects install as a new instance through the modpack installers | IMPLEMENTED | browser dispatch to MrpackInstaller / CurseForgePackInstaller; live install of a pack project not yet run from the UI |
+| J10 | Modpack browsing | A modpack result becomes a new instance through the modpack installers | VERIFIED | V025.3 dispatch, download, checksum; V005.1/V005.2 real pack install and launch |
 | J11 | Offline/cached metadata | Network-first cache; a failed call serves cached data and says how old it is | VERIFIED | V009 |
 
 ## K. CurseForge integration
@@ -273,6 +273,12 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 ## Summary
 
 | Status | Count |
+| --- | --- |
+| NOT STARTED | 0 |
+| IN PROGRESS | 0 |
+| IMPLEMENTED | 17 |
+| VERIFIED | 140 |
+| BLOCKED EXTERNAL | 15 |
 | --- | --- |
 | NOT STARTED | 0 |
 | IN PROGRESS | 0 |

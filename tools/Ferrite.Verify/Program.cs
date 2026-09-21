@@ -53,6 +53,13 @@ internal static class Program
                     GetOption(args, "--instance"),
                     cancellation.Token),
                 "modrinth" => await Scenarios.ModrinthSearchAsync(services, versionId, cancellation.Token),
+                "browse" => await Scenarios.BrowseAsync(
+                    services,
+                    GetOption(args, "--query") ?? "sodium",
+                    GetOption(args, "--category"),
+                    GetOption(args, "--minecraft"),
+                    GetOption(args, "--loader"),
+                    cancellation.Token),
                 "curseforge" => await Scenarios.CurseForgeAsync(services, versionId, cancellation.Token),
                 "content" => await Scenarios.InstallContentAsync(
                     services,

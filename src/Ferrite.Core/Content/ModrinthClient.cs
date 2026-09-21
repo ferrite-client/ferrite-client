@@ -188,10 +188,15 @@ public sealed class ModrinthClient : IContentProvider
         var tags = new List<ContentTag>();
         foreach (var element in document.RootElement.EnumerateArray())
         {
-            var name = GetString(element, "name");
+            // Most facets name their entries with "name"; the game-version facet uses "version"
+            // (with "version_type" alongside it), which is why it reads both.
+            var name = GetString(element, "name") ?? GetString(element, "version");
             if (!string.IsNullOrEmpty(name))
             {
-                tags.Add(new ContentTag(name, GetString(element, "display_name"), GetString(element, "icon")));
+                tags.Add(new ContentTag(
+                    name,
+                    GetString(element, "display_name") ?? name,
+                    GetString(element, "icon")));
             }
         }
 
@@ -256,8 +261,40 @@ public sealed class ModrinthClient : IContentProvider
             GetStrings(element, "game_versions"),
             GetStrings(element, "loaders"),
             GetString(element, "source_url"),
-            GetString(element, "issues_url"));
+            GetString(element, "issues_url"),
+            ReadGallery(element));
     }
+
+    /// <summary>Gallery entries that are images, in the order the project lists them.</summary>
+    private static List<string> ReadGallery(JsonElement element)
+    {
+        var images = new List<string>();
+        if (element.ValueKind != JsonValueKind.Object
+            || !element.TryGetProperty("gallery", out var gallery)
+            || gallery.ValueKind != JsonValueKind.Array)
+        {
+            return images;
+        }
+
+        foreach (var item in gallery.EnumerateArray())
+        {
+            // A Modrinth gallery also carries video links, whose URLs are not images.
+            var url = GetString(item, "url");
+            if (url is { Length: > 0 } && IsImageUrl(url))
+            {
+                images.Add(url);
+            }
+        }
+
+        return images;
+    }
+
+    private static bool IsImageUrl(string url) =>
+        url.EndsWith(".png", StringComparison.OrdinalIgnoreCase)
+        || url.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase)
+        || url.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase)
+        || url.EndsWith(".webp", StringComparison.OrdinalIgnoreCase)
+        || url.EndsWith(".gif", StringComparison.OrdinalIgnoreCase);
 
     private ContentVersion ReadVersion(JsonElement element)
     {

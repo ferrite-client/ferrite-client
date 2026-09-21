@@ -118,6 +118,7 @@ public sealed partial class BrowseViewModel : ObservableObject
         CacheNote = null;
         StatusNote = null;
         OnPropertyChanged(nameof(HasResults));
+        _ = LoadFacetsAsync();
         _ = SearchAsync();
     }
 
@@ -125,6 +126,7 @@ public sealed partial class BrowseViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(HasSelection));
         _ = LoadVersionsAsync();
+        _ = LoadProjectDetailsAsync(value);
     }
 
     partial void OnSelectedVersionChanged(ContentVersion? value) => OnPropertyChanged(nameof(CanInstall));
@@ -134,6 +136,7 @@ public sealed partial class BrowseViewModel : ObservableObject
     public async Task InitializeAsync()
     {
         await LoadInstancesAsync().ConfigureAwait(true);
+        await LoadFacetsAsync().ConfigureAwait(true);
         if (Results.Count == 0)
         {
             await SearchAsync().ConfigureAwait(true);
@@ -156,6 +159,7 @@ public sealed partial class BrowseViewModel : ObservableObject
             {
                 GameVersionFilter = instance.MinecraftVersion;
                 LoaderFilter = instance.Loader.ToContentProviderToken();
+                ApplyFiltersToFacets();
             }
         }
         catch (Exception exception)
@@ -188,6 +192,7 @@ public sealed partial class BrowseViewModel : ObservableObject
                         type,
                         string.IsNullOrWhiteSpace(GameVersionFilter) ? null : GameVersionFilter,
                         string.IsNullOrWhiteSpace(LoaderFilter) ? null : LoaderFilter,
+                        Categories: CategoryFilter is { Length: > 0 } category ? [category] : null,
                         Limit: 30,
                         SortBy: SelectedSort ?? "relevance"),
                     CancellationToken.None)
@@ -220,6 +225,12 @@ public sealed partial class BrowseViewModel : ObservableObject
         SelectedVersion = null;
         if (SelectedResult is not { } project)
         {
+            return;
+        }
+
+        if (!ActiveProvider.IsConfigured)
+        {
+            // A provider without a key cannot answer, so there is nothing to look up.
             return;
         }
 

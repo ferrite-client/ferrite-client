@@ -65,6 +65,18 @@ internal static class StringsPl
             ["L.Browse.RefreshInstances"] = "Odśwież instancje",
             ["L.Browse.FieldMinecraftVersion"] = "Wersja Minecrafta",
             ["L.Browse.FieldLoader"] = "Loader",
+            ["L.Browse.FieldCategory"] = "Kategoria",
+            ["L.Browse.FieldProvider"] = "Źródło",
+            ["L.Browse.FieldProjectType"] = "Typ treści",
+            ["L.Browse.FieldSort"] = "Kolejność",
+            ["L.Browse.AnyCategory"] = "Dowolna kategoria",
+            ["L.Browse.AnyVersion"] = "Dowolna wersja",
+            ["L.Browse.AnyLoader"] = "Dowolny loader",
+            ["L.Browse.About"] = "O TYM PROJEKCIE",
+            ["L.Browse.Changelog"] = "ZMIANY",
+            ["L.Browse.NoChangelog"] = "Dostawca nie opublikował zmian dla tej wersji.",
+            ["L.Browse.Gallery"] = "GALERIA",
+            ["L.Browse.BodyTruncated"] = "… opis skrócony; reszta jest na stronie projektu.",
             ["L.Browse.Empty"] =
                 "Przeszukaj dostawcę treści w poszukiwaniu modów, modpacków, paczek zasobów i shaderów. "
                 + "Wyniki są filtrowane według wersji Minecrafta i loadera wybranej instancji.",

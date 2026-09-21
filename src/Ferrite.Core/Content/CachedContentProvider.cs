@@ -88,6 +88,18 @@ public sealed class CachedContentProvider : IContentProvider
             .ConfigureAwait(false);
     }
 
+    /// <summary>Tag vocabularies change rarely, so they are cached like any other response.</summary>
+    public async Task<IReadOnlyList<ContentTag>> GetTagsAsync(string kind, CancellationToken cancellationToken)
+    {
+        var key = ContentCache.KeyFor(Name, "tags", kind);
+        return await LoadAsync(
+                key,
+                () => _inner.GetTagsAsync(kind, cancellationToken),
+                static tags => tags.Count > 0,
+                cancellationToken)
+            .ConfigureAwait(false);
+    }
+
     public async Task<ContentVersion?> GetVersionAsync(
         string projectId,
         string versionId,

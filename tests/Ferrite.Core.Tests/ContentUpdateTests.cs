@@ -353,6 +353,9 @@ public sealed class ContentUpdateTests : IAsyncLifetime
         public Task<ContentProject?> GetProjectAsync(string idOrSlug, CancellationToken cancellationToken) =>
             Task.FromResult<ContentProject?>(null);
 
+        public Task<IReadOnlyList<ContentTag>> GetTagsAsync(string kind, CancellationToken cancellationToken) =>
+            Task.FromResult<IReadOnlyList<ContentTag>>([]);
+
         public Task<IReadOnlyList<ContentVersion>> GetVersionsAsync(
             string projectId,
             string? gameVersion,

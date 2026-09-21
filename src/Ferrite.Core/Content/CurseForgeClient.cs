@@ -71,6 +71,15 @@ public sealed class CurseForgeClient : IContentProvider
             parameters.Add("modLoaderType=" + loaderId);
         }
 
+        // CurseForge filters categories by numeric id, and accepts a comma-separated list.
+        var categoryIds = (query.Categories ?? [])
+            .Where(category => int.TryParse(category, NumberStyles.Integer, CultureInfo.InvariantCulture, out _))
+            .ToList();
+        if (categoryIds.Count > 0)
+        {
+            parameters.Add("categoryId=" + string.Join(',', categoryIds));
+        }
+
         if (MapSort(query.SortBy) is { } sort)
         {
             parameters.Add("sortField=" + sort.Field);
@@ -324,7 +333,93 @@ public sealed class CurseForgeClient : IContentProvider
         ReadStringArray(element, "latestFilesIndexes", "gameVersion"),
         [],
         GetString(element, "links", "websiteUrl"),
-        GetString(element, "links", "issuesUrl"));
+        GetString(element, "links", "issuesUrl"),
+        ReadScreenshots(element),
+        ReadAuthors(element));
+
+    /// <summary>Screenshot URLs the project page shows.</summary>
+    private static List<string> ReadScreenshots(JsonElement element)
+    {
+        var images = new List<string>();
+        if (element.ValueKind != JsonValueKind.Object
+            || !element.TryGetProperty("screenshots", out var screenshots)
+            || screenshots.ValueKind != JsonValueKind.Array)
+        {
+            return images;
+        }
+
+        foreach (var item in screenshots.EnumerateArray())
+        {
+            var url = GetString(item, "thumbnailUrl") ?? GetString(item, "url");
+            if (!string.IsNullOrEmpty(url))
+            {
+                images.Add(url);
+            }
+        }
+
+        return images;
+    }
+
+    private static List<string> ReadAuthors(JsonElement element)
+    {
+        var authors = new List<string>();
+        if (element.ValueKind != JsonValueKind.Object
+            || !element.TryGetProperty("authors", out var entries)
+            || entries.ValueKind != JsonValueKind.Array)
+        {
+            return authors;
+        }
+
+        foreach (var item in entries.EnumerateArray())
+        {
+            var name = GetString(item, "name");
+            if (!string.IsNullOrEmpty(name))
+            {
+                authors.Add(name);
+            }
+        }
+
+        return authors;
+    }
+
+    /// <summary>
+    /// The category vocabulary for a class of content. CurseForge keys categories by class, so the
+    /// facet follows the content type the browser is showing.
+    /// </summary>
+    public async Task<IReadOnlyList<ContentTag>> GetTagsAsync(
+        string kind,
+        CancellationToken cancellationToken)
+    {
+        if (!string.Equals(kind, "category", StringComparison.OrdinalIgnoreCase))
+        {
+            return [];
+        }
+
+        var json = await GetAsync(
+                $"/categories?gameId={CurseForgeIds.MinecraftGameId}",
+                cancellationToken)
+            .ConfigureAwait(false);
+        if (!json.TryGetProperty("data", out var data) || data.ValueKind != JsonValueKind.Array)
+        {
+            return [];
+        }
+
+        var tags = new List<ContentTag>();
+        foreach (var element in data.EnumerateArray())
+        {
+            var name = GetString(element, "name");
+            var id = GetInt(element, "id");
+            if (!string.IsNullOrEmpty(name) && id is { } value)
+            {
+                tags.Add(new ContentTag(
+                    value.ToString(CultureInfo.InvariantCulture),
+                    name,
+                    GetString(element, "iconUrl")));
+            }
+        }
+
+        return tags;
+    }
 
     private ContentVersion ReadVersion(JsonElement element)
     {

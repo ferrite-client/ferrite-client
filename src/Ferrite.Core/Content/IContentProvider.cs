@@ -19,6 +19,14 @@ public interface IContentProvider
 
     Task<ContentProject?> GetProjectAsync(string idOrSlug, CancellationToken cancellationToken);
 
+    /// <summary>
+    /// The provider's own vocabulary for one facet, so a filter offers real values instead of a
+    /// free-text guess. <paramref name="kind"/> is one of the Modrinth facet names: <c>category</c>,
+    /// <c>loader</c>, <c>game_version</c>, or <c>project_type</c>. A provider that has no such
+    /// vocabulary returns an empty list rather than failing.
+    /// </summary>
+    Task<IReadOnlyList<ContentTag>> GetTagsAsync(string kind, CancellationToken cancellationToken);
+
     Task<IReadOnlyList<ContentVersion>> GetVersionsAsync(
         string projectId,
         string? gameVersion,

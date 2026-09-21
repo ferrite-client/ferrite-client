@@ -30,7 +30,11 @@ public sealed record ContentProject(
     IReadOnlyList<string> GameVersions,
     IReadOnlyList<string> Loaders,
     string? SourceUrl,
-    string? IssuesUrl);
+    string? IssuesUrl,
+    /// <summary>Image URLs the provider publishes for this project, newest first.</summary>
+    IReadOnlyList<string>? Gallery = null,
+    /// <summary>Authors the provider names for this project, when it reports them.</summary>
+    IReadOnlyList<string>? Authors = null);
 
 public sealed record ContentFile(
     string FileName,

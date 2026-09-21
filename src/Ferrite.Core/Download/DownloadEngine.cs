@@ -213,7 +213,13 @@ public sealed class DownloadEngine
         }
 
         tracker.EndItem(success: false);
-        throw new DownloadFailedException($"Failed to download {request.DisplayName}", lastError);
+        // The reason matters to the user: a checksum mismatch and an unreachable host read the same
+        // otherwise, and only one of them is worth retrying by hand.
+        throw new DownloadFailedException(
+            lastError is null
+                ? $"Failed to download {request.DisplayName}"
+                : $"Failed to download {request.DisplayName}: {lastError.Message}",
+            lastError);
     }
 
     private async Task TransferAsync(

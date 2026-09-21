@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:Ferrite.App.ViewModels"
+             xmlns:ct="clr-namespace:Ferrite.Core.Content;assembly=Ferrite.Core"
              x:Class="Ferrite.App.Views.BrowseView"
              x:DataType="vm:BrowseViewModel">
 
@@ -14,20 +15,57 @@
         <Button Grid.Column="2" Content="{DynamicResource L.Browse.RefreshInstances}" Command="{Binding RefreshInstancesCommand}" />
       </Grid>
 
-      <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,*" ColumnSpacing="10">
-        <ComboBox Grid.Column="0" ItemsSource="{Binding Providers}" SelectedItem="{Binding SelectedProvider}"
-                  Width="150">
-          <ComboBox.ItemTemplate>
-            <DataTemplate>
-              <TextBlock Text="{Binding DisplayName}" />
-            </DataTemplate>
-          </ComboBox.ItemTemplate>
-        </ComboBox>
-        <ComboBox Grid.Column="1" ItemsSource="{Binding ProjectTypes}" SelectedItem="{Binding SelectedProjectType}" Width="150" />
-        <ComboBox Grid.Column="2" ItemsSource="{Binding SortOptions}" SelectedItem="{Binding SelectedSort}" Width="150" />
-        <TextBox Grid.Column="3" PlaceholderText="{DynamicResource L.Browse.FieldMinecraftVersion}" Text="{Binding GameVersionFilter}" Width="150" />
-        <TextBox Grid.Column="4" PlaceholderText="{DynamicResource L.Browse.FieldLoader}" Text="{Binding LoaderFilter}" Width="120" />
-        <TextBlock Grid.Column="5" Classes="faint" VerticalAlignment="Center" Text="{Binding ResultSummary}" />
+      <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*" ColumnSpacing="10">
+        <StackPanel Grid.Column="0" Spacing="4">
+          <TextBlock Classes="label" Text="{DynamicResource L.Browse.FieldProvider}" />
+          <ComboBox ItemsSource="{Binding Providers}" SelectedItem="{Binding SelectedProvider}" Width="150">
+            <ComboBox.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding DisplayName}" />
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+        </StackPanel>
+        <StackPanel Grid.Column="1" Spacing="4">
+          <TextBlock Classes="label" Text="{DynamicResource L.Browse.FieldProjectType}" />
+          <ComboBox ItemsSource="{Binding ProjectTypes}" SelectedItem="{Binding SelectedProjectType}" Width="130" />
+        </StackPanel>
+        <StackPanel Grid.Column="2" Spacing="4">
+          <TextBlock Classes="label" Text="{DynamicResource L.Browse.FieldSort}" />
+          <ComboBox ItemsSource="{Binding SortOptions}" SelectedItem="{Binding SelectedSort}" Width="130" />
+        </StackPanel>
+        <StackPanel Grid.Column="3" Spacing="4">
+          <TextBlock Classes="label" Text="{DynamicResource L.Browse.FieldCategory}" />
+          <ComboBox ItemsSource="{Binding CategoryChoices}" SelectedItem="{Binding SelectedCategory}" Width="170">
+            <ComboBox.ItemTemplate>
+              <DataTemplate DataType="ct:ContentTag">
+                <TextBlock Text="{Binding DisplayName}" />
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+        </StackPanel>
+        <StackPanel Grid.Column="4" Spacing="4">
+          <TextBlock Classes="label" Text="{DynamicResource L.Browse.FieldMinecraftVersion}" />
+          <ComboBox ItemsSource="{Binding GameVersionChoices}" SelectedItem="{Binding SelectedGameVersion}" Width="150">
+            <ComboBox.ItemTemplate>
+              <DataTemplate DataType="ct:ContentTag">
+                <TextBlock Text="{Binding DisplayName}" />
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+        </StackPanel>
+        <StackPanel Grid.Column="5" Spacing="4">
+          <TextBlock Classes="label" Text="{DynamicResource L.Browse.FieldLoader}" />
+          <ComboBox ItemsSource="{Binding LoaderChoices}" SelectedItem="{Binding SelectedLoader}" Width="130">
+            <ComboBox.ItemTemplate>
+              <DataTemplate DataType="ct:ContentTag">
+                <TextBlock Text="{Binding DisplayName}" />
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+        </StackPanel>
+        <TextBlock Grid.Column="6" Classes="faint" VerticalAlignment="Bottom" Margin="0,0,0,6"
+                   Text="{Binding ResultSummary}" />
       </Grid>
 
       <StackPanel Spacing="2">
@@ -106,7 +144,45 @@
           </StackPanel>
 
           <ScrollViewer Grid.Row="2">
-            <TextBlock Classes="mono" Text="{Binding SelectedVersion.Changelog}" />
+            <StackPanel Spacing="14">
+              <StackPanel Spacing="4" IsVisible="{Binding HasProjectMeta}">
+                <TextBlock Classes="label" Text="{DynamicResource L.Browse.About}" />
+                <TextBlock Classes="muted" TextWrapping="Wrap" Text="{Binding ProjectMeta}" />
+              </StackPanel>
+
+              <StackPanel Spacing="4" IsVisible="{Binding HasProjectBody}">
+                <TextBlock Classes="mono" TextWrapping="Wrap" Text="{Binding ProjectBody}" />
+              </StackPanel>
+
+              <StackPanel Spacing="6" IsVisible="{Binding HasGallery}">
+                <TextBlock Classes="label" Text="{DynamicResource L.Browse.Gallery}" />
+                <ItemsControl ItemsSource="{Binding Gallery}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                      <WrapPanel />
+                    </ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:GalleryImageViewModel">
+                      <Border Classes="card" Width="200" Margin="0,0,10,10">
+                        <StackPanel Spacing="4">
+                          <Image Source="{Binding Image}" Height="110" Stretch="Uniform"
+                                 IsVisible="{Binding HasImage}" />
+                          <TextBlock Classes="faint" Text="{Binding Note}" TextWrapping="Wrap" />
+                        </StackPanel>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+
+              <StackPanel Spacing="4">
+                <TextBlock Classes="label" Text="{DynamicResource L.Browse.Changelog}" />
+                <TextBlock Classes="mono" TextWrapping="Wrap" Text="{Binding SelectedVersion.Changelog}" />
+                <TextBlock Classes="faint" Text="{DynamicResource L.Browse.NoChangelog}"
+                           IsVisible="{Binding SelectedVersion.Changelog, Converter={x:Static ObjectConverters.IsNull}}" />
+              </StackPanel>
+            </StackPanel>
           </ScrollViewer>
 
           <StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">

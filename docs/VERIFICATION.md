@@ -1598,3 +1598,93 @@ Real log lines are written through `FileLoggerProvider` into a real directory an
 **Limitations, stated precisely.** These verify the file logger and the settings store as components.
 A GUI session's own log file is the same provider wired by `AppLogging`, but this entry does not
 inspect a log produced by an interactive session.
+
+---
+
+## V025 - Browsing content: facets, project details, artwork, and modpack dispatch (2026-09-21)
+
+### V025.1 Facets come from the provider, and narrow the search
+
+Command: `Ferrite.Verify browse --query sodium --category optimization --minecraft 1.21.1 --loader fabric`
+
+```
+Provider: modrinth (configured: True)
+Facet category        126 value(s)  e.g. 128x, 16x, 256x, 32x, 48x, 512x+
+Facet loader           29 value(s)  e.g. babric, bta-babric, bukkit, bungeecord, canvas, datapack
+Facet game_version    915 value(s)  e.g. 26.3, 26.3-rc-3, 26.3-rc-2, 26.3-rc-1, 26.3-pre-3
+
+Search: query='sodium' category=optimization version=1.21.1 loader=fabric
+  total hits: 28
+  - Sodium [fabric,neoforge,optimization,quilt] by jellysquid3 228,694,255 downloads
+  - Sodium Extra [cursed,fabric,neoforge,optimization,quilt,utility] by FlashyReese 96,965,977 downloads
+  ...
+  every hit carries the 'optimization' category
+```
+
+The last line is a check, not a summary: the scenario inspects every returned hit and fails if one of
+them lacks the category that was asked for. Verifies J01 and J02.
+
+**Defect found and fixed.** The first run reported `Facet game_version 0 value(s)`. Modrinth names
+that facet's entries `version` where every other facet uses `name`, so the reader was dropping all 915
+of them. Fixed in `ModrinthClient.GetTagsAsync`, with `ModrinthClientTests` pinning both field shapes
+and asserting the facet a filtered search sends.
+
+### V025.2 Project details, gallery, and changelog
+
+Command: same run as V025.1, continued into the first result.
+
+```
+Project: Sodium (sodium)
+  licence:      LicenseRef-Polyform-Shield-1.0.0
+  categories:   optimization
+  loaders:      fabric, neoforge, quilt
+  versions:     41 declared
+  body:         5596 characters
+  gallery:      6 image(s)
+  source:       https://github.com/CaffeineMinecraft/sodium
+  versions for the filters: 22
+  newest: mc1.21.1-0.8.13-fabric (release), game 1.21.1, loaders fabric
+  changelog: 647 characters
+  file: sodium-fabric-0.8.13+mc1.21.1.jar (1574609 bytes, sha1 present)
+  best for the instance: mc1.21.1-0.8.13-fabric (release)
+```
+
+The panel is exercised end to end in the app tests as well: `BrowseFacetTests` pins that a facet combo
+drives the filter the query uses, that "any" is a real choice rather than an empty selection, that the
+project panel reports what it has and what it lacks, and that the description is prepared for a text
+box (heading markers, rules, and code fences dropped, prose and list items kept).
+
+Artwork is verified against a real socket (`GalleryImageTests`): a PNG is fetched over HTTP and
+decoded to a width of at most 480, bytes that are not an image are reported on the frame, and an
+unreachable URL is reported rather than thrown.
+
+Verifies J03 and J05.
+
+### V025.3 A modpack result is downloaded, verified, and dispatched
+
+Command: `dotnet run --project tests/Ferrite.App.Tests -- -class Ferrite.App.Tests.BrowseModpackInstallTests`
+
+The browser's own install path is driven with a real archive served over loopback:
+
+- the archive is requested from the URL the provider published and, with a matching SHA-1, reaches the
+  unpacker, whose "not a modpack archive" refusal is what the user sees, and no instance is created;
+- with a SHA-1 that cannot match, the install stops at the download with
+  `Failed to download …: Checksum mismatch …` and the unpacker is never reached.
+
+**Defect found and fixed.** A failed download reported only `Failed to download <file>`; the reason
+was carried in an inner exception the user never sees. `DownloadEngine` now appends the reason, so a
+checksum mismatch is distinguishable from an unreachable host.
+
+Verifies J10 for the dispatch, download, and verification half. The install-and-launch half of a real
+modpack is V005.1 and V005.2, which installed Fabulously Optimized through the same
+`MrpackInstaller.InstallAsync` this dispatch calls.
+
+**Limitations, stated precisely.**
+
+- The changelog and the project description are shown as text. Neither is rendered as markdown: the
+  description has its heading markers, rules, and code fences removed so it reads cleanly, and the
+  changelog is shown as the provider published it.
+- CurseForge facets are implemented against its categories endpoint but cannot be exercised here: the
+  provider needs a user-issued API key (`HUMAN_ACTION_REQUIRED.md` H2), which is the same blocker as
+  K05.
+- At most six gallery frames are fetched, and only when a project panel is opened.

@@ -65,6 +65,18 @@ internal static class StringsEn
             ["L.Browse.RefreshInstances"] = "Refresh instances",
             ["L.Browse.FieldMinecraftVersion"] = "Minecraft version",
             ["L.Browse.FieldLoader"] = "Loader",
+            ["L.Browse.FieldCategory"] = "Category",
+            ["L.Browse.FieldProvider"] = "Source",
+            ["L.Browse.FieldProjectType"] = "Content type",
+            ["L.Browse.FieldSort"] = "Order",
+            ["L.Browse.AnyCategory"] = "Any category",
+            ["L.Browse.AnyVersion"] = "Any version",
+            ["L.Browse.AnyLoader"] = "Any loader",
+            ["L.Browse.About"] = "ABOUT THIS PROJECT",
+            ["L.Browse.Changelog"] = "CHANGELOG",
+            ["L.Browse.NoChangelog"] = "The provider published no changelog for this version.",
+            ["L.Browse.Gallery"] = "GALLERY",
+            ["L.Browse.BodyTruncated"] = "… description truncated; open the project page for the rest.",
             ["L.Browse.Empty"] =
                 "Search a provider for mods, modpacks, resource packs, and shaders. Results are filtered "
                 + "to the selected instance's Minecraft version and loader.",
