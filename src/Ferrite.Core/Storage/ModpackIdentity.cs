@@ -6,6 +6,7 @@ public enum ModpackProvider
     Modrinth = 1,
     CurseForge = 2,
     LocalFile = 3,
+    Ftb = 4,
 }
 
 /// <summary>Set when an instance was created from a modpack, so it can be updated later.</summary>

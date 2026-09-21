@@ -119,6 +119,17 @@ public sealed class AppServices : IDisposable
             paths,
             Manifests,
             loggerFactory.CreateLogger<ContentInstaller>());
+        Ftb = new FtbClient(Http, loggerFactory.CreateLogger<FtbClient>());
+        FtbPacks = new FtbPackInstaller(
+            Ftb,
+            Downloads,
+            Instances,
+            Fabric,
+            Forge,
+            Installer,
+            Java,
+            paths,
+            loggerFactory.CreateLogger<FtbPackInstaller>());
         ContentUpdates = new ContentUpdater(
             Downloads,
             Manifests,
@@ -130,7 +141,7 @@ public sealed class AppServices : IDisposable
             paths,
             loggerFactory.CreateLogger<UpdateService>(),
             UpdateFeedKey.Load());
-        ContentProviders = [Modrinth, CurseForge];
+        ContentProviders = [Modrinth, CurseForge, Ftb];
         Mods = new InstanceContentManager(new ModScanner(loggerFactory.CreateLogger<ModScanner>()));
         Modpacks = new MrpackInstaller(
             Downloads,
@@ -238,6 +249,12 @@ public sealed class AppServices : IDisposable
     public CurseForgeClient CurseForgeApi { get; }
 
     public ContentInstaller CurseForgeContent { get; }
+
+    /// <summary>Feed The Beast's pack source, which publishes a file list rather than an archive.</summary>
+    public FtbClient Ftb { get; }
+
+    /// <summary>Installs a Feed The Beast pack: its version, loader, game version, and files.</summary>
+    public FtbPackInstaller FtbPacks { get; }
 
     public ContentUpdater ContentUpdates { get; }
 

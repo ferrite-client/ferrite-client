@@ -65,6 +65,14 @@ internal static class Program
                     GetOption(args, "--loader"),
                     cancellation.Token),
                 "curseforge" => await Scenarios.CurseForgeAsync(services, versionId, cancellation.Token),
+                "ftb" => await Scenarios.FtbAsync(
+                    services,
+                    GetOption(args, "--term") ?? "direwolf",
+                    args.Contains("--install", StringComparer.OrdinalIgnoreCase),
+                    GetOption(args, "--pack"),
+                    GetOption(args, "--version"),
+                    args.Contains("--force", StringComparer.OrdinalIgnoreCase),
+                    cancellation.Token),
                 "content" => await Scenarios.InstallContentAsync(
                     services,
                     versionId,

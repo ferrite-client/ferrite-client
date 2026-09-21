@@ -2454,3 +2454,77 @@ instance's server is vanilla and will not load its mods. The server shares the i
 so a client launch and a server launch for the same instance cannot run at once. Online mode defaults
 to on; the verification run used `online-mode=false` deliberately so it could start without an
 authentication service.
+
+## V041 - Feed The Beast packs (2026-09-21)
+
+Commands: `FtbClientTests` and `FtbPackInstallerTests` (Core), the two live runs below, and the whole
+suite (`389` Core tests, `89` App tests, all passing).
+
+XMCL's catalogue names FTB beside Modrinth and CurseForge as a place to find packs; the first
+inventory did not include it. Ferrite now browses Feed The Beast and installs its packs. FTB needs no
+key and no account, so nothing here is externally blocked.
+
+### V041.1 Browsing, live
+
+Command: `Ferrite.Verify ftb --term direwolf`.
+
+```
+Searching FTB for "direwolf"
+Total: 19, returned 9
+  [79] FTB Presents Direwolf20 1.16 - 368,158 installs
+  [101] FTB Presents Direwolf20 1.19 - 249,882 installs
+  [95] FTB Presents Direwolf20 1.18 - 235,129 installs
+  [119] FTB Presents Direwolf20 1.20 - 232,297 installs
+  ...
+Pack 79: FTB Presents Direwolf20 1.16
+  game versions: 1.16.4, 1.16.5
+  loaders: forge
+  authors: FTB Team
+  versions: 23
+    2111 1.13.1 (1.16.5, forge)
+    2113 1.13.2 (1.16.5, forge)
+```
+
+FTB's search endpoint answers with pack ids only, so the client fetches the documents behind the ids
+- bounded, and concurrently so the list is not built one request at a time. The Core tests pin that
+those documents become real results, that a search for another project type asks the API nothing,
+and that version filtering and the newest-match choice work.
+
+### V041.2 A real pack install
+
+Command: `Ferrite.Verify ftb --pack 101 --install --force`.
+
+```
+Version 1.13.1: 1025 file(s), 723 MiB
+Installing as a new instance...
+[info] FtbPackInstaller: FTB pack files: 1023 downloaded, 0 skipped
+Instance: FTB Presents Direwolf20 1.19 1.13.1 (1.19.2-forge-43.3.7)
+  1023 file(s) downloaded, 0 skipped, 0 warning(s)
+  mods on disk: 296
+PASS: an FTB pack was installed as an instance.
+```
+
+The instance's version is Forge 43.3.7 on Minecraft 1.19.2, which is what the pack declares rather
+than a guess, and 296 mod jars are on disk. FTB publishes a file list rather than an archive, so the
+installer resolves the version's targets, installs the loader and the game, then downloads each
+declared file to the directory the pack names.
+
+### V041.3 The paths come from a remote document
+
+Because a pack's file paths are as untrusted as an archive entry, planning a file goes through the
+same containment check as extraction. The Core tests pin that an optional file is not installed, a
+file with no download is reported rather than skipped silently, a path that climbs out of the
+instance is refused, an absolute path is refused, and every planned target stays inside the
+instance. A defect the tests caught: the first version stripped `./` everywhere instead of only at
+the front, which would have rewritten `../../../x` into a harmless path instead of refusing it.
+
+### V041.4 The interface
+
+FTB appears as a third provider in the browser, so search, facets, the project panel, and the version
+list work through the same code as the other two providers. Its pack install goes through the FTB
+installer rather than the archive path, since there is no archive to download.
+
+**Limitations, stated precisely.** FTB publishes no category or loader vocabulary, so its facets offer
+only "any" and filtering happens on the browser's own version and loader fields. FTB does not publish
+per-version changelogs in the endpoint used here, so the changelog panel is empty for an FTB version.
+Optional pack files are not installed; the pack's own optional list is not offered as a choice yet.

@@ -7,6 +7,7 @@ public static class ContentProviderNames
     {
         CurseForgeClient.ProviderName => "CurseForge",
         ModrinthClient.ProviderName => "Modrinth",
+        FtbClient.ProviderName => "FTB",
         _ => provider,
     };
 }

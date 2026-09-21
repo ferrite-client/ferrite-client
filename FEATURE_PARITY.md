@@ -218,7 +218,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | L05 | Update modpack | Re-apply a pack over an existing instance; what it replaces is moved to a named backup | VERIFIED | V031.2, V031.3 |
 | L06 | Overrides protection | Never clobber user-edited config without a backup | VERIFIED | V005.1 backup on existing content |
 | L07 | Drag-and-drop install | Drop a pack archive on the library, or pick one; both pack formats accepted | VERIFIED | V027.3 |
-| L08 | FTB modpack source | Browse and install Feed The Beast modpacks | NOT STARTED | XMCL feature catalogue 08 |
+| L08 | FTB modpack source | Browse Feed The Beast packs, read a version's metadata, and install it as an instance | VERIFIED | V041.1 live browse (9 real packs); V041.2 live install (1023 files, 296 mods); no key needed |
 
 ## M. Worlds, servers, and multiplayer
 
@@ -287,8 +287,8 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 
 | Status | Count |
 | --- | --- |
-| NOT STARTED | 5 |
+| NOT STARTED | 4 |
 | IN PROGRESS | 0 |
 | IMPLEMENTED | 0 |
-| VERIFIED | 162 |
+| VERIFIED | 163 |
 | BLOCKED EXTERNAL | 18 |

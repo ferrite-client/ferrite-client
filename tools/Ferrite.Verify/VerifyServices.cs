@@ -91,6 +91,17 @@ internal sealed class VerifyServices : IDisposable
             Http,
             LoggerFactory.CreateLogger<CurseForgeClient>(),
             () => Credentials.CurseForgeApiKey);
+        Ftb = new FtbClient(Http, LoggerFactory.CreateLogger<FtbClient>());
+        FtbPacks = new FtbPackInstaller(
+            Ftb,
+            Downloads,
+            Instances,
+            Fabric,
+            Forge,
+            Installer,
+            Java,
+            Paths,
+            LoggerFactory.CreateLogger<FtbPackInstaller>());
         CurseForgeContent = new ContentInstaller(
             CurseForge,
             Downloads,
@@ -193,6 +204,12 @@ internal sealed class VerifyServices : IDisposable
     public ProviderCredentialStore Credentials { get; }
 
     public CurseForgeClient CurseForge { get; }
+
+    /// <summary>Feed The Beast's pack source, which needs no key.</summary>
+    public FtbClient Ftb { get; }
+
+    /// <summary>Installs an FTB pack from its file list.</summary>
+    public FtbPackInstaller FtbPacks { get; }
 
     public ContentInstaller CurseForgeContent { get; }
 

@@ -73,6 +73,37 @@ public sealed partial class BrowseViewModel
 
     private async Task InstallModpackAsync(ContentVersion version)
     {
+        // FTB publishes a file list rather than an archive, so its packs are installed by the FTB
+        // installer instead of being downloaded and unpacked.
+        if (string.Equals(ActiveProvider.Name, FtbClient.ProviderName, StringComparison.OrdinalIgnoreCase))
+        {
+            var title2 = SelectedResult?.Title ?? version.VersionNumber;
+            _shell.BeginActivity(Localizer.Format("L.Browse.Downloading", title2));
+            StatusNote = null;
+            try
+            {
+                var ftb = await _services.FtbPacks
+                    .InstallAsync(
+                        version.ProjectId,
+                        version.VersionId,
+                        new Progress<InstallProgress>(_shell.ReportActivity),
+                        CancellationToken.None)
+                    .ConfigureAwait(true);
+                StatusNote = Localizer.Format(
+                    "L.Library.ModpackInstalled",
+                    ftb.Instance.Name,
+                    ftb.FilesDownloaded);
+                _shell.ReportStatus(StatusNote);
+                await LoadInstancesAsync().ConfigureAwait(true);
+            }
+            finally
+            {
+                _shell.EndActivity();
+            }
+
+            return;
+        }
+
         var file = version.PrimaryFile;
         if (file is null || string.IsNullOrEmpty(file.Url))
         {
@@ -147,6 +178,7 @@ public sealed partial class BrowseViewModel
     {
         CurseForgeClient.ProviderName =>
             $"{CurseForgeIds.WebBase}/{CurseForgeIds.WebSegmentFor(project.ProjectType)}/{project.Slug}",
+        FtbClient.ProviderName => $"{FtbClient.WebBase}/{project.ProjectId}",
         _ => $"https://modrinth.com/project/{project.Slug}",
     };
 
