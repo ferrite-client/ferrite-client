@@ -214,28 +214,59 @@
           </Grid>
 
           <ScrollViewer Grid.Row="1">
-            <ItemsControl ItemsSource="{Binding Servers}">
-              <ItemsControl.ItemTemplate>
-                <DataTemplate DataType="vm:ServerItemViewModel">
-                  <Border Classes="card" Margin="0,0,0,8">
-                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
-                      <StackPanel Grid.Column="0" Spacing="2">
-                        <TextBlock Classes="h2" Text="{Binding Name}" />
-                        <TextBlock Classes="mono" Text="{Binding Address}" />
-                        <TextBlock Classes="muted" Text="{Binding StatusText}" />
-                        <TextBlock Classes="faint" Text="{Binding Motd}" IsVisible="{Binding HasMotd}" />
-                      </StackPanel>
-                      <Button Grid.Column="1" Classes="danger" Content="Remove"
-                              Command="{Binding RemoveCommand}" VerticalAlignment="Center" />
-                    </Grid>
-                  </Border>
-                </DataTemplate>
-              </ItemsControl.ItemTemplate>
-            </ItemsControl>
-          </ScrollViewer>
+            <StackPanel Spacing="18">
+              <StackPanel Spacing="6">
+                <TextBlock Classes="label" Text="SAVED SERVERS" />
+                <ItemsControl ItemsSource="{Binding Servers}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:ServerItemViewModel">
+                      <Border Classes="card" Margin="0,0,0,8">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                          <StackPanel Grid.Column="0" Spacing="2">
+                            <TextBlock Classes="h2" Text="{Binding Name}" />
+                            <TextBlock Classes="mono" Text="{Binding Address}" />
+                            <TextBlock Classes="muted" Text="{Binding StatusText}" />
+                            <TextBlock Classes="faint" Text="{Binding Motd}" IsVisible="{Binding HasMotd}" />
+                          </StackPanel>
+                          <Button Grid.Column="1" Classes="danger" Content="Remove"
+                                  Command="{Binding RemoveCommand}" VerticalAlignment="Center" />
+                        </Grid>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <TextBlock Classes="faint" IsVisible="{Binding !HasServers}"
+                           Text="No saved servers. Add one to see its status here." />
+              </StackPanel>
 
-          <TextBlock Grid.Row="1" Classes="muted" IsVisible="{Binding !HasServers}"
-                     Text="No saved servers. Add one to see its status here." />
+              <StackPanel Spacing="6">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                  <Button Grid.Column="0" Content="Find LAN worlds"
+                          Command="{Binding ToggleLanScanCommand}" />
+                  <TextBlock Grid.Column="1" Classes="muted" VerticalAlignment="Center"
+                             TextWrapping="Wrap" Text="{Binding LanStatus}" />
+                </Grid>
+                <ItemsControl ItemsSource="{Binding LanWorlds}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:LanWorldItemViewModel">
+                      <Border Classes="card" Margin="0,0,0,8">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                          <StackPanel Grid.Column="0" Spacing="2">
+                            <TextBlock Classes="h2" Text="{Binding Name}" />
+                            <TextBlock Classes="mono" Text="{Binding Address}" />
+                            <TextBlock Classes="faint" Text="{Binding LastSeenText}" />
+                            <TextBlock Classes="muted" Text="{Binding Note}" />
+                          </StackPanel>
+                          <Button Grid.Column="1" Classes="primary" Content="Add"
+                                  Command="{Binding AddToServersCommand}" VerticalAlignment="Center" />
+                        </Grid>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </StackPanel>
+          </ScrollViewer>
         </Grid>
       </TabItem>
 

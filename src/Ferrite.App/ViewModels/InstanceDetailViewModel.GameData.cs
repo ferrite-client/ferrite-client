@@ -12,6 +12,8 @@ public sealed partial class InstanceDetailViewModel
 
     public ObservableCollection<ServerItemViewModel> Servers { get; } = [];
 
+    public ObservableCollection<LanWorldItemViewModel> LanWorlds { get; } = [];
+
     [ObservableProperty]
     private string? _newServerName;
 
@@ -21,9 +23,112 @@ public sealed partial class InstanceDetailViewModel
     [ObservableProperty]
     private string? _worldStatus;
 
+    [ObservableProperty]
+    private bool _isLanScanning;
+
+    [ObservableProperty]
+    private string? _lanStatus;
+
+    public bool HasLanWorlds => LanWorlds.Count > 0;
+
     public bool HasWorlds => Worlds.Count > 0;
 
     public bool HasServers => Servers.Count > 0;
+
+    /// <summary>
+    /// Starts or stops listening for "Open to LAN" broadcasts. The listener is shared, so it is
+    /// always stopped when the detail page closes.
+    /// </summary>
+    [RelayCommand]
+    private void ToggleLanScan()
+    {
+        if (IsLanScanning)
+        {
+            StopLanScan("LAN search stopped.");
+            return;
+        }
+
+        _services.LanWorlds.Changed += OnLanWorldsChanged;
+        _services.LanWorlds.Start();
+
+        if (!_services.LanWorlds.IsListening)
+        {
+            _services.LanWorlds.Changed -= OnLanWorldsChanged;
+            LanStatus = $"This machine cannot listen for LAN worlds: {_services.LanWorlds.FailureReason}";
+            return;
+        }
+
+        IsLanScanning = true;
+        LanStatus = "Searching the local network. Ask the other player to open their world to LAN.";
+        RefreshLanWorlds();
+    }
+
+    /// <summary>Stops listening and detaches. Called when the page closes.</summary>
+    public void StopLanScan(string? status = null)
+    {
+        if (!IsLanScanning)
+        {
+            return;
+        }
+
+        _services.LanWorlds.Changed -= OnLanWorldsChanged;
+        _services.LanWorlds.Stop();
+        IsLanScanning = false;
+        LanWorlds.Clear();
+        OnPropertyChanged(nameof(HasLanWorlds));
+        if (status is { Length: > 0 })
+        {
+            LanStatus = status;
+        }
+    }
+
+    private void OnLanWorldsChanged()
+    {
+        // The listener runs on a background thread, so the collection is rebuilt on the UI thread.
+        if (Avalonia.Threading.Dispatcher.UIThread.CheckAccess())
+        {
+            RefreshLanWorlds();
+            return;
+        }
+
+        Avalonia.Threading.Dispatcher.UIThread.Post(RefreshLanWorlds);
+    }
+
+    private void RefreshLanWorlds()
+    {
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        LanWorlds.Clear();
+        foreach (var world in _services.LanWorlds.Current)
+        {
+            seen.Add(world.Address);
+            LanWorlds.Add(new LanWorldItemViewModel(world, AddLanWorldAsync));
+        }
+
+        OnPropertyChanged(nameof(HasLanWorlds));
+        if (IsLanScanning && LanWorlds.Count == 0)
+        {
+            LanStatus = "No LAN worlds found yet.";
+        }
+    }
+
+    private async Task AddLanWorldAsync(LanWorldItemViewModel item)
+    {
+        try
+        {
+            _services.Servers.Add(
+                GameDirectory,
+                new ServerEntry { Name = item.Name, Address = item.Address });
+            RefreshServers();
+            item.Note = "Added to this instance's server list";
+            LanStatus = item.Note;
+        }
+        catch (Exception exception)
+        {
+            _shell.ReportError(exception.Message);
+        }
+
+        await Task.CompletedTask.ConfigureAwait(true);
+    }
 
     public async Task RefreshWorldsAsync()
     {

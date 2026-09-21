@@ -262,3 +262,17 @@ feed they may never have configured deliberately.
 its own machine state. Making the last step explicit, with the exact command shown in Settings,
 keeps the user in the loop without making the process manual: the script does the work, including
 waiting for Ferrite to exit and cleaning up the staging directory.
+
+## D024 - LAN discovery reads only what the game already broadcasts
+
+**Decision.** Ferrite joins Minecraft's LAN multicast group, parses the announcement, and lists the
+world until it stops broadcasting. It never answers a broadcast, never scans a subnet, and never
+probes a port it did not read from a datagram.
+
+**Rejected.** Subnet scanning or a port sweep to find worlds. It is faster to write than it sounds,
+but it turns "listen to what is being announced on my LAN" into "enumerate the network", which is
+something a game launcher has no business doing and which would look exactly like reconnaissance to
+anyone watching the network.
+
+**Why.** The datagram is already being sent to every device on the segment; reading it adds nothing
+to what the network already exposes. Everything beyond reading it would.

@@ -30,6 +30,8 @@ What has been exercised end to end against live services (evidence in `docs/VERI
   the old file removed only after the replacement was hash-verified.
 - Publishing and consuming a signed update feed, and applying a staged build through the generated
   hand-off script.
+- Finding worlds other players have opened to LAN, straight from the game's own announcement
+  broadcast, and adding one to an instance's server list in a click.
 - Java discovery across PATH, vendor installs, and the Minecraft launcher's own runtimes.
 
 Content browsing covers Modrinth and CurseForge through one browser. CurseForge needs a

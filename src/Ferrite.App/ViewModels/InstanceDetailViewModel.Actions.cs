@@ -11,7 +11,12 @@ namespace Ferrite.App.ViewModels;
 public sealed partial class InstanceDetailViewModel
 {
     [RelayCommand]
-    private void Back() => _shell.DetailPage = null;
+    private void Back()
+    {
+        // The LAN listener is a shared socket; leaving the page must not leave it running.
+        StopLanScan();
+        _shell.DetailPage = null;
+    }
 
     [RelayCommand]
     private Task RefreshLog() => RefreshLogAsync();

@@ -27,7 +27,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | A05 | Crash-safe settings persistence | Atomic JSON write, schema version, migration, backup on damage | IMPLEMENTED | tests |
 | A06 | Storage layout separation | config / data / store / instances / cache / logs / tmp / backups | VERIFIED | V001 |
 | A07 | Nullable-clean, warning-free build | `TreatWarningsAsErrors`, analyzer-clean | VERIFIED | V001 |
-| A08 | Automated test suite | xUnit projects `Ferrite.Core.Tests` and `Ferrite.App.Tests` | VERIFIED | 218 tests (2026-09-21) |
+| A08 | Automated test suite | xUnit projects `Ferrite.Core.Tests` and `Ferrite.App.Tests` | VERIFIED | 235 tests (2026-09-21) |
 | A09 | Windows packaging | `scripts/package.ps1` publishes framework-dependent and self-contained win-x64 builds with zips | VERIFIED | V011.1, V011.2; unsigned (see `HUMAN_ACTION_REQUIRED.md`) |
 | A10 | Clean-checkout build script | `scripts/build.ps1`, `test.ps1`, `package.ps1`, `verify-live.ps1` | VERIFIED | V011.1; the earlier claim that `package.ps1` existed was wrong and is now true |
 
@@ -225,7 +225,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | M06 | `servers.dat` management | Read, edit, add, remove | VERIFIED | server list round trip tests |
 | M07 | Server status ping | Modern status protocol + legacy fallback | VERIFIED | V006.3 |
 | M08 | Server list UI | MOTD, players, latency, version | VERIFIED | V006.3, Servers tab |
-| M09 | LAN world discovery | Local discovery assistance | NOT STARTED | - |
+| M09 | LAN world discovery | Listens on the game's LAN broadcast address and lists worlds that are still announcing, with one-click add to the instance | VERIFIED | V013 |
 | M10 | Internet LAN relay | Requires a relay service Ferrite does not operate | BLOCKED EXTERNAL | `HUMAN_ACTION_REQUIRED.md` H4 |
 
 ## N. Diagnostics and observability
@@ -273,6 +273,12 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 ## Summary
 
 | Status | Count |
+| --- | --- |
+| NOT STARTED | 3 |
+| IN PROGRESS | 0 |
+| IMPLEMENTED | 63 |
+| VERIFIED | 101 |
+| BLOCKED EXTERNAL | 5 |
 | --- | --- |
 | NOT STARTED | 4 |
 | IN PROGRESS | 0 |

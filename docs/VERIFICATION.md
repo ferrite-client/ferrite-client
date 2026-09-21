@@ -859,3 +859,53 @@ execution path:
 the check and download actions, and the hand-off command once a build is staged. In a build with no
 embedded key it states that plainly — "This build carries no update signing key, so an update feed
 cannot be trusted" — rather than offering a check that cannot succeed.
+
+---
+
+## V013 - LAN world discovery (2026-09-21)
+
+Environment: Windows 11 x64, .NET 10.0.5, real multicast on the machine's LAN interface.
+
+### V013.1 A broadcast is received on the address the game uses
+
+Command: `Ferrite.Verify lan --seconds 6`
+
+```
+Listening on 224.0.2.60:4445 for 6s
+Emulated a Minecraft broadcast: "Ferrite verification world" on port 51234
+  LAN world: Ferrite verification world at 26.18.170.204:51234
+
+1 LAN world(s) observed.
+```
+
+The listener joined the multicast group the game broadcasts to and reported the world with the
+sender's local address and the announced port. The scenario emulates one broadcast because
+verification cannot conjure a second Minecraft player, but everything after the datagram — the
+receive loop, the parse, the sender address, the port, and the freshness bookkeeping — is the same
+code path a real world uses. The address is in the local network control block, so a router does not
+forward it: this only ever sees the local network.
+
+### V013.2 What the parser accepts and refuses
+
+`LanWorldDiscoveryTests` covers the payload the game sends, `[MOTD]name[/MOTD][AD]port[/AD]`:
+
+- A complete payload parses into a name and a port; legacy section-sign colour codes are stripped.
+- A world with an empty name still counts, because the port is the part that matters.
+- A payload with a port but no name block is not a Minecraft announcement and is refused, as are a
+  port of zero, a port above 65535, a non-numeric port, an empty datagram, and a datagram over 1 KiB.
+- A 900-character name is truncated rather than stored.
+- A repeated broadcast from the same world replaces the previous entry instead of stacking up, two
+  worlds on one machine stay separate, junk datagrams are ignored without an exception, and a world
+  that stops broadcasting disappears once its entry ages out.
+- A real multicast datagram is delivered to the listener in-process, which is the same check V013.1
+  performs through the harness.
+
+### V013.3 Interface
+
+`instance-servers-lan.png` renders the Servers tab: the saved-server list, a *Find LAN worlds*
+action with the search status beside it, and each discovered world with its name, address, how long
+ago it was announced, and an *Add* action that writes it into the instance's `servers.dat` with the
+world's own name.
+
+The listener is a shared socket, so leaving the detail page stops it; the detail page's Back action
+does that rather than leaving a socket open for the rest of the session.

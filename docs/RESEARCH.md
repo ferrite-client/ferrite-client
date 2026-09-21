@@ -333,9 +333,14 @@ The response's `description` arrives either as a plain string or as a chat compo
 
 ## 9. Peer-to-peer LAN relay — LIMIT
 
-- XMCL's "play over the internet as if on LAN" depends on a relay/rendezvous service Ferrite
-  does not operate and cannot reuse. Ferrite implements local LAN announcement assistance
-  only and documents the relay capability as externally restricted.
+- **Local discovery (**VERIFIED**, V013):** Minecraft publishes worlds opened to LAN as a UDP
+  multicast datagram to 224.0.2.60:4445 with the payload `[MOTD]<name>[/MOTD][AD]<port>[/AD]`. That
+  address is in the local network control block (224.0.0.0/24), which routers deliberately do not
+  forward, so a listener on it only sees its own network. Ferrite joins the group, parses the
+  payload, and lists a world until 15 seconds after its last broadcast.
+- XMCL's "play over the internet as if on LAN" is a different capability: it depends on a
+  relay/rendezvous service Ferrite does not operate and will not reuse. That part stays externally
+  restricted (M10, `HUMAN_ACTION_REQUIRED.md` H4).
 
 ## 10. Launcher self-update — LIMIT
 

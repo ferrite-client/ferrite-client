@@ -85,6 +85,12 @@ internal static class Program
                     GetOption(args, "--out"),
                     cancellation.Token),
                 "cache" => await Scenarios.ContentCacheAsync(services, versionId, cancellation.Token),
+                "lan" => await Scenarios.LanWorldsAsync(
+                    services,
+                    seconds,
+                    GetOption(args, "--motd"),
+                    int.TryParse(GetOption(args, "--port"), out var lanPort) ? lanPort : null,
+                    cancellation.Token),
                 "sign-update" => await Scenarios.SignUpdateAsync(
                     services,
                     GetOption(args, "--out"),

@@ -113,6 +113,57 @@ public sealed class ShellRenderingTests : IDisposable
         Save(frame!, "instance-updates");
     }
 
+    /// <summary>The Servers tab shows saved servers and the worlds found on the local network.</summary>
+    [AvaloniaFact]
+    public void Instance_servers_tab_renders_lan_discovery()
+    {
+        var record = _services.Instances
+            .CreateAsync(
+                new InstanceRecord
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "LAN instance",
+                    MinecraftVersion = "1.21.1",
+                    Loader = LoaderKind.Vanilla,
+                },
+                CancellationToken.None)
+            .GetAwaiter()
+            .GetResult();
+
+        var shell = new MainWindowViewModel(_services);
+        var viewModel = new InstanceDetailViewModel(record, _services, shell);
+        viewModel.LanWorlds.Add(new LanWorldItemViewModel(
+            new Ferrite.Core.Game.LanWorld(
+                "192.168.1.20",
+                51234,
+                "Steve's world",
+                DateTimeOffset.UtcNow),
+            _ => Task.CompletedTask));
+        viewModel.LanStatus = "Searching the local network.";
+
+        var window = new Window
+        {
+            Content = new InstanceDetailView { DataContext = viewModel },
+            Width = 1200,
+            Height = 900,
+        };
+        window.Show();
+
+        var tabs = window.GetVisualDescendants().OfType<TabControl>().First();
+        tabs.SelectedIndex = 4;
+
+        var frame = window.CaptureRenderedFrame();
+        Assert.NotNull(frame);
+
+        var texts = Texts(window);
+        Assert.Contains("Steve's world", texts);
+        Assert.Contains("192.168.1.20:51234", texts);
+        Assert.Contains("Find LAN worlds", texts);
+        Assert.Contains("SAVED SERVERS", texts);
+
+        Save(frame!, "instance-servers-lan");
+    }
+
     [AvaloniaFact]
     public void Shell_renders_with_navigation_and_status_bar()
     {

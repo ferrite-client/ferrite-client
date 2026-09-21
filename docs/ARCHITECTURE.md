@@ -225,3 +225,18 @@ extraction path is checked for containment inside the intended destination.
   constant, so nothing from a feed is ever interpolated into script text. The script refuses to act
   unless the marker file is present, and the launcher never runs the hand-off itself: replacing a
   running installation is the user's decision.
+
+## 14. LAN world discovery
+
+- `LanWorldDiscovery` joins the multicast group Minecraft broadcasts "Open to LAN" worlds on
+  (224.0.2.60:4445, in the local network control block, so routers do not forward it) and keeps the
+  worlds that are still announcing themselves. An entry expires 15 seconds after its last broadcast,
+  which is what makes the list self-cleaning.
+- Parsing and aggregation are separate from the socket: `TryParse` handles the game's payload and
+  `Ingest` records one observation with an explicit timestamp, so both are tested without a network
+  and the clock is injectable.
+- The socket is shared and reused across processes (`ReuseAddress`), so a second launcher or the game
+  itself listening on the same port is not a conflict. Listening is opt-in per view: the Servers tab
+  starts it, and leaving the page stops it.
+- A datagram is only ever read, never answered, and the sender address is used as reported: the
+  launcher does not probe ports it discovers.
