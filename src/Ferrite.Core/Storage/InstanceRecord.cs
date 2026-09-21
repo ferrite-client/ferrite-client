@@ -56,6 +56,12 @@ public sealed class InstanceRecord
     /// <summary>Relative path (inside the instance directory) to a custom icon image.</summary>
     public string? IconPath { get; set; }
 
+    /// <summary>Relative path (inside the instance directory) to a theme background image.</summary>
+    public string? ThemeBackgroundPath { get; set; }
+
+    /// <summary>The instance's accent colour as "#RRGGBB", or null for the launcher's own accent.</summary>
+    public string? ThemeAccent { get; set; }
+
     /// <summary>
     /// Optional user-assigned folder the library can filter by so a large collection stays
     /// scannable. Null means the instance is not in any folder.

@@ -127,6 +127,12 @@ public sealed partial class InstanceDetailViewModel
     [RelayCommand]
     private async Task SaveAsync()
     {
+        // A mistyped colour must not be saved as "no colour", so the save stops before writing.
+        if (!TryApplyThemeAccent())
+        {
+            return;
+        }
+
         try
         {
             Record.MemoryMb = MemoryMb is > 0 ? MemoryMb : null;

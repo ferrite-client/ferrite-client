@@ -2351,3 +2351,47 @@ prompt. Every new label exists in English and Polish; the localisation tests pas
 **Limitations, stated precisely.** Saving is per provider, so the same project saved from two
 providers is two entries; there is no folder or tag grouping inside the saved list, and the saved
 view lists all of a provider's saved projects with no further filtering.
+
+## V039 - Per-instance theme (2026-09-21)
+
+Commands: `InstanceThemeTests` (Core), `InstanceThemeViewTests` (App), and the whole suite
+(`366` Core tests, `86` App tests, all passing).
+
+XMCL's catalogue has "Instance Theme - give each world its own identity with backgrounds, colours,
+blur, fonts, and custom CSS". The first inventory did not list it. Ferrite now gives an instance a
+background image and an accent colour.
+
+### V039.1 What is implemented, and what is deliberately not
+
+A background image and an accent colour are implemented. Blur, font choice, and custom CSS are not:
+custom CSS and blur are properties of a web-rendered interface, and Ferrite is a native Avalonia
+application with no stylesheet to inject - reproducing them would mean the one thing the product
+brief forbids. The parity row claims only the two that exist.
+
+### V039.2 The image is copied, and the colour is validated in Core
+
+Picking a background copies the file into the instance's own `theme` folder rather than referencing
+it where it was chosen, so moving or deleting the original cannot break the instance; a previously
+chosen image with a different extension is removed so a stale file cannot be reintroduced. The
+accent is validated by `InstanceTheme.TryNormalizeAccent` in Core, which accepts `#RGB` or
+`#RRGGBB` with or without the hash and normalises to upper-case six digits. The Core tests pin the
+normalisation, the blank-means-none rule, and five values that are not colours.
+
+### V039.3 A typo does not erase an existing theme
+
+The App tests drive the page. A valid accent is stored and produces a brush; an empty accent clears
+it; and an invalid accent reports an error and stops the save *before* anything is written, so a
+theme the user already had survives a slip in the box - which is the failure a naive "assign, then
+validate" would have produced. Picking a background is asserted to copy the file, to be readable
+after the source is deleted, and to survive a page reopen from the stored record; clearing it removes
+the copy and the stored path.
+
+### V039.4 The interface
+
+The detail page shows a banner above the instance heading when a theme is set, using the background
+image and the accent as its bottom border; the banner does not exist otherwise, so the default layout
+is unchanged. The settings tab gains the accent field, a background picker, a clear control, and the
+error line. Every new label exists in English and Polish; the localisation tests pass.
+
+**Limitations, stated precisely.** The theme is a background image and an accent colour. There is no
+blur, no font selection, and no custom stylesheet, for the reason given above.

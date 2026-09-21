@@ -239,6 +239,16 @@ internal static class StringsEn
             ["L.Instance.FieldGroup"] = "FOLDER",
             ["L.Instance.FieldGroupHint"] =
                 "Folders only organise the library; they never change the instance's files.",
+            ["L.Instance.FieldThemeAccent"] = "ACCENT COLOUR (hex, optional)",
+            ["L.Instance.ThemeHint"] =
+                "The accent tints this instance's banner, and the background image is copied into the "
+                + "instance so it cannot break when you move the original.",
+            ["L.Instance.ThemeAccentInvalid"] =
+                "That is not a colour. Use a hex value such as #D08A3E, or leave it empty.",
+            ["L.Instance.ChooseThemeBackground"] = "Background image",
+            ["L.Instance.ClearThemeBackground"] = "Clear background",
+            ["L.Instance.ThemeBackgroundSet"] = "Background saved for this instance",
+            ["L.Instance.ThemeBackgroundCleared"] = "Background cleared",
             ["L.Instance.DemoMode"] = "Launch in demo mode",
             ["L.Instance.AcceptEula"] = "Accept Minecraft's EULA for this instance (writes eula.txt)",
             ["L.Instance.AcceptEulaHint"] =

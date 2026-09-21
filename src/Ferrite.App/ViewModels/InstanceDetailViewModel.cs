@@ -32,6 +32,7 @@ public sealed partial class InstanceDetailViewModel : ObservableObject
         JvmArgumentsText = string.Join(Environment.NewLine, record.JvmArguments);
         GameArgumentsText = string.Join(Environment.NewLine, record.GameArguments);
         ServerAddress = record.LastServerAddress;
+        LoadTheme();
     }
 
     /// <summary>

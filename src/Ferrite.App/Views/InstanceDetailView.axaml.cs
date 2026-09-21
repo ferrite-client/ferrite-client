@@ -169,6 +169,36 @@ public partial class InstanceDetailView : UserControl
         }
     }
 
+    /// <summary>
+    /// Picks a background image for the instance's theme. The file is copied into the instance, so it
+    /// keeps working after the original is moved or deleted.
+    /// </summary>
+    private async void OnPickThemeBackgroundClick(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not InstanceDetailViewModel viewModel)
+        {
+            return;
+        }
+
+        var storage = TopLevel.GetTopLevel(this)?.StorageProvider;
+        if (storage is null)
+        {
+            return;
+        }
+
+        var files = await storage.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Choose a background image",
+            AllowMultiple = false,
+            FileTypeFilter =
+            [
+                new FilePickerFileType("Images") { Patterns = ["*.png", "*.jpg", "*.jpeg", "*.webp"] },
+            ],
+        });
+
+        await viewModel.SetThemeBackgroundAsync(files.FirstOrDefault()?.TryGetLocalPath());
+    }
+
     /// <summary>Reads file items from a drag payload, tolerating payloads without files.</summary>
     private static IReadOnlyList<IStorageItem> TryGetFiles(IDataTransfer? transfer)
     {

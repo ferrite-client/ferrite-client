@@ -52,6 +52,8 @@ public sealed class InstanceManager
             Fullscreen = source.Fullscreen,
             DemoMode = source.DemoMode,
             Group = source.Group,
+            ThemeBackgroundPath = source.ThemeBackgroundPath,
+            ThemeAccent = source.ThemeAccent,
             AccountId = source.AccountId,
             Notes = source.Notes,
             ModGroups = source.ModGroups

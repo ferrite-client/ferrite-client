@@ -241,6 +241,16 @@ internal static class StringsPl
             ["L.Instance.FieldGroup"] = "FOLDER",
             ["L.Instance.FieldGroupHint"] =
                 "Foldery porządkują tylko bibliotekę; nigdy nie zmieniają plików instancji.",
+            ["L.Instance.FieldThemeAccent"] = "KOLOR AKCENTU (hex, opcjonalny)",
+            ["L.Instance.ThemeHint"] =
+                "Akcent barwi baner tej instancji, a obraz tła jest kopiowany do instancji, więc "
+                + "przeniesienie oryginału niczego nie zepsuje.",
+            ["L.Instance.ThemeAccentInvalid"] =
+                "To nie jest kolor. Użyj wartości hex, np. #D08A3E, albo zostaw puste.",
+            ["L.Instance.ChooseThemeBackground"] = "Obraz tła",
+            ["L.Instance.ClearThemeBackground"] = "Usuń tło",
+            ["L.Instance.ThemeBackgroundSet"] = "Zapisano tło dla tej instancji",
+            ["L.Instance.ThemeBackgroundCleared"] = "Usunięto tło",
             ["L.Instance.DemoMode"] = "Uruchom w trybie demo",
             ["L.Instance.AcceptEula"] = "Akceptuj EULA Minecrafta dla tej instancji (zapisuje eula.txt)",
             ["L.Instance.AcceptEulaHint"] =
