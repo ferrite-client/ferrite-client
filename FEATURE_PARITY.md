@@ -51,6 +51,8 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | B14 | Instance search, filter, sort | Library search over name/version/loader/pack, and an order control | VERIFIED | V023.1 |
 | B15 | Instance disk usage | Per-instance size calculated off the UI thread, and usable as an order | VERIFIED | V023.1 |
 | B16 | Protect user data on destructive ops | Instances and instance content are moved to backups, never deleted in place | VERIFIED | V023.2, V020.2, V022.1 |
+| B17 | Instance folder groups | Arrange instances into named folders and filter the library by one | NOT STARTED | XMCL feature catalogue 03 |
+| B18 | Per-instance theme | A per-instance background image and accent colour | NOT STARTED | XMCL feature catalogue 05 |
 
 ## C. Minecraft versions and installation
 
@@ -138,6 +140,8 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | G09 | Loader update / reinstall / repair | Switch an instance to another loader version: install, lay out, then point | VERIFIED | V033; repair stays the instance's Repair button (V001.5) |
 | G10 | Loader launch behaviour | Loader main class, args, library ordering | VERIFIED | V002.1, V002.2 |
 | G11 | OptiFine install | Recognises OptiFine's own installer, runs it with the right Java in a launcher-owned directory, adopts the produced version into the store, and refuses a build for another Minecraft version | VERIFIED | V016. The user completes OptiFine's installer window: OptiFine publishes no headless entry point and no API |
+| G12 | LabyMod install | Recognise LabyMod's own installer and adopt the produced version | NOT STARTED | XMCL feature catalogue 02 |
+| G13 | Bedrock edition instances | Bedrock is a different edition with a different install and launch pipeline | NOT STARTED | XMCL feature catalogue 02 ("experimental Bedrock") |
 
 ## H. Launch pipeline
 
@@ -174,6 +178,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | I12 | Datapack management | Per-world listing, enable/disable, removal to backups | VERIFIED | V022.2 |
 | I13 | Screenshot gallery | Gallery with decoded thumbnails and open-file | VERIFIED | V022.3 |
 | I14 | Content-pack metadata parsing | `pack.mcmeta` formats read and compared with the instance's own format from its client file | VERIFIED | V014 |
+| I15 | Custom mod groups | User-defined groups that organise a complex instance | NOT STARTED | XMCL feature catalogue 14 |
 
 ## J. Modrinth integration
 
@@ -190,6 +195,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | J09 | Compatibility guarantee | Never install an incompatible version | VERIFIED | V003.1, V003.2 |
 | J10 | Modpack browsing | A modpack result becomes a new instance through the modpack installers | VERIFIED | V025.3 dispatch, download, checksum; V005.1/V005.2 real pack install and launch |
 | J11 | Offline/cached metadata | Network-first cache; a failed call serves cached data and says how old it is | VERIFIED | V009 |
+| J12 | Mod collections | Save ("follow") projects to revisit, and turn a collection into a setup | NOT STARTED | XMCL feature catalogue 11 |
 
 ## K. CurseForge integration
 
@@ -212,6 +218,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | L05 | Update modpack | Re-apply a pack over an existing instance; what it replaces is moved to a named backup | VERIFIED | V031.2, V031.3 |
 | L06 | Overrides protection | Never clobber user-edited config without a backup | VERIFIED | V005.1 backup on existing content |
 | L07 | Drag-and-drop install | Drop a pack archive on the library, or pick one; both pack formats accepted | VERIFIED | V027.3 |
+| L08 | FTB modpack source | Browse and install Feed The Beast modpacks | NOT STARTED | XMCL feature catalogue 08 |
 
 ## M. Worlds, servers, and multiplayer
 
@@ -227,6 +234,8 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | M08 | Server list UI | MOTD, players, latency, version | VERIFIED | V006.3, Servers tab |
 | M09 | LAN world discovery | Listens on the game's LAN broadcast address and lists worlds that are still announcing, with one-click add to the instance | VERIFIED | V013 |
 | M10 | Internet LAN relay | Requires a relay service Ferrite does not operate | BLOCKED EXTERNAL | `HUMAN_ACTION_REQUIRED.md` H4 |
+| M11 | Launch a local server | Turn an instance into a configurable local server and start it | NOT STARTED | XMCL feature catalogue 06 |
+| M12 | Server export | Select world and server files and export a runnable server | NOT STARTED | XMCL feature catalogue 18 |
 
 ## N. Diagnostics and observability
 
@@ -238,6 +247,9 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | N04 | Diagnostics bundle export | Redacted zip of launcher logs, operations, instance metadata, game logs, and crash analysis | VERIFIED | V008.3; `DiagnosticsTests` |
 | N05 | Installation diagnose + repair | Detect and fix missing/corrupt files | VERIFIED | V001.4, V001.5 |
 | N06 | Operation log | Recent operations with outcome and duration, persisted and bounded | VERIFIED | V008.4; `DiagnosticsTests` |
+| N07 | Save preview and chunk tools | Read a world visually and select, copy, or delete chunks | NOT STARTED | XMCL feature catalogue 15 |
+| N08 | Blueprint preview | Preview a structure in 3D with compatibility and materials | NOT STARTED | XMCL feature catalogue 16 |
+| N09 | Built-in assistant | Explain a failed launch from the instance's own evidence | NOT STARTED | XMCL feature catalogue 22 |
 
 ## O. Launcher settings, storage, and updates
 
@@ -254,6 +266,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | O09 | Update feed | Requires externally hosted infrastructure | BLOCKED EXTERNAL | `HUMAN_ACTION_REQUIRED.md` H3 |
 | O10 | Localisation | English and Polish, switchable at runtime; every label, button, empty state, and launcher-composed message comes from the table | VERIFIED | V015. Message text produced by Core (provider errors, verification results) stays English; see `docs/ARCHITECTURE.md` section 16 |
 | O11 | Accessibility | Contrast, control names, and visible focus, all checked mechanically | VERIFIED | V028 |
+| O12 | Quick actions | Find an instance or run a command from anywhere in the app | NOT STARTED | XMCL feature catalogue 20 |
 
 ## P. Cross-cutting quality
 
@@ -274,7 +287,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 
 | Status | Count |
 | --- | --- |
-| NOT STARTED | 0 |
+| NOT STARTED | 13 |
 | IN PROGRESS | 0 |
 | IMPLEMENTED | 0 |
 | VERIFIED | 154 |

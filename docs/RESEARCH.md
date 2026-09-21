@@ -12,7 +12,12 @@ restriction.
 Sources: https://github.com/Voxelum/x-minecraft-launcher (README, fetched 2026-09-20),
 https://xmcl.app.
 
-**VERIFIED** XMCL is an Electron-based cross-platform launcher whose headline capabilities are:
+**VERIFIED** XMCL is an Electron-based cross-platform launcher. Its GitHub README lists the
+headline capabilities, and its published feature catalogue (https://xmcl.app/en/features, fetched
+2026-09-21, "22 features in view") enumerates the current surface as 22 entries across Instances,
+Community, Mod control, World tools, Sharing, Accounts, and Diagnostics.
+
+From the README:
 
 - Download and auto-complete Minecraft, Forge, Fabric, Quilt, OptiFine, and JVM from official
   or third-party mirrors.
@@ -25,6 +30,30 @@ https://xmcl.app.
   user-supplied third-party authentication servers.
 - Peer-to-peer LAN play between users not on the same physical LAN.
 - Code-signed Windows packaging via appx/appinstaller.
+
+From the feature catalogue (the items the README does not name):
+
+- **Loaders/editions:** the catalogue lists "Forge, Fabric, Quilt, NeoForge, OptiFine, and
+  LabyMod" and "experimental Bedrock" editions, alongside "Java and Bedrock Instances".
+- **Instance Folder Groups:** arrange instances into folders so setups stay scannable.
+- **Instance Theme:** per-instance backgrounds, colours, blur, fonts, and custom CSS.
+- **Launch a local server / Server Export:** turn an instance into a configurable local server
+  (world, player limit) and export its files.
+- **Modpack Market across Modrinth, CurseForge, and FTB**, with pack detail pages.
+- **Mod Collections:** save ("follow") projects and turn a collection into a reusable setup.
+- **Custom Mod Groups:** user-defined groups that organise a complex instance.
+- **Save Preview and Chunk Tools:** read a world visually and select, copy, or delete chunks.
+- **Blueprint Preview:** preview a structure in 3D and check compatibility and materials.
+- **Quick Action:** find instances and run commands from anywhere in the app.
+- **Built-in AI Agent:** an agent that inspects the instance filesystem and explains an
+  actionable fix.
+
+**Audit note (2026-09-21).** The first pass at this inventory was taken from the GitHub README
+alone and missed the LabyMod loader, FTB as a third modpack source, instance folders, custom mod
+groups, mod collections, per-instance themes, local-server launch/export, save preview and chunk
+tools, blueprint preview, quick actions, the built-in AI agent, and the experimental Bedrock
+edition. `FEATURE_PARITY.md` rows B17, B18, G12, G13, I15, J12, L08, M11, M12, N07, N08, N09, and
+O12 record these. Nothing here changes the earlier findings; it widens the target.
 
 Its published core packages reveal the feature surface a full launcher needs: core launch,
 installer (Minecraft/Forge/Fabric/Quilt/OptiFine/JVM), user auth and skin, mod parsing
