@@ -195,6 +195,9 @@ internal static class StringsPl
             ["L.Instance.Back"] = "Wstecz",
             ["L.Instance.Verify"] = "Sprawdź",
             ["L.Instance.ExportPack"] = "Eksportuj paczkę",
+            ["L.Instance.UpdateFromPack"] = "Nałóż paczkę na tę instancję",
+            ["L.Instance.UpdatedFromPack"] =
+                "Nałożono paczkę: pobrano {0} plik(ów), {1} nadpisanie(a).",
             ["L.Instance.TabSettings"] = "Ustawienia",
             ["L.Instance.TabMods"] = "Mody",
             ["L.Instance.TabContent"] = "Treści",

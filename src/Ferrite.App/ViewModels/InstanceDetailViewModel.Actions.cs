@@ -23,6 +23,69 @@ public sealed partial class InstanceDetailViewModel
     private Task RefreshLog() => RefreshLogAsync();
 
     /// <summary>
+    /// Applies a pack archive over this instance: the same installers that create an instance from a
+    /// pack, told to target the one that is already open. Existing content is moved into the launcher's
+    /// backups before the pack's files land, so an update cannot destroy what it replaces silently.
+    /// </summary>
+    public async Task UpdateFromArchiveAsync(string? archivePath)
+    {
+        if (string.IsNullOrWhiteSpace(archivePath) || !File.Exists(archivePath))
+        {
+            StatusNote = Localizer.Get("L.Library.UnreadableFile");
+            return;
+        }
+
+        IsBusy = true;
+        try
+        {
+            _shell.BeginActivity($"Updating {Name} from {Path.GetFileName(archivePath)}...");
+            StatusNote = null;
+
+            var request = new ModpackInstallRequest
+            {
+                ArchivePath = archivePath,
+                TargetInstanceId = Record.Id,
+            };
+            var progress = new Progress<InstallProgress>(_shell.ReportActivity);
+            var result = ModpackArchives.DetectKind(archivePath) switch
+            {
+                ModpackArchiveKind.Modrinth => await _services.Modpacks
+                    .InstallAsync(request, progress, CancellationToken.None)
+                    .ConfigureAwait(true),
+                ModpackArchiveKind.CurseForge => await _services.CurseForgePacks
+                    .InstallAsync(request, progress, CancellationToken.None)
+                    .ConfigureAwait(true),
+                _ => throw new ContentProviderException(Localizer.Get("L.Library.ModpackUnsupported")),
+            };
+
+            // The install rewrote the record's loader and pack identity, so the page has to re-read it.
+            ApplyRecord(result.Instance);
+            StatusNote = Localizer.Format(
+                "L.Instance.UpdatedFromPack",
+                result.FilesDownloaded,
+                result.OverrideFiles);
+            foreach (var warning in result.Warnings.Take(2))
+            {
+                StatusNote += " · " + warning;
+            }
+
+            _shell.ReportStatus(StatusNote);
+            await RefreshContentAsync().ConfigureAwait(true);
+            await _shell.Library.RefreshAsync().ConfigureAwait(true);
+        }
+        catch (Exception exception)
+        {
+            StatusNote = exception.Message;
+            _shell.ReportError(exception.Message);
+        }
+        finally
+        {
+            IsBusy = false;
+            _shell.EndActivity();
+        }
+    }
+
+    /// <summary>
     /// Exports this instance as a Modrinth modpack. Called by the view after the user picks a target
     /// file, so the view model never touches platform storage APIs.
     /// </summary>

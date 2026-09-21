@@ -66,6 +66,36 @@ public partial class InstanceDetailView : UserControl
             .Select(path => path!)
             .ToList();
 
+    /// <summary>
+    /// Picks a pack archive to apply over this instance. Both pack formats are offered because the
+    /// archive's own root entry decides which installer runs.
+    /// </summary>
+    private async void OnUpdateFromPackClick(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not InstanceDetailViewModel viewModel)
+        {
+            return;
+        }
+
+        var storage = TopLevel.GetTopLevel(this)?.StorageProvider;
+        if (storage is null)
+        {
+            return;
+        }
+
+        var files = await storage.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Apply a modpack over this instance",
+            AllowMultiple = false,
+            FileTypeFilter =
+            [
+                new FilePickerFileType("Minecraft modpack") { Patterns = ["*.mrpack", "*.zip"] },
+            ],
+        });
+
+        await viewModel.UpdateFromArchiveAsync(files.FirstOrDefault()?.TryGetLocalPath());
+    }
+
     private async void OnExportModpackClick(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not InstanceDetailViewModel viewModel)

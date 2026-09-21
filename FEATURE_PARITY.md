@@ -208,8 +208,8 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | L01 | Install `.mrpack` | Index + downloads + overrides, checksum verified | VERIFIED | V005.1, V005.2 |
 | L02 | Install CurseForge zip | manifest.json + overrides + file resolution | BLOCKED EXTERNAL | V027.3 dispatch and manifest reading verified offline; the download needs a user-issued key (K05) |
 | L03 | Export `.mrpack` | Pack index with hashes and overrides | VERIFIED | V005.3 |
-| L04 | Modpack identity | Project, version, provider in instance metadata | IMPLEMENTED | model |
-| L05 | Update modpack | Apply a new version, preserve user content | IMPLEMENTED | re-install over an existing instance backs up first |
+| L04 | Modpack identity | Project, version, and provider recorded on the instance | VERIFIED | V031.1 |
+| L05 | Update modpack | Re-apply a pack over an existing instance; what it replaces is moved to a named backup | VERIFIED | V031.2, V031.3 |
 | L06 | Overrides protection | Never clobber user-edited config without a backup | VERIFIED | V005.1 backup on existing content |
 | L07 | Drag-and-drop install | Drop a pack archive on the library, or pick one; both pack formats accepted | VERIFIED | V027.3 |
 
@@ -273,6 +273,12 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 ## Summary
 
 | Status | Count |
+| --- | --- |
+| NOT STARTED | 0 |
+| IN PROGRESS | 0 |
+| IMPLEMENTED | 2 |
+| VERIFIED | 153 |
+| BLOCKED EXTERNAL | 17 |
 | --- | --- |
 | NOT STARTED | 0 |
 | IN PROGRESS | 0 |

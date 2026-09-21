@@ -33,7 +33,21 @@ public sealed partial class InstanceDetailViewModel : ObservableObject
         ServerAddress = record.LastServerAddress;
     }
 
-    public InstanceRecord Record { get; }
+    /// <summary>
+    /// The instance the page is showing. Settable because a modpack install can change its loader and
+    /// its pack identity underneath the page, and the page has to show what is now true.
+    /// </summary>
+    public InstanceRecord Record { get; private set; }
+
+    /// <summary>Replaces the record after something rewrote it, and refreshes what the page shows.</summary>
+    private void ApplyRecord(InstanceRecord updated)
+    {
+        Record = updated;
+        OnPropertyChanged(nameof(Record));
+        OnPropertyChanged(nameof(Name));
+        OnPropertyChanged(nameof(VersionId));
+        OnPropertyChanged(nameof(LoaderText));
+    }
 
     public string Name => Record.Name;
 

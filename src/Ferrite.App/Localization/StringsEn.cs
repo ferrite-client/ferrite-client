@@ -193,6 +193,9 @@ internal static class StringsEn
             ["L.Instance.Back"] = "Back",
             ["L.Instance.Verify"] = "Verify",
             ["L.Instance.ExportPack"] = "Export pack",
+            ["L.Instance.UpdateFromPack"] = "Apply pack over this instance",
+            ["L.Instance.UpdatedFromPack"] =
+                "Applied the pack: {0} file(s) downloaded, {1} override(s).",
             ["L.Instance.TabSettings"] = "Settings",
             ["L.Instance.TabMods"] = "Mods",
             ["L.Instance.TabContent"] = "Content",

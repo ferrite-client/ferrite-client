@@ -77,6 +77,9 @@ internal static class Program
                 "modpack" => await Scenarios.InstallModpackAsync(
                     services,
                     GetOption(args, "--source") ?? versionId,
+                    GetOption(args, "--slug"),
+                    GetOption(args, "--update"),
+                    GetOption(args, "--update-id"),
                     cancellation.Token),
                 "export" => await Scenarios.ExportModpackAsync(services, versionId, cancellation.Token),
                 "worlds" => await Scenarios.ListWorldsAsync(

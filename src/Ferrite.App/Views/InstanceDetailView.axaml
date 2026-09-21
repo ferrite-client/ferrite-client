@@ -18,6 +18,7 @@
         <Button Content="{DynamicResource L.Instance.Verify}" Command="{Binding VerifyCommand}" />
         <Button Content="{DynamicResource L.Common.Repair}" Command="{Binding RepairCommand}" />
         <Button Content="{DynamicResource L.Instance.ExportPack}" Click="OnExportModpackClick" />
+        <Button Content="{DynamicResource L.Instance.UpdateFromPack}" Click="OnUpdateFromPackClick" />
         <Button Classes="primary" Content="{DynamicResource L.Common.Save}" Command="{Binding SaveCommand}" />
       </StackPanel>
     </Grid>

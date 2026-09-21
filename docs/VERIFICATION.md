@@ -1935,3 +1935,68 @@ Twelve isolated runs of the class passed; two further full-suite runs with the c
 capped at four parallel collections passed. That cap is the change: it keeps the run parallel without
 making the machine compete with itself. No assertion was weakened - the test still requires the refusal
 to name the signature.
+
+---
+
+## V031 - The modpack lifecycle: identity, and updating over an instance (2026-09-21)
+
+### V031.1 Pack identity on the instance
+
+Command: `Ferrite.Verify modpack --slug fabulously-optimized`
+
+A pack can now be fetched by project slug, the way the browser does, rather than by a URL the caller
+had to find first. The live run installed the current release:
+
+```
+Project: Fabulously Optimized (fabulously-optimized)
+Version: 14.1.0 (release)
+Pack: Fabulously Optimized 14.1.0 (format 1)
+Dependencies: fabric-loader=0.19.5, minecraft=26.2
+Declared files: 51
+Instance: Fabulously Optimized (8bdf3004-755e-4722-9434-7d8b9df8a9c3)
+  launch version: fabric-loader-0.19.5-26.2
+  files:          51 downloaded, 0 skipped
+  overrides:      50
+  pack identity:  Modrinth 'Fabulously Optimized' 14.1.0
+  record now:     minecraft 26.2, loader Fabric 0.19.5
+  mod inventory:  49 mod(s)
+```
+
+The instance records the provider, the pack name, and the pack version, which is what makes it
+recognisable later. Verifies L04.
+
+### V031.2 Updating over an existing instance
+
+Command: `Ferrite.Verify modpack --slug fabulously-optimized --update-id <instance id>`
+
+The update points both pack installers at an instance that already exists. Before the run, two files
+the pack does not contain were written into the instance: `config/my-own-settings.txt` and
+`mods/zzz-user-added.jar`.
+
+```
+Updating instance: Fabulously Optimized (8bdf3004-755e-4722-9434-7d8b9df8a9c3)
+  before: minecraft 26.2, loader Fabric 0.19.5, pack 'Fabulously Optimized' 14.1.0
+  warn: Existing instance content was backed up to ...\backups\modpack-Fabulously Optimized-20260921-064333
+Instance: Fabulously Optimized (8bdf3004-755e-4722-9434-7d8b9df8a9c3)
+  files: 51 downloaded, overrides: 50, mod inventory: 49 mod(s)
+  pack identity: Modrinth 'Fabulously Optimized' 14.1.0
+```
+
+Both of the user's files are in the backup the warning names, with their contents intact (`fov:95`
+read back out of `config/my-own-settings.txt`), and the instance keeps its id, so nothing dangling
+points at a replaced instance. Verifies L05.
+
+### V031.3 A failed update leaves the instance alone
+
+Command: `dotnet run --project tests/Ferrite.App.Tests -- -class Ferrite.App.Tests.InstancePackUpdateTests`
+
+Applying an archive that is not a pack reports "not a modpack" and the stored record is exactly what it
+was - still Minecraft 1.21.1 on Fabric, with no pack identity. A CurseForge manifest is recognised and
+reaches its installer, where it stops at the missing key rather than swapping the instance's loader on
+the way. A missing file is reported rather than ignored.
+
+**Limitations, stated precisely.** An update re-applies the pack: the content it replaces is moved
+into a backup whose path the user is told, rather than merged in place. A file the user edited that the
+pack also ships comes back as the pack's version, with the user's copy in the backup. Merging would
+need a per-file three-way comparison against the previous pack revision, which the installed-content
+manifest does not record per file.
