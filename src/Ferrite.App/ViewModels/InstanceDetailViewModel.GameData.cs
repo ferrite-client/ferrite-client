@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Ferrite.App.Localization;
+using Ferrite.App.Services;
 using Ferrite.Core.Content;
 using Ferrite.Core.Game;
 
@@ -144,7 +145,12 @@ public sealed partial class InstanceDetailViewModel
             Worlds.Clear();
             foreach (var world in worlds)
             {
-                var item = new WorldItemViewModel(world, BackupWorldAsync, DeleteWorldAsync, DuplicateWorldAsync);
+                var item = new WorldItemViewModel(
+                    world,
+                    BackupWorldAsync,
+                    DeleteWorldAsync,
+                    DuplicateWorldAsync,
+                    PlayWorldAsync);
                 item.LoadIcon();
                 Worlds.Add(item);
             }
@@ -159,6 +165,58 @@ public sealed partial class InstanceDetailViewModel
     }
 
     public bool HasWorldDatapacks => WorldDatapacks.Any(group => group.HasDatapacks);
+
+    /// <summary>
+    /// Starts the game and opens this world. The world is remembered on the instance, because the
+    /// quick-play argument and the placeholder both read the instance's last world.
+    /// </summary>
+    private async Task PlayWorldAsync(WorldItemViewModel item)
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        IsBusy = true;
+        try
+        {
+            Record.LastWorld = item.Name;
+            await _services.Instances.SaveAsync(Record, CancellationToken.None).ConfigureAwait(true);
+
+            _shell.BeginActivity($"Starting {Name} in {item.Name}...");
+            var result = await InstanceLaunchFlow
+                .StartAsync(
+                    _services,
+                    _shell,
+                    Record,
+                    quickPlayWorld: item.Name,
+                    joinLastServer: false,
+                    CancellationToken.None)
+                .ConfigureAwait(true);
+
+            if (!result.Started || result.Process is null)
+            {
+                StatusNote = result.Error ?? Localizer.Get("L.Instance.LaunchFailed");
+                _shell.ReportError(StatusNote);
+                return;
+            }
+
+            StatusNote = Localizer.Format("L.Instance.RunningAs", result.Process.ProcessId);
+            _shell.RunningInstanceName = Name;
+            _shell.ReportStatus(Localizer.Format("L.Instance.Running", Name));
+            InstanceLaunchFlow.WatchExit(_services, _shell, Record, result.Process);
+        }
+        catch (Exception exception)
+        {
+            StatusNote = exception.Message;
+            _shell.ReportError(exception.Message);
+        }
+        finally
+        {
+            IsBusy = false;
+            _shell.EndActivity();
+        }
+    }
 
     /// <summary>
     /// Lists each world's datapacks. They sit inside the world rather than the instance, so this runs

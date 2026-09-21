@@ -153,7 +153,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | H08 | Kill running instance | Graceful close then forced kill | VERIFIED | V001.6 |
 | H09 | Launch preflight | Java, files, account, memory validation | VERIFIED | V001.6 |
 | H10 | Command preview | Resolved command with credentials redacted | VERIFIED | V001.7 |
-| H11 | Quick play | `--quickPlaySingleplayer` / `--quickPlayMultiplayer` | IMPLEMENTED | tests |
+| H11 | Quick play | Both arguments are generated correctly; the client did not act on them in this environment | IMPLEMENTED | V032: command verified, in-game entry not demonstrated |
 | H12 | Demo mode | `--demo` toggle | VERIFIED | tests, V001 |
 
 ## I. Content: mods, resource packs, shaders
@@ -273,6 +273,12 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 ## Summary
 
 | Status | Count |
+| --- | --- |
+| NOT STARTED | 0 |
+| IN PROGRESS | 0 |
+| IMPLEMENTED | 2 |
+| VERIFIED | 153 |
+| BLOCKED EXTERNAL | 17 |
 | --- | --- |
 | NOT STARTED | 0 |
 | IN PROGRESS | 0 |

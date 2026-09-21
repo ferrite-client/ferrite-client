@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.Input;
 using Ferrite.App.Localization;
+using Ferrite.App.Services;
 using Ferrite.Core.Minecraft;
 
 namespace Ferrite.App.ViewModels;
@@ -21,18 +22,8 @@ public sealed partial class InstanceCardViewModel
             _shell.BeginActivity($"Preparing {Record.Name}...");
             StatusNote = null;
 
-            var account = await ResolveAccountAsync().ConfigureAwait(true);
-            var result = await _services.InstanceLauncher
-                .LaunchAsync(
-                    new InstanceLaunchRequest
-                    {
-                        Instance = Record,
-                        Account = account,
-                        DefaultJavaPath = _services.Settings.Current.DefaultJavaPath,
-                        CustomJavaPaths = _services.Settings.Current.CustomJavaPaths,
-                    },
-                    new Progress<InstallProgress>(_shell.ReportActivity),
-                    CancellationToken.None)
+            var result = await InstanceLaunchFlow
+                .StartAsync(_services, _shell, Record, quickPlayWorld: null, joinLastServer: false, CancellationToken.None)
                 .ConfigureAwait(true);
 
             if (!result.Started || result.Process is null)
@@ -63,38 +54,12 @@ public sealed partial class InstanceCardViewModel
 
     private void WatchExit(GameProcess process)
     {
-        _ = Task.Run(async () =>
+        InstanceLaunchFlow.WatchExit(_services, _shell, Record, process, exitCode =>
         {
-            var exitCode = await process.WaitForExitAsync(CancellationToken.None).ConfigureAwait(false);
-            await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(async () =>
-            {
-                IsRunning = false;
-                StatusNote = exitCode == 0
-                    ? Localizer.Get("L.Instance.ExitNormal")
-                    : Localizer.Format("L.Instance.ExitCode", exitCode);
-                Record.LastLaunchedAt = DateTimeOffset.UtcNow;
-                Record.TotalPlayTimeSeconds += (long)process.Duration.TotalSeconds;
-                _shell.RunningInstanceName = null;
-            _shell.ReportStatus(Localizer.Format("L.Instance.Stopped", Record.Name));
-                await _services.Instances.SaveAsync(Record, CancellationToken.None).ConfigureAwait(true);
-            });
+            IsRunning = false;
+            StatusNote = exitCode == 0
+                ? Localizer.Get("L.Instance.ExitNormal")
+                : Localizer.Format("L.Instance.ExitCode", exitCode);
         });
-    }
-
-    private async Task<LaunchAccount?> ResolveAccountAsync()
-    {
-        var accountId = Record.AccountId ?? _services.Settings.Current.ActiveAccountId;
-        if (accountId is { } id)
-        {
-            var launchAccount = await _services.Accounts
-                .GetLaunchAccountAsync(id, CancellationToken.None)
-                .ConfigureAwait(true);
-            if (launchAccount is not null)
-            {
-                return launchAccount;
-            }
-        }
-
-        return null;
     }
 }

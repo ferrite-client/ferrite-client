@@ -61,6 +61,7 @@ internal static class VersionFixtures
           { "rules": [ { "action": "allow", "features": { "is_demo_user": true } } ], "value": "--demo" },
           { "rules": [ { "action": "allow", "features": { "has_custom_resolution": true } } ], "value": "--width ${resolution_width} --height ${resolution_height}" },
           { "rules": [ { "action": "allow", "features": { "has_quick_plays_support": true } } ], "value": "--quickPlayPath ${quickPlayPath}" },
+          { "rules": [ { "action": "allow", "features": { "is_quick_play_singleplayer": true } } ], "value": "--quickPlaySingleplayer ${quickPlaySingleplayer}" },
           { "rules": [ { "action": "allow", "features": { "is_quick_play_multiplayer": true } } ], "value": "--quickPlayMultiplayer ${quickPlayMultiplayer}" }
         ]
       }

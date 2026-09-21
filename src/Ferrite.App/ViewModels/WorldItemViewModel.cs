@@ -12,17 +12,20 @@ public sealed partial class WorldItemViewModel : ObservableObject
     private readonly Func<WorldItemViewModel, Task> _backup;
     private readonly Func<WorldItemViewModel, Task> _delete;
     private readonly Func<WorldItemViewModel, Task> _duplicate;
+    private readonly Func<WorldItemViewModel, Task> _play;
 
     public WorldItemViewModel(
         WorldInfo world,
         Func<WorldItemViewModel, Task> backup,
         Func<WorldItemViewModel, Task> delete,
-        Func<WorldItemViewModel, Task> duplicate)
+        Func<WorldItemViewModel, Task> duplicate,
+        Func<WorldItemViewModel, Task> play)
     {
         World = world;
         _backup = backup;
         _delete = delete;
         _duplicate = duplicate;
+        _play = play;
     }
 
     public WorldInfo World { get; }
@@ -79,6 +82,10 @@ public sealed partial class WorldItemViewModel : ObservableObject
 
     [RelayCommand]
     private Task Duplicate() => _duplicate(this);
+
+    /// <summary>Starts the game and goes straight into this world.</summary>
+    [RelayCommand]
+    private Task Play() => _play(this);
 
     [RelayCommand]
     private void OpenFolder() => ShellOpen.Directory(World.DirectoryPath);

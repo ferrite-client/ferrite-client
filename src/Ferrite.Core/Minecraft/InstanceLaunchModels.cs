@@ -24,6 +24,12 @@ public sealed record InstanceLaunchRequest
     public bool RepairBeforeLaunch { get; init; } = true;
 
     public bool JoinLastServer { get; init; }
+
+    /// <summary>
+    /// The saved world to open on start, or null to show the title screen. Passing one is what turns a
+    /// launch into a quick play into that world.
+    /// </summary>
+    public string? QuickPlayWorld { get; init; }
 }
 
 public sealed record InstanceLaunchResult

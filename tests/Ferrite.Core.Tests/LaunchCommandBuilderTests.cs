@@ -102,6 +102,37 @@ public sealed class LaunchCommandBuilderTests
         Assert.Contains("play.example.net:25565", command.Arguments);
     }
 
+    /// <summary>
+    /// The version document only passes the quick-play arguments when the matching feature is on, so
+    /// the singleplayer flag has to be set when a world was asked for - and only then.
+    /// </summary>
+    [Fact]
+    public void Quick_play_singleplayer_is_passed_only_when_a_world_was_requested()
+    {
+        var instance = CreateInstance();
+        instance.LastWorld = "My World";
+
+        var requested = new LaunchCommandBuilder().Build(CreateRequest(
+            VersionFixtures.ModernRelease,
+            instance,
+            requestQuickPlaySingleplayer: true));
+        Assert.Contains("--quickPlaySingleplayer", requested.Arguments);
+        Assert.Contains("My World", requested.Arguments);
+        Assert.DoesNotContain("--quickPlayMultiplayer", requested.Arguments);
+
+        // The same instance without the request starts at the title screen.
+        var notRequested = new LaunchCommandBuilder().Build(CreateRequest(VersionFixtures.ModernRelease, instance));
+        Assert.DoesNotContain("--quickPlaySingleplayer", notRequested.Arguments);
+
+        // And a request with no world to open produces nothing to pass.
+        var noWorld = CreateInstance();
+        var withoutWorld = new LaunchCommandBuilder().Build(CreateRequest(
+            VersionFixtures.ModernRelease,
+            noWorld,
+            requestQuickPlaySingleplayer: true));
+        Assert.DoesNotContain("--quickPlaySingleplayer", withoutWorld.Arguments);
+    }
+
     [Fact]
     public void Quick_play_arguments_are_absent_when_not_requested()
     {
@@ -168,6 +199,7 @@ public sealed class LaunchCommandBuilderTests
         string documentJson,
         InstanceRecord? instance = null,
         bool requestQuickPlayMultiplayer = false,
+        bool requestQuickPlaySingleplayer = false,
         Action<VersionDocument>? mutate = null)
     {
         var document = JsonSerializer.Deserialize<VersionDocument>(documentJson, JsonDefaults.Remote)!;
@@ -224,6 +256,7 @@ public sealed class LaunchCommandBuilderTests
             LibrariesDirectory = Path.Combine(workspace, "libraries"),
             LegacyAssetsDirectory = Path.Combine(workspace, "assets", "virtual", "legacy"),
             RequestQuickPlayMultiplayer = requestQuickPlayMultiplayer,
+            RequestQuickPlaySingleplayer = requestQuickPlaySingleplayer,
         };
     }
 }

@@ -272,6 +272,7 @@ internal static class StringsEn
                 "Backups and deleted worlds are written to the launcher's backups folder.",
             ["L.Instance.OpenSaves"] = "Open saves",
             ["L.Instance.Backup"] = "Backup",
+            ["L.Instance.PlayWorld"] = "Play this world",
             ["L.Instance.Duplicate"] = "Duplicate",
             ["L.Instance.NoWorlds"] = "No saved worlds in this instance yet.",
             ["L.Instance.ServerNamePlaceholder"] = "Name (optional)",

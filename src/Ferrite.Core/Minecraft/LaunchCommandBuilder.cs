@@ -184,13 +184,17 @@ public sealed class LaunchCommandBuilder
         var hasResolution = instance.WindowWidth is > 0 && instance.WindowHeight is > 0;
         var quickPlayMultiplayer = request.RequestQuickPlayMultiplayer
             && !string.IsNullOrWhiteSpace(instance.LastServerAddress);
+        // The singleplayer argument is only passed by versions that enable this feature, so the flag
+        // has to follow the same rule: requested *and* there is a world to open.
+        var quickPlaySingleplayer = request.RequestQuickPlaySingleplayer
+            && !string.IsNullOrWhiteSpace(instance.LastWorld);
 
         return new Dictionary<string, bool>(StringComparer.Ordinal)
         {
             ["is_demo_user"] = instance.DemoMode,
             ["has_custom_resolution"] = hasResolution,
-            ["has_quick_plays_support"] = quickPlayMultiplayer,
-            ["is_quick_play_singleplayer"] = false,
+            ["has_quick_plays_support"] = quickPlayMultiplayer || quickPlaySingleplayer,
+            ["is_quick_play_singleplayer"] = quickPlaySingleplayer,
             ["is_quick_play_multiplayer"] = quickPlayMultiplayer,
             ["is_quick_play_realms"] = false,
         };

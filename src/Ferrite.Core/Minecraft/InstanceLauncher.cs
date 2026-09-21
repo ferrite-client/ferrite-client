@@ -59,6 +59,15 @@ public sealed class InstanceLauncher
         var instance = request.Instance;
         var versionId = LaunchVersionId(instance);
 
+        // The quick-play placeholder reads the instance's last world, so a launch into a named world
+        // sets it for the command. Persisting the choice is the caller's job, because the caller is
+        // what knows the user picked that world.
+        var quickPlayWorld = request.QuickPlayWorld is { Length: > 0 } world ? world : null;
+        if (quickPlayWorld is not null)
+        {
+            instance.LastWorld = quickPlayWorld;
+        }
+
         // The instance's acceptance is the source of truth; the file is derived from it, so a file
         // deleted by hand comes back on the next launch and a withdrawn acceptance is undone.
         EulaFile.Apply(_paths.InstanceGameDirectory(instance.Id), instance.AcceptEula);
@@ -125,6 +134,7 @@ public sealed class InstanceLauncher
             LegacyAssetsDirectory = _paths.LegacyVirtualAssetsDirectory,
             DefaultMemoryMb = instance.MemoryMb ?? LaunchPreflight.SuggestDefaultMemoryMb(),
             RequestQuickPlayMultiplayer = request.JoinLastServer,
+            RequestQuickPlaySingleplayer = quickPlayWorld is not null,
         };
 
         LaunchCommand command;

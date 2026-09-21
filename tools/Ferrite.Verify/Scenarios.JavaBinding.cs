@@ -25,6 +25,8 @@ internal static partial class Scenarios
         int seconds,
         string? java,
         bool viaDefault,
+        string? world,
+        string? joinServer,
         CancellationToken cancellationToken)
     {
         var instance = await GetOrCreateInstanceAsync(services, versionId, cancellationToken)
@@ -83,6 +85,12 @@ internal static partial class Scenarios
                 : "  The pin differs from the automatic choice, so the run distinguishes them.");
 
         instance.JavaPath = viaDefault ? null : pinned.ExecutablePath;
+        if (joinServer is { Length: > 0 })
+        {
+            instance.LastServerAddress = joinServer;
+            instance.LastServerPort = null;
+        }
+
         // A per-instance memory setting and custom JVM argument, so this run also shows that the
         // instance's own launch settings reach the command the game is started with.
         instance.MemoryMb = 3072;
@@ -106,6 +114,9 @@ internal static partial class Scenarios
                     // The launcher's own scan has to be told about the user's path, exactly as the
                     // Java page's saved list does.
                     CustomJavaPaths = userPath is null ? [] : [userPath],
+                    // A named world turns the launch into a quick play into it.
+                    QuickPlayWorld = world,
+                    JoinLastServer = joinServer is { Length: > 0 },
                 },
                 progress: null,
                 cancellationToken)
@@ -140,9 +151,15 @@ internal static partial class Scenarios
         {
             Console.WriteLine("Command (credentials redacted):");
             Console.WriteLine("  " + preview);
-            var memoryOk = preview.Contains("-Xmx3072M", StringComparison.Ordinal);
+        var memoryOk = preview.Contains("-Xmx3072M", StringComparison.Ordinal);
             var argumentOk = preview.Contains("-Dferrite.verify.marker=1", StringComparison.Ordinal);
             var redactedOk = !preview.Contains("verify-pipeline-token", StringComparison.Ordinal);
+            if (world is { Length: > 0 })
+            {
+                Console.WriteLine(
+                    $"  quickPlaySingleplayer in command: "
+                    + $"{preview.Contains("--quickPlaySingleplayer", StringComparison.Ordinal)}");
+            }
             settingsReachedTheCommand = memoryOk && argumentOk && redactedOk;
             Console.WriteLine(
                 $"  instance memory in command: {memoryOk}; custom JVM argument in command: {argumentOk}; "

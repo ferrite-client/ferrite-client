@@ -67,12 +67,15 @@ public static class VersionArgumentReader
 
             foreach (var value in entry.Value)
             {
-                var text = expand is null ? value : expand(value);
-                foreach (var token in SplitValue(text))
+                // The template is split before the placeholders are filled in, so a value that itself
+                // contains spaces - a world name, a server address with a space in it - stays one
+                // argument instead of being torn in two.
+                foreach (var token in SplitValue(value))
                 {
-                    if (token.Length > 0)
+                    var text = expand is null ? token : expand(token);
+                    if (text.Length > 0)
                     {
-                        result.Add(token);
+                        result.Add(text);
                     }
                 }
             }

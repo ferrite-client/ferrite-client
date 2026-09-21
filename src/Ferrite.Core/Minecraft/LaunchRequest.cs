@@ -52,6 +52,12 @@ public sealed class LaunchRequest
 
     /// <summary>Join a server straight away using the modern quick-play argument.</summary>
     public bool RequestQuickPlayMultiplayer { get; init; }
+
+    /// <summary>
+    /// True when the launch should go straight into the instance's last world. The version's own
+    /// arguments are gated on this feature, so a world name alone is not enough.
+    /// </summary>
+    public bool RequestQuickPlaySingleplayer { get; init; }
 }
 
 /// <summary>A fully resolved launch command. Arguments are a list, never a shell string.</summary>

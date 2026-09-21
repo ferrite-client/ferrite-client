@@ -275,6 +275,7 @@ internal static class StringsPl
                 "Kopie zapasowe i usunięte światy trafiają do katalogu kopii launchera.",
             ["L.Instance.OpenSaves"] = "Otwórz zapisy",
             ["L.Instance.Backup"] = "Kopia zapasowa",
+            ["L.Instance.PlayWorld"] = "Uruchom ten świat",
             ["L.Instance.Duplicate"] = "Duplikuj",
             ["L.Instance.NoWorlds"] = "Ta instancja nie ma jeszcze zapisanych światów.",
             ["L.Instance.ServerNamePlaceholder"] = "Nazwa (opcjonalna)",

@@ -2000,3 +2000,58 @@ into a backup whose path the user is told, rather than merged in place. A file t
 pack also ships comes back as the pack's version, with the user's copy in the backup. Merging would
 need a per-file three-way comparison against the previous pack revision, which the installed-content
 manifest does not record per file.
+
+---
+
+## V032 - Quick play: the arguments are generated, the client did not act (2026-09-21)
+
+**This entry records partial verification and an open question. H11 is not marked VERIFIED.**
+
+### V032.1 Two defects found and fixed in argument generation
+
+Command: `dotnet run --project tests/Ferrite.Core.Tests -- -class Ferrite.Core.Tests.LaunchCommandBuilderTests`
+
+1. **The singleplayer feature flag was hardcoded off.** The builder filled in the
+   `quickPlaySingleplayer` placeholder but always reported `is_quick_play_singleplayer = false`, and a
+   version document only passes arguments whose feature is enabled. The result was that
+   `--quickPlaySingleplayer` could never appear on any version, whatever the instance recorded. The
+   flag now follows the request and whether the instance has a world.
+2. **A placeholder value containing a space was torn into separate arguments.** Arguments were
+   expanded and *then* split on spaces, so `--quickPlaySingleplayer "My World"` became
+   `--quickPlaySingleplayer My World` as two arguments. Templates are now split first and the
+   placeholders filled in afterwards, so a value with spaces stays one argument - which is what the
+   game expects. `LaunchCommandBuilderTests` covers both.
+
+The live command confirms the fix end to end:
+
+```
+... --quickPlayPath ...\minecraft\quickPlay\quickPlayLog.json --quickPlaySingleplayer "New World"
+  quickPlaySingleplayer in command: True
+```
+
+### V032.2 What the client did
+
+Commands: `Ferrite.Verify instance-launch 1.20.4 --world "New World" --seconds 70`, then
+`... --join "mc.hypixel.net:25565"`, then the same singleplayer run with the quick-play log file
+pre-created.
+
+A 1.20.4 world copied from `%APPDATA%\.minecraft\saves\New World` was placed in the instance, so the
+world and the client version match. In all three runs the game started, reached the renderer, and
+stopped on the title screen - and in the singleplayer runs:
+
+- `logs/latest.log` contains no world-loading lines;
+- the world's `level.dat` was never touched;
+- the `quickPlay` folder the client names in `--quickPlayPath` was never created, and a pre-created
+  `quickPlayLog.json` was left as it was.
+
+A probe of the client jar confirms the arguments exist in the client
+(`quickPlayPath`, `quickPlaySingleplayer`, `quickPlayMultiplayer`, `quickPlayRealms` in
+`net/minecraft/client/main/Main.class`, plus `quickPlayWorld` and `quickPlayData` elsewhere), so the
+client does parse them; what it does next is not satisfied by what this launcher passes.
+
+**Open question for the next pass.** The client's own gate is not documented in this repository and
+there is no way to consult the current official specification from this environment. The next step is
+to read Mojang's launcher/quick-play behaviour from an authoritative source (or compare the argument
+list against a launch from the official launcher) and then either satisfy it or record it as an
+external limitation. Until that is done, H11 stays `IMPLEMENTED`: the arguments this launcher produces
+are correct and tested, the game entering a world is not demonstrated.
