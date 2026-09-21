@@ -28,6 +28,7 @@ public sealed partial class InstanceDetailViewModel : ObservableObject
         WindowHeight = record.WindowHeight;
         DemoMode = record.DemoMode;
         AcceptEula = record.AcceptEula;
+        Group = record.Group ?? string.Empty;
         JvmArgumentsText = string.Join(Environment.NewLine, record.JvmArguments);
         GameArgumentsText = string.Join(Environment.NewLine, record.GameArguments);
         ServerAddress = record.LastServerAddress;
@@ -100,6 +101,10 @@ public sealed partial class InstanceDetailViewModel : ObservableObject
 
     [ObservableProperty]
     private string? _serverAddress;
+
+    /// <summary>The folder this instance is filed under. Blank means it is not in any folder.</summary>
+    [ObservableProperty]
+    private string _group = string.Empty;
 
     [ObservableProperty]
     private JavaRuntime? _selectedJava;

@@ -53,12 +53,21 @@ internal static class StringsEn
             ["L.Library.CloneTitle"] = "Clone instance",
             ["L.Library.CloneHint"] =
                 "The clone copies this instance's mods, configs, and settings into an independent instance.",
+            ["L.Library.Move"] = "Move",
+            ["L.Library.GroupTitle"] = "Move to folder",
+            ["L.Library.GroupHint"] =
+                "Folders only organise the library. Type a name to file this instance, or clear the box "
+                + "to take it out of its folder.",
+            ["L.Library.GroupAll"] = "All folders",
+            ["L.Library.MoveToFolder"] = "Move to folder",
+            ["L.Library.FolderChip"] = "Folder: {0}",
             ["L.Library.CreateTitle"] = "New instance",
             ["L.Library.FieldName"] = "NAME",
             ["L.Library.FieldMinecraftVersion"] = "MINECRAFT VERSION",
             ["L.Library.ShowSnapshots"] = "Show snapshots",
             ["L.Library.FieldLoader"] = "MOD LOADER",
             ["L.Library.FieldLoaderVersion"] = "LOADER VERSION",
+            ["L.Library.FieldGroup"] = "FOLDER",
             ["L.Library.CreateAndInstall"] = "Create and install",
 
             ["L.Browse.Search"] = "Search",
@@ -212,6 +221,9 @@ internal static class StringsEn
             ["L.Common.SelectItem"] = "Select this item",
             ["L.Instance.WindowSizeHint"] = "width x height, blank for the default",
             ["L.Instance.FieldDefaultServer"] = "DEFAULT SERVER (used when joining from the library)",
+            ["L.Instance.FieldGroup"] = "FOLDER",
+            ["L.Instance.FieldGroupHint"] =
+                "Folders only organise the library; they never change the instance's files.",
             ["L.Instance.DemoMode"] = "Launch in demo mode",
             ["L.Instance.AcceptEula"] = "Accept Minecraft's EULA for this instance (writes eula.txt)",
             ["L.Instance.AcceptEulaHint"] =
@@ -352,6 +364,8 @@ internal static class StringsEn
             ["L.Library.InstallingLoader"] = "Installing {0} {1}...",
             ["L.Library.InstanceReady"] = "{0} is ready",
             ["L.Library.MovedToBackups"] = "{0} was moved to backups",
+            ["L.Library.Grouped"] = "{0} moved to {1}",
+            ["L.Library.GroupCleared"] = "Instance taken out of its folder",
             ["L.Accounts.ClientIdCleared"] = "Client id cleared",
             ["L.Accounts.ClientIdSaved"] = "Client id saved",
             ["L.Java.NoBuilds"] = "Mojang publishes no {0} build for this platform",

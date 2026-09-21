@@ -76,6 +76,12 @@ public sealed partial class LibraryViewModel : ObservableObject
         new("size", Localizer.Get("L.Library.SortSize")),
     ];
 
+    /// <summary>The folder filter: "All" first, then every folder in use, re-derived on refresh.</summary>
+    public ObservableCollection<ChoiceOption> GroupChoices { get; } = [];
+
+    [ObservableProperty]
+    private ChoiceOption? _selectedGroup;
+
     [ObservableProperty]
     private bool _isBusy;
 
@@ -98,6 +104,12 @@ public sealed partial class LibraryViewModel : ObservableObject
                     || (instance.ModpackText ?? string.Empty).Contains(
                         SearchText,
                         StringComparison.CurrentCultureIgnoreCase));
+
+            if (SelectedGroup?.Value is { Length: > 0 } group)
+            {
+                visible = visible.Where(instance =>
+                    string.Equals(instance.Record.Group, group, StringComparison.CurrentCultureIgnoreCase));
+            }
 
             return (SelectedSort?.Value ?? "recent") switch
             {
@@ -132,6 +144,8 @@ public sealed partial class LibraryViewModel : ObservableObject
 
     partial void OnSelectedSortChanged(ChoiceOption? value) => OnPropertyChanged(nameof(VisibleInstances));
 
+    partial void OnSelectedGroupChanged(ChoiceOption? value) => OnPropertyChanged(nameof(VisibleInstances));
+
     public async Task RefreshAsync()
     {
         try
@@ -145,6 +159,7 @@ public sealed partial class LibraryViewModel : ObservableObject
                 await card.RefreshAsync(CancellationToken.None).ConfigureAwait(true);
             }
 
+            RebuildGroupChoices(records);
             OnPropertyChanged(nameof(HasInstances));
             OnPropertyChanged(nameof(VisibleInstances));
         }
@@ -152,6 +167,34 @@ public sealed partial class LibraryViewModel : ObservableObject
         {
             _shell.ReportError(exception.Message);
         }
+    }
+
+    /// <summary>
+    /// Rebuilds the folder filter from the folders actually in use and keeps the selection if that
+    /// folder still has instances. An instance moved out of a folder therefore drops out of the
+    /// filter rather than leaving an empty one behind.
+    /// </summary>
+    private void RebuildGroupChoices(IReadOnlyList<InstanceRecord> records)
+    {
+        var previous = SelectedGroup?.Value ?? string.Empty;
+        var groups = records
+            .Select(record => record.Group)
+            .Where(group => !string.IsNullOrWhiteSpace(group))
+            .Select(group => group!)
+            .Distinct(StringComparer.CurrentCultureIgnoreCase)
+            .OrderBy(group => group, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+
+        GroupChoices.Clear();
+        GroupChoices.Add(new ChoiceOption(string.Empty, Localizer.Get("L.Library.GroupAll")));
+        foreach (var group in groups)
+        {
+            GroupChoices.Add(new ChoiceOption(group, group));
+        }
+
+        SelectedGroup = GroupChoices.FirstOrDefault(choice =>
+                            string.Equals(choice.Value, previous, StringComparison.CurrentCultureIgnoreCase))
+                        ?? GroupChoices[0];
     }
 
     [RelayCommand]

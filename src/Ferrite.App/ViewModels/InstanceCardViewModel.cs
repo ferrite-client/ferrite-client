@@ -46,6 +46,14 @@ public sealed partial class InstanceCardViewModel : ObservableObject
 
     public bool HasModpack => Record.Modpack is not null;
 
+    /// <summary>
+    /// The label of the folder chip: the folder's name when the instance is filed, or a prompt to
+    /// file it. It is the affordance that opens the folder prompt without widening the action row.
+    /// </summary>
+    public string GroupButtonText => Record.Group is { Length: > 0 } group
+        ? Localizer.Format("L.Library.FolderChip", group)
+        : Localizer.Get("L.Library.MoveToFolder");
+
     [ObservableProperty]
     private bool _isRunning;
 
@@ -83,6 +91,9 @@ public sealed partial class InstanceCardViewModel : ObservableObject
 
     [RelayCommand]
     private void Clone() => _shell.Library.BeginClone(this);
+
+    [RelayCommand]
+    private void Group() => _shell.Library.BeginGroup(this);
 
     [RelayCommand]
     private async Task StopAsync() =>

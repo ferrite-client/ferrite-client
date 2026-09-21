@@ -53,12 +53,21 @@ internal static class StringsPl
             ["L.Library.CloneTitle"] = "Klonuj instancję",
             ["L.Library.CloneHint"] =
                 "Klon kopiuje mody, konfiguracje i ustawienia tej instancji do niezależnej instancji.",
+            ["L.Library.Move"] = "Przenieś",
+            ["L.Library.GroupTitle"] = "Przenieś do folderu",
+            ["L.Library.GroupHint"] =
+                "Foldery porządkują tylko bibliotekę. Wpisz nazwę, aby przypisać instancję, lub wyczyść "
+                + "pole, aby usunąć ją z folderu.",
+            ["L.Library.GroupAll"] = "Wszystkie foldery",
+            ["L.Library.MoveToFolder"] = "Przenieś do folderu",
+            ["L.Library.FolderChip"] = "Folder: {0}",
             ["L.Library.CreateTitle"] = "Nowa instancja",
             ["L.Library.FieldName"] = "NAZWA",
             ["L.Library.FieldMinecraftVersion"] = "WERSJA MINECRAFTA",
             ["L.Library.ShowSnapshots"] = "Pokaż snapshoty",
             ["L.Library.FieldLoader"] = "MOD LOADER",
             ["L.Library.FieldLoaderVersion"] = "WERSJA LOADERA",
+            ["L.Library.FieldGroup"] = "FOLDER",
             ["L.Library.CreateAndInstall"] = "Utwórz i zainstaluj",
 
             ["L.Browse.Search"] = "Szukaj",
@@ -214,6 +223,9 @@ internal static class StringsPl
             ["L.Common.SelectItem"] = "Zaznacz ten element",
             ["L.Instance.WindowSizeHint"] = "szerokość x wysokość, puste dla domyślnego",
             ["L.Instance.FieldDefaultServer"] = "DOMYŚLNY SERWER (używany przy dołączaniu z biblioteki)",
+            ["L.Instance.FieldGroup"] = "FOLDER",
+            ["L.Instance.FieldGroupHint"] =
+                "Foldery porządkują tylko bibliotekę; nigdy nie zmieniają plików instancji.",
             ["L.Instance.DemoMode"] = "Uruchom w trybie demo",
             ["L.Instance.AcceptEula"] = "Akceptuj EULA Minecrafta dla tej instancji (zapisuje eula.txt)",
             ["L.Instance.AcceptEulaHint"] =
@@ -355,6 +367,8 @@ internal static class StringsPl
             ["L.Library.InstallingLoader"] = "Instalowanie {0} {1}...",
             ["L.Library.InstanceReady"] = "{0} jest gotowe",
             ["L.Library.MovedToBackups"] = "Przeniesiono {0} do kopii zapasowych",
+            ["L.Library.Grouped"] = "Przeniesiono {0} do {1}",
+            ["L.Library.GroupCleared"] = "Usunięto instancję z folderu",
             ["L.Accounts.ClientIdCleared"] = "Identyfikator klienta usunięty",
             ["L.Accounts.ClientIdSaved"] = "Identyfikator klienta zapisany",
             ["L.Java.NoBuilds"] = "Mojang nie publikuje kompilacji {0} dla tej platformy",

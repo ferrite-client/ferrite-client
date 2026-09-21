@@ -56,6 +56,12 @@ public sealed class InstanceRecord
     /// <summary>Relative path (inside the instance directory) to a custom icon image.</summary>
     public string? IconPath { get; set; }
 
+    /// <summary>
+    /// Optional user-assigned folder the library can filter by so a large collection stays
+    /// scannable. Null means the instance is not in any folder.
+    /// </summary>
+    public string? Group { get; set; }
+
     public Guid? AccountId { get; set; }
 
     public ModpackIdentity? Modpack { get; set; }

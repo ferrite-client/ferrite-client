@@ -109,6 +109,14 @@
               <TextBox Text="{Binding ServerAddress}" PlaceholderText="play.example.net" />
             </StackPanel>
 
+            <StackPanel Spacing="4">
+              <TextBlock Classes="label" Text="{DynamicResource L.Instance.FieldGroup}" />
+              <TextBox Text="{Binding Group}"
+                       AutomationProperties.Name="{DynamicResource L.Instance.FieldGroup}" />
+              <TextBlock Classes="faint" TextWrapping="Wrap"
+                         Text="{DynamicResource L.Instance.FieldGroupHint}" />
+            </StackPanel>
+
             <CheckBox Content="{DynamicResource L.Instance.DemoMode}" IsChecked="{Binding DemoMode}" />
 
             <StackPanel Spacing="4">

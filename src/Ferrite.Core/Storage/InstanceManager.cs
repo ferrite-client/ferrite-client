@@ -51,6 +51,7 @@ public sealed class InstanceManager
             WindowHeight = source.WindowHeight,
             Fullscreen = source.Fullscreen,
             DemoMode = source.DemoMode,
+            Group = source.Group,
             AccountId = source.AccountId,
             Notes = source.Notes,
             CreatedAt = DateTimeOffset.UtcNow,
@@ -103,6 +104,29 @@ public sealed class InstanceManager
         _logger.LogInformation("Renamed instance {Previous} to {Name}", previous, record.Name);
         return record;
     }
+
+    /// <summary>
+    /// Assigns the instance to a folder, or clears the assignment when the name is blank. Only the
+    /// metadata changes; the game directory is never touched.
+    /// </summary>
+    public async Task<InstanceRecord> SetGroupAsync(
+        Guid id,
+        string? group,
+        CancellationToken cancellationToken)
+    {
+        var record = await _store.LoadAsync(id, cancellationToken).ConfigureAwait(false);
+        record.Group = NormalizeGroup(group);
+        await _store.SaveAsync(record, cancellationToken).ConfigureAwait(false);
+        _logger.LogInformation(
+            "Instance {Name} assigned to folder {Group}",
+            record.Name,
+            record.Group ?? "(none)");
+        return record;
+    }
+
+    /// <summary>The trimmed folder name, or null when it is blank.</summary>
+    public static string? NormalizeGroup(string? group) =>
+        string.IsNullOrWhiteSpace(group) ? null : group.Trim();
 
     /// <summary>
     /// Zips an entire instance, including logs, worlds, and screenshots, without modifying it.

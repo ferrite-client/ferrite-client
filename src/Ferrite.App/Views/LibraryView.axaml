@@ -6,7 +6,7 @@
 
   <Grid RowDefinitions="Auto,*,Auto" Margin="24">
 
-    <Grid Grid.Row="0" ColumnDefinitions="*,200,Auto,Auto" ColumnSpacing="12" Margin="0,0,0,16">
+    <Grid Grid.Row="0" ColumnDefinitions="*,160,160,Auto,Auto" ColumnSpacing="12" Margin="0,0,0,16">
         <TextBox Grid.Column="0" PlaceholderText="{DynamicResource L.Library.SearchInstances}" Text="{Binding SearchText}" />
         <ComboBox Grid.Column="1" HorizontalAlignment="Stretch" ItemsSource="{Binding SortChoices}"
                   SelectedItem="{Binding SelectedSort}">
@@ -16,8 +16,17 @@
             </DataTemplate>
           </ComboBox.ItemTemplate>
         </ComboBox>
-        <Button Grid.Column="2" Content="{DynamicResource L.Library.ImportModpack}" Click="OnImportModpackClick" />
-        <Button Grid.Column="3" Classes="primary" Content="{DynamicResource L.Library.NewInstance}"
+        <ComboBox Grid.Column="2" HorizontalAlignment="Stretch" ItemsSource="{Binding GroupChoices}"
+                  SelectedItem="{Binding SelectedGroup}"
+                  AutomationProperties.Name="{DynamicResource L.Library.FieldGroup}">
+          <ComboBox.ItemTemplate>
+            <DataTemplate DataType="vm:ChoiceOption">
+              <TextBlock Text="{Binding Label}" />
+            </DataTemplate>
+          </ComboBox.ItemTemplate>
+        </ComboBox>
+        <Button Grid.Column="3" Content="{DynamicResource L.Library.ImportModpack}" Click="OnImportModpackClick" />
+        <Button Grid.Column="4" Classes="primary" Content="{DynamicResource L.Library.NewInstance}"
               Command="{Binding OpenCreateCommand}" />
     </Grid>
 
@@ -31,6 +40,8 @@
                   <TextBlock Classes="h2" Text="{Binding Name}" />
                   <TextBlock Classes="muted" Text="{Binding Subtitle}" />
                   <TextBlock Classes="faint" Text="{Binding ModpackText}" IsVisible="{Binding HasModpack}" />
+                  <Button Classes="chip" HorizontalAlignment="Left" Content="{Binding GroupButtonText}"
+                          Command="{Binding GroupCommand}" />
                   <StackPanel Orientation="Horizontal" Spacing="14" Margin="0,4,0,0">
                     <TextBlock Classes="faint" Text="{Binding MemoryText}" />
                     <TextBlock Classes="faint" Text="{Binding SizeText}" />
@@ -91,6 +102,22 @@
           <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
               <Button Content="{DynamicResource L.Common.Cancel}" Command="{Binding CancelCloneCommand}" />
               <Button Classes="primary" Content="{DynamicResource L.Library.Clone}" Command="{Binding ConfirmCloneCommand}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </Border>
+
+    <!-- Folder prompt -->
+    <Border Grid.Row="0" Grid.RowSpan="3" Margin="-24" Padding="24"
+            Background="{DynamicResource FerriteSurface}" IsVisible="{Binding IsGrouping}">
+      <Border Classes="card" MaxWidth="440" VerticalAlignment="Center" HorizontalAlignment="Center">
+        <StackPanel Spacing="12">
+              <TextBlock Classes="h2" Text="{DynamicResource L.Library.GroupTitle}" />
+          <TextBlock Classes="muted" Text="{DynamicResource L.Library.GroupHint}" />
+          <TextBox Text="{Binding GroupName}" AutomationProperties.Name="{DynamicResource L.Library.FieldGroup}" />
+          <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+              <Button Content="{DynamicResource L.Common.Cancel}" Command="{Binding CancelGroupCommand}" />
+              <Button Classes="primary" Content="{DynamicResource L.Library.Move}" Command="{Binding ConfirmGroupCommand}" />
           </StackPanel>
         </StackPanel>
       </Border>

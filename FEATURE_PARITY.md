@@ -51,7 +51,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | B14 | Instance search, filter, sort | Library search over name/version/loader/pack, and an order control | VERIFIED | V023.1 |
 | B15 | Instance disk usage | Per-instance size calculated off the UI thread, and usable as an order | VERIFIED | V023.1 |
 | B16 | Protect user data on destructive ops | Instances and instance content are moved to backups, never deleted in place | VERIFIED | V023.2, V020.2, V022.1 |
-| B17 | Instance folder groups | Arrange instances into named folders and filter the library by one | NOT STARTED | XMCL feature catalogue 03 |
+| B17 | Instance folder groups | Arrange instances into named folders and filter the library by one | VERIFIED | V034; folders are flat metadata and never touch the instance directory |
 | B18 | Per-instance theme | A per-instance background image and accent colour | NOT STARTED | XMCL feature catalogue 05 |
 
 ## C. Minecraft versions and installation
@@ -287,8 +287,8 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 
 | Status | Count |
 | --- | --- |
-| NOT STARTED | 13 |
+| NOT STARTED | 12 |
 | IN PROGRESS | 0 |
 | IMPLEMENTED | 0 |
-| VERIFIED | 154 |
+| VERIFIED | 155 |
 | BLOCKED EXTERNAL | 18 |

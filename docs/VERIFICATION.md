@@ -2147,3 +2147,42 @@ does not stop a running game first, so switching while the instance is running l
 process on the old version (the next launch uses the new one). Reinstalling or repairing the version an
 instance already runs stays where it was - the instance's Repair button, verified in V001.5 - rather
 than being folded into this control.
+
+## V034 - Instance folders (2026-09-21)
+
+Commands: `InstanceGroupTests` (Core), `LibraryGroupTests` (App), and the whole suite
+(`328` Core tests, `70` App tests, all passing).
+
+XMCL's feature catalogue includes "Instance Folder Groups - arrange many instances into folders so
+different worlds and setups stay easy to scan". The first parity inventory did not have it. Ferrite
+now stores an optional folder name on the instance record and filters the library by it.
+
+### V034.1 The folder is metadata only
+
+`InstanceRecord.Group` is a nullable trimmed string and `InstanceManager.SetGroupAsync` is the only
+writer; `NormalizeGroup` treats a blank name as "no folder". The Core tests assert that an assignment
+survives a reload, that a blank name clears it, that filing an instance leaves its game directory
+byte-for-byte alone, and that a clone inherits its source's folder. Nothing under the instance
+directory moves, so a folder can never cost a user their world or their mods.
+
+### V034.2 The library filter only offers folders that exist
+
+The App tests drive the real view model: the library's folder control is `All folders` followed by
+the folders actually in use, ordered by name; choosing one narrows the list and composes with the
+search box; moving an instance into a folder adds that folder to the control, and clearing it removes
+the folder again rather than leaving a selection that shows nothing. `InstanceCardViewModel` exposes
+the chip label ("Move to folder", or "Folder: <name>") that opens the prompt, so filing an instance is
+available from the library itself and the chip does not widen the card's action row.
+
+### V034.3 The interface
+
+The library header gains a folder control beside the sort control, and each card shows a folder chip
+under its pack line. The instance settings page gains a FOLDER field beside the default server, saved
+by the same Save action that writes the rest of the instance's settings. The chip is a real button
+(`Button.chip` in the style sheet), so it is keyboard focusable and carries the standard visible-focus
+treatment instead of being hover-only text. Every new label exists in English and Polish, which the
+localisation tests enforce by failing on a missing, unused, or placeholder-mismatched key.
+
+**Limitations, stated precisely.** Folders are a flat, single-level grouping: an instance is in one
+folder or none, and folders have no nesting, colour, or ordering of their own. That matches what the
+library filter needs; the parity row does not claim anything more.

@@ -137,6 +137,7 @@ public sealed partial class InstanceDetailViewModel
             Record.AcceptEula = AcceptEula;
             Record.JavaPath = SelectedJava?.ExecutablePath;
             Record.LastServerAddress = string.IsNullOrWhiteSpace(ServerAddress) ? null : ServerAddress.Trim();
+            Record.Group = InstanceManager.NormalizeGroup(Group);
             Record.JvmArguments = SplitArguments(JvmArgumentsText);
             Record.GameArguments = SplitArguments(GameArgumentsText);
 
