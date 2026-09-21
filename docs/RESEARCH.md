@@ -276,6 +276,18 @@ so the account record retains the Xbox XUID alongside the Minecraft access token
   Ferrite implements the modern protocol with VarInt framing and bounded response size, plus a
   legacy fallback.
 
+**VERIFIED** live on 2026-09-21:
+
+- `play.cubecraft.net` answered the modern status exchange with
+  `CubeCraft`, `757/5000` players and a 126 ms round trip.
+- `mc.hypixel.net` answered with `Requires MC 1.8 / 1.21`, `23644/200000` players, 406 ms, and a
+  multi-line MOTD (`Hypixel Network [1.8/26.3]` plus a second line).
+- Unreachable hosts (`2b2t.org` timing out, an unknown hostname) produce an offline status with the
+  reason instead of an exception.
+
+The response's `description` arrives either as a plain string or as a chat component with nested
+`extra` arrays and legacy section-sign colour codes; both shapes are flattened to plain text.
+
 ## 8. NBT
 
 - `level.dat` is gzip-compressed NBT; `servers.dat` is uncompressed NBT. Ferrite implements a

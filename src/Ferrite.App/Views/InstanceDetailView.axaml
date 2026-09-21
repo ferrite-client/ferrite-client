@@ -55,9 +55,9 @@
                 <TextBlock Classes="label" Text="WINDOW SIZE" />
                 <Grid ColumnDefinitions="*,12,*" ColumnSpacing="0">
                   <NumericUpDown Grid.Column="0" Value="{Binding WindowWidth}" Minimum="0" Maximum="16384"
-                                 Increment="10" ShowButtonSpinner="False" />
+                                 Increment="10" />
                   <NumericUpDown Grid.Column="2" Value="{Binding WindowHeight}" Minimum="0" Maximum="16384"
-                                 Increment="10" ShowButtonSpinner="False" />
+                                 Increment="10" />
                 </Grid>
                 <TextBlock Classes="faint" Text="width x height, blank for the default" />
               </StackPanel>
@@ -129,6 +129,122 @@
       </TabItem>
 
       <TabItem Header="Content">
+        <ScrollViewer>
+          <StackPanel Spacing="18" Margin="0,16,0,0">
+            <StackPanel Spacing="6">
+              <TextBlock Classes="label" Text="RESOURCE PACKS" />
+              <ItemsControl ItemsSource="{Binding ResourcePacks}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <TextBlock Text="{Binding FileName}" />
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <TextBlock Classes="faint" Text="No resource packs." IsVisible="{Binding !HasResourcePacks}" />
+            </StackPanel>
+
+            <StackPanel Spacing="6">
+              <TextBlock Classes="label" Text="SHADER PACKS" />
+              <ItemsControl ItemsSource="{Binding ShaderPacks}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <TextBlock Text="{Binding FileName}" />
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <TextBlock Classes="faint" Text="No shader packs." IsVisible="{Binding !HasShaderPacks}" />
+            </StackPanel>
+
+            <StackPanel Spacing="6">
+              <TextBlock Classes="label" Text="SCREENSHOTS" />
+              <ItemsControl ItemsSource="{Binding Screenshots}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <TextBlock Text="{Binding FileName}" />
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <TextBlock Classes="faint" Text="No screenshots." IsVisible="{Binding !HasScreenshots}" />
+            </StackPanel>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <TabItem Header="Worlds">
+        <Grid RowDefinitions="Auto,*" Margin="0,16,0,0">
+          <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" Margin="0,0,0,12">
+            <Button Grid.Column="0" Content="Refresh" Command="{Binding RefreshGameDataCommand}" />
+            <TextBlock Grid.Column="1" Classes="muted" VerticalAlignment="Center"
+                       Text="Backups and deleted worlds are written to the launcher's backups folder." />
+            <Button Grid.Column="2" Content="Open saves" Click="OnOpenSavesClick" />
+          </Grid>
+
+          <ScrollViewer Grid.Row="1">
+            <ItemsControl ItemsSource="{Binding Worlds}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="vm:WorldItemViewModel">
+                  <Border Classes="card" Margin="0,0,0,8">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                      <StackPanel Grid.Column="0" Spacing="2">
+                        <TextBlock Classes="h2" Text="{Binding Name}" />
+                        <TextBlock Classes="muted" Text="{Binding DetailText}" />
+                        <TextBlock Classes="faint" Text="{Binding SeedText}" />
+                        <TextBlock Classes="faint" Text="{Binding Note}" />
+                      </StackPanel>
+                      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <Button Content="Backup" Command="{Binding BackupCommand}" />
+                        <Button Content="Duplicate" Command="{Binding DuplicateCommand}" />
+                        <Button Content="Folder" Command="{Binding OpenFolderCommand}" />
+                        <Button Classes="danger" Content="Delete" Command="{Binding DeleteCommand}" />
+                      </StackPanel>
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+
+          <TextBlock Grid.Row="1" Classes="muted" IsVisible="{Binding !HasWorlds}"
+                     Text="No saved worlds in this instance yet." />
+        </Grid>
+      </TabItem>
+
+      <TabItem Header="Servers">
+        <Grid RowDefinitions="Auto,*" Margin="0,16,0,0">
+          <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="10" Margin="0,0,0,12">
+            <TextBox Grid.Column="0" PlaceholderText="play.example.net" Text="{Binding NewServerAddress}" />
+            <TextBox Grid.Column="1" Width="160" PlaceholderText="Name (optional)" Text="{Binding NewServerName}" />
+            <Button Grid.Column="2" Content="Add" Command="{Binding AddServerCommand}" />
+            <Button Grid.Column="3" Classes="primary" Content="Ping all" Command="{Binding PingServersCommand}" />
+          </Grid>
+
+          <ScrollViewer Grid.Row="1">
+            <ItemsControl ItemsSource="{Binding Servers}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="vm:ServerItemViewModel">
+                  <Border Classes="card" Margin="0,0,0,8">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                      <StackPanel Grid.Column="0" Spacing="2">
+                        <TextBlock Classes="h2" Text="{Binding Name}" />
+                        <TextBlock Classes="mono" Text="{Binding Address}" />
+                        <TextBlock Classes="muted" Text="{Binding StatusText}" />
+                        <TextBlock Classes="faint" Text="{Binding Motd}" IsVisible="{Binding HasMotd}" />
+                      </StackPanel>
+                      <Button Grid.Column="1" Classes="danger" Content="Remove"
+                              Command="{Binding RemoveCommand}" VerticalAlignment="Center" />
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+
+          <TextBlock Grid.Row="1" Classes="muted" IsVisible="{Binding !HasServers}"
+                     Text="No saved servers. Add one to see its status here." />
+        </Grid>
+      </TabItem>
+
+      <TabItem Header="Files">
         <ScrollViewer>
           <StackPanel Spacing="18" Margin="0,16,0,0">
             <StackPanel Spacing="6">

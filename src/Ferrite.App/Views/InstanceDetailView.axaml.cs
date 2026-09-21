@@ -3,6 +3,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using Ferrite.App.ViewModels;
+using Ferrite.Core.Util;
 
 namespace Ferrite.App.Views;
 
@@ -93,6 +94,14 @@ public partial class InstanceDetailView : UserControl
         if (!string.IsNullOrEmpty(path))
         {
             await viewModel.ExportModpackAsync(path);
+        }
+    }
+
+    private void OnOpenSavesClick(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is InstanceDetailViewModel viewModel)
+        {
+            ShellOpen.Directory(Path.Combine(viewModel.GameDirectory, "saves"));
         }
     }
 

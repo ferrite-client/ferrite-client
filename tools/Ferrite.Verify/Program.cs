@@ -52,6 +52,20 @@ internal static class Program
                     GetOption(args, "--source") ?? versionId,
                     cancellation.Token),
                 "export" => await Scenarios.ExportModpackAsync(services, versionId, cancellation.Token),
+                "worlds" => await Scenarios.ListWorldsAsync(
+                    services,
+                    versionId,
+                    GetOption(args, "--game-dir"),
+                    cancellation.Token),
+                "backup-world" => await Scenarios.BackupWorldAsync(
+                    services,
+                    versionId,
+                    GetOption(args, "--game-dir"),
+                    cancellation.Token),
+                "ping" => await Scenarios.PingAsync(
+                    services,
+                    args.Skip(1).Where(argument => !argument.StartsWith("--", StringComparison.Ordinal)).ToList(),
+                    cancellation.Token),
                 "fabric" => await Scenarios.InstallLoaderAsync(
                     services,
                     LoaderKind.Fabric,

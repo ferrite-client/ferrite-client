@@ -102,6 +102,8 @@ public sealed partial class InstanceDetailViewModel : ObservableObject
         await RefreshModsAsync().ConfigureAwait(true);
         RefreshFolders();
         await RefreshLogAsync().ConfigureAwait(true);
+        await RefreshWorldsAsync().ConfigureAwait(true);
+        RefreshServers();
     }
 
     private async Task LoadJavaRuntimesAsync()

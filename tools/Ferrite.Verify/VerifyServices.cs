@@ -1,4 +1,5 @@
 using Ferrite.Core.Download;
+using Ferrite.Core.Game;
 using Ferrite.Core.Content;
 using Ferrite.Core.Java;
 using Ferrite.Core.Loaders;
@@ -73,6 +74,10 @@ internal sealed class VerifyServices : IDisposable
             Paths,
             LoggerFactory.CreateLogger<MrpackInstaller>());
         ModpackExporter = new ModpackExporter(Paths, LoggerFactory.CreateLogger<ModpackExporter>());
+        Worlds = new WorldService(LoggerFactory.CreateLogger<WorldService>());
+        WorldsArchive = new WorldArchive(Paths.BackupsDirectory, LoggerFactory.CreateLogger<WorldArchive>());
+        Servers = new ServerListService(LoggerFactory.CreateLogger<ServerListService>());
+        Pinger = new ServerPinger(LoggerFactory.CreateLogger<ServerPinger>());
     }
 
     public ILoggerFactory LoggerFactory { get; }
@@ -114,6 +119,14 @@ internal sealed class VerifyServices : IDisposable
     public MrpackInstaller Modpacks { get; }
 
     public ModpackExporter ModpackExporter { get; }
+
+    public WorldService Worlds { get; }
+
+    public WorldArchive WorldsArchive { get; }
+
+    public ServerListService Servers { get; }
+
+    public ServerPinger Pinger { get; }
 
     public void Dispose()
     {

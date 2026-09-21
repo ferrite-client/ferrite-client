@@ -1,6 +1,7 @@
 using Ferrite.Core.Auth;
 using Ferrite.Core.Content;
 using Ferrite.Core.Download;
+using Ferrite.Core.Game;
 using Ferrite.Core.Java;
 using Ferrite.Core.Loaders;
 using Ferrite.Core.Minecraft;
@@ -76,6 +77,10 @@ public sealed class AppServices : IDisposable
             paths,
             loggerFactory.CreateLogger<MrpackInstaller>());
         ModpackExporter = new ModpackExporter(paths, loggerFactory.CreateLogger<ModpackExporter>());
+        Worlds = new WorldService(loggerFactory.CreateLogger<WorldService>());
+        WorldsArchive = new WorldArchive(paths.BackupsDirectory, loggerFactory.CreateLogger<WorldArchive>());
+        Servers = new ServerListService(loggerFactory.CreateLogger<ServerListService>());
+        Pinger = new ServerPinger(loggerFactory.CreateLogger<ServerPinger>());
         Accounts = new AccountService(
             new AccountStore(paths, secrets, loggerFactory.CreateLogger<AccountStore>()),
             new MicrosoftAuthClient(Http, loggerFactory.CreateLogger<MicrosoftAuthClient>(), clientId: null),
@@ -121,6 +126,14 @@ public sealed class AppServices : IDisposable
     public MrpackInstaller Modpacks { get; }
 
     public ModpackExporter ModpackExporter { get; }
+
+    public WorldService Worlds { get; }
+
+    public WorldArchive WorldsArchive { get; }
+
+    public ServerListService Servers { get; }
+
+    public ServerPinger Pinger { get; }
 
     public AccountService Accounts { get; }
 

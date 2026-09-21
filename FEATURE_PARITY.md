@@ -171,7 +171,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | I09 | Update detection | Compare installed hash against providers | IMPLEMENTED | provider match by version, not wired in UI |
 | I10 | Resource pack management | List, enable/disable, delete, reorder | IMPLEMENTED | V004 content tab |
 | I11 | Shader pack management | List, enable/disable, delete | IMPLEMENTED | V004 content tab |
-| I12 | Datapack management | Per-world datapack listing | NOT STARTED | - |
+| I12 | Datapack management | Per-world datapack listing | IMPLEMENTED | datapack folder listed as content |
 | I13 | Screenshot gallery | Browse instance screenshots | IMPLEMENTED | V004 content tab |
 | I14 | Content-pack metadata parsing | `pack.mcmeta` compatibility ranges | NOT STARTED | - |
 
@@ -217,14 +217,14 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 
 | ID | Capability | Our implementation | Status | Evidence |
 | --- | --- | --- | --- | --- |
-| M01 | NBT reader | Bounds-checked read-only NBT (gzip + raw) | NOT STARTED | - |
-| M02 | World listing | `level.dat` metadata | NOT STARTED | - |
-| M03 | World icon extraction | Render `icon.png` thumbnails | NOT STARTED | - |
-| M04 | World backup / restore | Zip, restore, verify | NOT STARTED | - |
-| M05 | World delete / duplicate / export | Safe destructive operations | NOT STARTED | - |
-| M06 | `servers.dat` management | Read, edit, add, remove | NOT STARTED | - |
-| M07 | Server status ping | Modern status protocol + legacy fallback | NOT STARTED | - |
-| M08 | Server list UI | MOTD, players, latency, version | NOT STARTED | - |
+| M01 | NBT reader | Bounds-checked read-only NBT (gzip + raw) | VERIFIED | V006.1, tests |
+| M02 | World listing | `level.dat` metadata | VERIFIED | V006.1 |
+| M03 | World icon extraction | Render `icon.png` thumbnails | IMPLEMENTED | icon path surfaced in the UI |
+| M04 | World backup / restore | Zip, restore, verify | VERIFIED | V006.2, tests |
+| M05 | World delete / duplicate / export | Safe destructive operations | VERIFIED | delete/duplicate tests |
+| M06 | `servers.dat` management | Read, edit, add, remove | VERIFIED | server list round trip tests |
+| M07 | Server status ping | Modern status protocol + legacy fallback | VERIFIED | V006.3 |
+| M08 | Server list UI | MOTD, players, latency, version | VERIFIED | V006.3, Servers tab |
 | M09 | LAN world discovery | Local discovery assistance | NOT STARTED | - |
 | M10 | Internet LAN relay | Requires a relay service Ferrite does not operate | BLOCKED EXTERNAL | `HUMAN_ACTION_REQUIRED.md` H4 |
 
@@ -232,7 +232,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 
 | ID | Capability | Our implementation | Status | Evidence |
 | --- | --- | --- | --- | --- |
-| N01 | Instance log viewer | Tail logs with bounded memory | NOT STARTED | - |
+| N01 | Instance log viewer | Tail logs with bounded memory | IMPLEMENTED | log tail in the instance Logs tab |
 | N02 | Crash report parsing | Description, cause, stack, affected mods | NOT STARTED | - |
 | N03 | Mod attribution from crash | Match stack frames to installed mods | NOT STARTED | - |
 | N04 | Diagnostics bundle export | Redacted zip of logs and system info | NOT STARTED | - |
@@ -273,6 +273,12 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 ## Summary
 
 | Status | Count |
+| --- | --- |
+| NOT STARTED | 36 |
+| IN PROGRESS | 0 |
+| IMPLEMENTED | 48 |
+| VERIFIED | 83 |
+| BLOCKED EXTERNAL | 5 |
 | --- | --- |
 | NOT STARTED | 46 |
 | IN PROGRESS | 0 |

@@ -326,3 +326,64 @@ The first install attempt failed with
 contain a bare `overrides/` directory entry, which strips to an empty relative path and was being
 passed to the path validator. Fixed by treating the prefix entry as the destination root, with a
 regression test (`ExtractZip_ignores_the_prefix_directory_entry`).
+
+---
+
+## V006 - Worlds, NBT, and server status (2026-09-21)
+
+### V006.1 Reading a real world
+
+Command: `Ferrite.Verify worlds --game-dir %APPDATA%\.minecraft`
+
+The existing Minecraft installation on this machine was read (read-only) as a fixture:
+
+```
+Reading worlds from C:\Users\wwmky\AppData\Roaming\.minecraft (read-only)
+Found 1 world(s)
+  New World [New World] creative v1.20.4 seed=5494849442907459678 8.4 MiB last=2025-09-22 19:56
+      icon: C:\Users\wwmky\AppData\Roaming\.minecraft\saves\New World\icon.png
+```
+
+Every field came from the world's own gzip-compressed `level.dat`: display name, game mode,
+version name and data version, seed, size on disk, last-played time, and the icon file. The seed
+lives under `Data.RandomSeed` in older versions and `Data.WorldGenSettings.seed` in newer ones;
+both are handled.
+
+### V006.2 World backup
+
+Command: `Ferrite.Verify backup-world --game-dir %APPDATA%\.minecraft`
+
+```
+Backed up world ...\.minecraft\saves\New World to ...\Ferrite\backups\world-New World-....zip
+  size: 674.4 KiB
+  entries: 33
+  contains level.dat: True
+```
+
+Unit tests cover the rest of the lifecycle: restore (including moving a newer world aside rather
+than overwriting it), duplicate, and delete-by-moving-to-backups.
+
+### V006.3 Server status
+
+Command: `Ferrite.Verify ping mc.hypixel.net play.cubecraft.net 2b2t.org`
+
+```
+  play.cubecraft.net:25565: CubeCraft 757/5000 126 ms
+      CubeCraft Games [EU] / BEDWARS UPDATE: NEW ITEMS + MAPS
+  mc.hypixel.net:25565: Requires MC 1.8 / 1.21 23644/200000 406 ms
+      Hypixel Network [1.8/26.3]
+      SKYBLOCK 0.27.1 TORRHUS & SAFARI
+  2b2t.org: offline (The server did not respond in time.)
+```
+
+Two production servers answered the modern status exchange with version, player counts, latency,
+and multi-line MOTDs; an unreachable host produced an offline status with a reason rather than an
+exception.
+
+### V006.4 Defect found and fixed
+
+The NBT writer used `BinaryWriter`, which is little-endian, while NBT is big-endian. The first
+world and server-list round trips failed with
+`NbtException: The document ended after 6 byte(s) while 1792 more were needed` — a byte-swapped
+string length. The writer now emits every multi-byte value big-endian explicitly. This mattered:
+without the fix, `servers.dat` written by the launcher would have been unreadable by the game.
