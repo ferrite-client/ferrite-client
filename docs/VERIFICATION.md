@@ -1750,3 +1750,77 @@ with different bytes but an identical size and timestamp would be served from th
 that rewrite a file in place without changing its size need the timestamp to move, which is how
 ordinary writes behave. The scanner's off-thread behaviour (`ScanAsync` wraps `Scan` in `Task.Run`) is
 by construction and is not separately measured here.
+
+---
+
+## V027 - CurseForge boundary, provider keys, hostile input, and pack import (2026-09-21)
+
+### V027.1 The CurseForge client, and the retail-file rule
+
+Commands: `CurseForgeClientTests`, then `CurseForgePackTests`.
+
+The client is exercised against a real HTTP boundary with the request shapes and response payloads
+the service documents: search (including `classId`, `modLoaderType`, `gameVersion`), version listing
+with hashes and dependencies, project lookup by numeric id, **bulk file lookup** (two files resolved
+in one `POST /v1/mods/files`, with the withheld file coming back without a URL), the id mappings, and
+the configuration error when no key is set (which is reported before any request is made).
+
+The retail rule is verified at both levels: the client reports no download URL for a withheld file and
+a URL for a distributable one, and `CurseForgePackInstaller.PlanFiles` places only the available file
+while reporting the other two - one withheld by the author, one the API no longer resolves - as
+warnings naming the reason, with a skipped count.
+
+**Interpretation.** Verifies K01 and K04. Every call above goes over HTTP to a scripted boundary, so
+what is proven is the client's behaviour against the documented API. What is not proven is a live
+call, which needs a key: that boundary is K05, and K03 and L02 are marked BLOCKED EXTERNAL for it.
+
+### V027.2 A provider key entered in Settings
+
+Command: `SettingsKeyTests`
+
+A key typed into Settings and saved reaches the credential store, the provider reports itself
+configured, the field is cleared so it does not sit in the UI, and the status line says the key is
+stored protected. The plaintext appears in neither the settings document nor the credential file on
+disk, and a second store reading the file decrypts the key - which is what a restart does. Clearing
+removes it from the store and from the file. Verifies K02.
+
+### V027.3 Importing a pack, by button or by dropping it
+
+Command: `LibraryImportTests`
+
+Both entry points call the same method, so the import path is the thing to check:
+
+- a `.zip` with no pack index is refused by name ("not a modpack: it has neither modrinth.index.json
+  nor manifest.json");
+- a CurseForge-shaped archive is recognised and dispatched to the CurseForge installer, where it stops
+  at the missing API key rather than at the archive being unsupported - which is what proves the
+  dispatch, manifest reading, and loader mapping ran;
+- a path that does not exist is reported rather than ignored.
+
+The drop target is now wired on the library (`DragDrop.SetAllowDrop`, drag-over filtering by
+extension, drop calling the same import), and the file picker offers both `*.mrpack` and `*.zip`
+because the archive's root entry decides which installer runs. Verifies L07, and the dispatch half of
+L02.
+
+**Limitations, stated precisely.** The OS drag-and-drop gesture itself is not simulated in the
+headless tests; the handler reads the payload defensively (a drag from any application can carry
+anything) and calls the import path these tests exercise.
+
+### V027.4 Hostile metadata and archives
+
+Command: `HostileMetadataTests`
+
+Ten cases, each one an input a launcher cannot trust:
+
+| Input | Expected | Observed |
+| --- | --- | --- |
+| `../escaped.txt`, `../../escaped.txt`, `C:/Windows/Temp/...`, `/etc/...` as archive entries | nothing outside the destination | nothing written outside; the checkpointed paths do not exist afterwards |
+| an archive that expands past `MaxTotalBytes` | typed refusal | `PathSafetyException: Archive exceeds the total expanded size limit.` |
+| a mod descriptor nested past the JSON depth limit | the mod is listed, unreadable | loader `unknown`, no id, scan continues |
+| a descriptor larger than the 4 MB read cap | not parsed | loader `unknown` |
+| NBT nested past the depth limit | typed refusal | `NbtException: NBT nesting exceeds the 64 level limit.` |
+| an NBT list claiming 2,147,483,647 entries | typed refusal | `NbtException: List length 2147483647 is out of range.` |
+| a pack index that is not JSON | typed refusal | `ContentProviderException: modrinth.index.json is not valid JSON.` |
+
+The archive-traversal and entry-limit behaviour is also pinned by `ArchiveExtractorTests`, and the
+CurseForge manifest validation by `CurseForgePackTests`. Verifies P03.

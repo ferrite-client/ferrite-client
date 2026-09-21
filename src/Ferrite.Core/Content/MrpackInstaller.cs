@@ -143,7 +143,11 @@ public sealed partial class MrpackInstaller
     }
 
     /// <summary>Reads and validates a pack index without installing anything.</summary>
-    public ModrinthIndex ReadIndex(string archivePath)
+    /// <summary>
+    /// Reads and validates a pack's index. Static because reading an archive needs nothing but the
+    /// file, which also lets the hostile-input tests exercise it without an installer graph.
+    /// </summary>
+    public static ModrinthIndex ReadIndex(string archivePath)
     {
         var json = ArchiveExtractor.ReadEntryText(archivePath, IndexEntryName, MaxIndexBytes)
             ?? throw new ContentProviderException(

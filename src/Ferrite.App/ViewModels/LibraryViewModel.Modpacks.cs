@@ -70,7 +70,7 @@ public sealed partial class LibraryViewModel
         ModpackInstallRequest request,
         IProgress<InstallProgress> progress)
     {
-        var index = _services.Modpacks.ReadIndex(archivePath);
+        var index = MrpackInstaller.ReadIndex(archivePath);
         _shell.BeginActivity(Localizer.Format("L.Library.Installing", index.Name));
         return await _services.Modpacks
             .InstallAsync(request, progress, CancellationToken.None)

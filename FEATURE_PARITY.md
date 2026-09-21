@@ -195,10 +195,10 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 
 | ID | Capability | Our implementation | Status | Evidence |
 | --- | --- | --- | --- | --- |
-| K01 | API client | Search, project, files, bulk file lookup, dependency resolution | IMPLEMENTED | `CurseForgeClient`, `CurseForgeIds`, `CurseForgeClientTests` |
-| K02 | API key configuration | Key in the OS-protected secret store, entered in Settings | IMPLEMENTED | `ProviderCredentialStore`, `ProviderCredentialStoreTests`, SettingsView |
-| K03 | Modpack install | `manifest.json` + overrides installer with API file resolution | IMPLEMENTED | `CurseForgePackInstaller`, `CurseForgePackTests` |
-| K04 | Retail-file restriction handling | Files without a download URL are reported, never silently skipped | IMPLEMENTED | `CurseForgePackInstaller.PlanFiles` + test |
+| K01 | API client | Search, project, files, bulk file lookup, dependency resolution | VERIFIED | V027.1; live calls need a key (K05) |
+| K02 | API key configuration | Key in the OS-protected secret store, entered in Settings | VERIFIED | V027.2 |
+| K03 | Modpack install | `manifest.json` + overrides installer with API file resolution | BLOCKED EXTERNAL | offline plan/override tests pass; the install needs a user-issued key (`HUMAN_ACTION_REQUIRED.md` H2, K05) |
+| K04 | Retail-file restriction handling | Files without a download URL are reported, never silently skipped | VERIFIED | V027.1 |
 | K05 | Live CurseForge calls | Requires a user-issued API key | BLOCKED EXTERNAL | `HUMAN_ACTION_REQUIRED.md` H2 |
 
 ## L. Modpacks
@@ -206,12 +206,12 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | ID | Capability | Our implementation | Status | Evidence |
 | --- | --- | --- | --- | --- |
 | L01 | Install `.mrpack` | Index + downloads + overrides, checksum verified | VERIFIED | V005.1, V005.2 |
-| L02 | Install CurseForge zip | manifest.json + overrides + file resolution | IMPLEMENTED | `CurseForgePackInstaller`; archive kind auto-detected on import. Live install BLOCKED EXTERNAL (K05) |
+| L02 | Install CurseForge zip | manifest.json + overrides + file resolution | BLOCKED EXTERNAL | V027.3 dispatch and manifest reading verified offline; the download needs a user-issued key (K05) |
 | L03 | Export `.mrpack` | Pack index with hashes and overrides | VERIFIED | V005.3 |
 | L04 | Modpack identity | Project, version, provider in instance metadata | IMPLEMENTED | model |
 | L05 | Update modpack | Apply a new version, preserve user content | IMPLEMENTED | re-install over an existing instance backs up first |
 | L06 | Overrides protection | Never clobber user-edited config without a backup | VERIFIED | V005.1 backup on existing content |
-| L07 | Drag-and-drop install | Drop a pack file onto the window | IMPLEMENTED | import button; window-level drop not wired |
+| L07 | Drag-and-drop install | Drop a pack archive on the library, or pick one; both pack formats accepted | VERIFIED | V027.3 |
 
 ## M. Worlds, servers, and multiplayer
 
@@ -261,7 +261,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | --- | --- | --- | --- | --- |
 | P01 | Archive safety | Zip-slip, absolute path, traversal, link rejection | VERIFIED | tests |
 | P02 | Path safety | Canonicalisation and containment before writes | VERIFIED | tests |
-| P03 | Malicious metadata defence | Size caps, depth caps, parse failures as typed errors | IMPLEMENTED | tests |
+| P03 | Malicious metadata defence | Size caps, depth caps, parse failures as typed errors | VERIFIED | V027.4 |
 | P04 | Network resilience | Offline fallback, retries, timeouts | VERIFIED | V001.2, tests |
 | P05 | Performance with large packs | Metadata cache keyed on file fingerprint; scans off the UI thread | VERIFIED | V026.4; V001.3 |
 | P06 | Visual QA pass | Full screen/state sweep with fixes | VERIFIED | V004 |
@@ -273,6 +273,12 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 ## Summary
 
 | Status | Count |
+| --- | --- |
+| NOT STARTED | 0 |
+| IN PROGRESS | 0 |
+| IMPLEMENTED | 6 |
+| VERIFIED | 149 |
+| BLOCKED EXTERNAL | 17 |
 | --- | --- |
 | NOT STARTED | 0 |
 | IN PROGRESS | 0 |

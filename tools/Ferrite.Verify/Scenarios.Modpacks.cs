@@ -45,7 +45,7 @@ internal static partial class Scenarios
         }
         else
         {
-            var index = services.Modpacks.ReadIndex(archivePath);
+            var index = MrpackInstaller.ReadIndex(archivePath);
             Console.WriteLine($"Pack: {index.Name} {index.VersionId} (format {index.FormatVersion})");
             Console.WriteLine($"Dependencies: {string.Join(", ", index.Dependencies.Select(pair => pair.Key + "=" + pair.Value))}");
             Console.WriteLine($"Declared files: {index.Files.Count}");
@@ -104,7 +104,7 @@ internal static partial class Scenarios
         Console.WriteLine($"  version id: {export.VersionId}, overrides: {export.OverrideCount}");
         Console.WriteLine($"  size: {ByteSize.Format(new FileInfo(export.ArchivePath).Length)}");
 
-        var roundTrip = services.Modpacks.ReadIndex(export.ArchivePath);
+        var roundTrip = MrpackInstaller.ReadIndex(export.ArchivePath);
         Console.WriteLine(
             $"  re-read index: {roundTrip.Name} {roundTrip.VersionId}, "
             + $"{roundTrip.Dependencies.Count} dependency(ies)");

@@ -205,10 +205,55 @@ public sealed class CurseForgeClientTests : IAsyncLifetime
         Assert.Equal("https://edge.forgecdn.net/files/111/222/mod.jar", url);
     }
 
+    /// <summary>
+    /// A modpack manifest lists project/file pairs; the bulk endpoint is how their metadata is
+    /// fetched without one request per file, so it has to map the response back to files.
+    /// </summary>
+    [Fact]
+    public async Task Bulk_file_lookup_resolves_many_files_in_one_request()
+    {
+        _server.AddHandler("POST", "/v1/mods/files", _ => new TestResponse(
+            200,
+            """
+            {
+              "data": [
+                {
+                  "id": 111,
+                  "modId": 900,
+                  "fileName": "first.jar",
+                  "downloadUrl": "https://edge.forgecdn.net/files/111/first.jar",
+                  "fileLength": 10,
+                  "gameVersions": [ "1.21.1" ],
+                  "dependencies": []
+                },
+                {
+                  "id": 222,
+                  "modId": 901,
+                  "fileName": "second.jar",
+                  "downloadUrl": null,
+                  "fileLength": 20,
+                  "gameVersions": [ "1.21.1" ],
+                  "dependencies": []
+                }
+              ]
+            }
+            """));
+
+        var files = await _client.GetFilesAsync([111, 222], TestContext.Current.CancellationToken);
+
+        Assert.Equal(2, files.Count);
+        Assert.Equal("first.jar", files[0].Files[0].FileName);
+        Assert.Equal("https://edge.forgecdn.net/files/111/first.jar", files[0].Files[0].Url);
+        // A file the author withheld has no URL, which is what the installer reports rather than
+        // silently skipping.
+        Assert.Empty(files[1].Files);
+        Assert.Equal(1, _server.RequestCount("/v1/mods/files"));
+    }
+
     [Fact]
     public void Class_and_loader_ids_map_both_ways()
-    {
-        Assert.Equal(6, CurseForgeIds.ClassIdFor(ContentProjectType.Mod));
+   {
+       Assert.Equal(6, CurseForgeIds.ClassIdFor(ContentProjectType.Mod));
         Assert.Equal(4471, CurseForgeIds.ClassIdFor(ContentProjectType.Modpack));
         Assert.Equal(ContentProjectType.Shader, CurseForgeIds.ProjectTypeFor(6552));
         Assert.Equal(6, CurseForgeIds.ModLoaderFor("neoforge"));
