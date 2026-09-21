@@ -15,6 +15,9 @@ coverage*.xml
 coverage*.json
 *.trx
 
+# Screenshots written by the headless render tests (FERRITE_UI_SHOTS).
+.uishots/
+
 # Publish output
 publish/
 artifacts/

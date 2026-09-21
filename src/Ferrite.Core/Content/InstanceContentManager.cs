@@ -1,3 +1,5 @@
+using Ferrite.Core.Util;
+
 namespace Ferrite.Core.Content;
 
 /// <summary>
@@ -115,6 +117,40 @@ public sealed class InstanceContentManager
         {
             File.Delete(filePath);
         }
+    }
+
+    /// <summary>
+    /// Moves a content file out of an instance into a backup folder instead of deleting it. A mod a
+    /// user dropped in is their file, so removing it from the instance keeps a copy rather than
+    /// destroying it. Returns where the file went, or null when there was nothing to move.
+    /// </summary>
+    public static string? RemoveToBackup(string filePath, string backupDirectory)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
+        ArgumentException.ThrowIfNullOrWhiteSpace(backupDirectory);
+
+        if (!File.Exists(filePath))
+        {
+            return null;
+        }
+
+        Directory.CreateDirectory(backupDirectory);
+        var fileName = Path.GetFileName(filePath);
+        var target = Path.Combine(
+            backupDirectory,
+            $"{DateTime.UtcNow:yyyyMMdd-HHmmss}-{PathSafety.SanitizeFileName(fileName)}");
+
+        // Two removals inside the same second must not overwrite one another.
+        var unique = target;
+        for (var index = 1; File.Exists(unique); index++)
+        {
+            unique = Path.Combine(
+                backupDirectory,
+                $"{Path.GetFileNameWithoutExtension(target)}-{index}{Path.GetExtension(target)}");
+        }
+
+        File.Move(filePath, unique);
+        return unique;
     }
 
     public static long GetDirectorySize(string directory)

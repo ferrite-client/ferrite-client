@@ -11,12 +11,21 @@ public sealed partial class ModItemViewModel : ObservableObject
 {
     private readonly AppServices _services;
     private readonly Action _onChanged;
+    private readonly Action? _onSelectionChanged;
+    private readonly string _backupDirectory;
 
-    public ModItemViewModel(ModMetadata metadata, AppServices services, Action onChanged)
+    public ModItemViewModel(
+        ModMetadata metadata,
+        AppServices services,
+        Action onChanged,
+        string backupDirectory,
+        Action? onSelectionChanged = null)
     {
         Metadata = metadata;
         _services = services;
         _onChanged = onChanged;
+        _backupDirectory = backupDirectory;
+        _onSelectionChanged = onSelectionChanged;
     }
 
     public ModMetadata Metadata { get; }
@@ -43,34 +52,65 @@ public sealed partial class ModItemViewModel : ObservableObject
 
     public bool IsEnabled => Metadata.Enabled;
 
+    /// <summary>Marks this mod for a bulk action. Selection is a property of the list, not the file.</summary>
+    [ObservableProperty]
+    private bool _isSelected;
+
+    partial void OnIsSelectedChanged(bool value) => _onSelectionChanged?.Invoke();
+
     [ObservableProperty]
     private string? _note;
 
     [RelayCommand]
     private void Toggle()
     {
+        if (TrySetEnabled(!Metadata.Enabled))
+        {
+            _onChanged();
+        }
+    }
+
+    /// <summary>Enables or disables the file. Returns false and records why when the rename fails.</summary>
+    public bool TrySetEnabled(bool enabled)
+    {
         try
         {
-            InstanceContentManager.SetEnabled(Metadata.FilePath, !Metadata.Enabled);
-            _onChanged();
+            InstanceContentManager.SetEnabled(Metadata.FilePath, enabled);
+            Note = null;
+            return true;
         }
         catch (Exception exception)
         {
             Note = exception.Message;
+            return false;
         }
     }
 
     [RelayCommand]
-    private void Delete()
+    private void Remove()
+    {
+        if (TryRemove())
+        {
+            _onChanged();
+        }
+    }
+
+    /// <summary>
+    /// Takes the file out of the instance and keeps it in the launcher's backup folder, so removing
+    /// a mod by mistake is recoverable. Returns false and records why when the move fails.
+    /// </summary>
+    public bool TryRemove()
     {
         try
         {
-            InstanceContentManager.Delete(Metadata.FilePath);
-            _onChanged();
+            InstanceContentManager.RemoveToBackup(Metadata.FilePath, _backupDirectory);
+            Note = null;
+            return true;
         }
         catch (Exception exception)
         {
             Note = exception.Message;
+            return false;
         }
     }
 

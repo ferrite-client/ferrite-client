@@ -555,6 +555,61 @@ public sealed class ShellRenderingTests : IDisposable
         Save(frame!, "instance-logs");
     }
 
+    /// <summary>
+    /// The mods tab has to render the search, loader filter, and order controls with real mods behind
+    /// them: a pack with hundreds of files is unusable as one unfiltered list.
+    /// </summary>
+    [AvaloniaFact]
+    public async Task Instance_mods_tab_renders_the_search_and_filter()
+    {
+        var record = _services.Instances
+            .CreateAsync(
+                new InstanceRecord
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Mods tab instance",
+                    MinecraftVersion = "1.21.1",
+                    Loader = LoaderKind.Fabric,
+                    LoaderVersion = "0.19.5",
+                },
+                CancellationToken.None)
+            .GetAwaiter()
+            .GetResult();
+
+        var modsDirectory = Path.Combine(_services.Paths.InstanceGameDirectory(record.Id), "mods");
+        Directory.CreateDirectory(modsDirectory);
+        ModArchiveFixture.WriteFabric(
+            Path.Combine(modsDirectory, "sodium.jar"), "sodium", "Sodium", "0.6.0", 96, "fabric-api");
+        ModArchiveFixture.WriteFabric(
+            Path.Combine(modsDirectory, "lithium.jar"), "lithium", "Lithium", "0.14.0", 48, "fabric-api");
+
+        var shell = new MainWindowViewModel(_services);
+        var viewModel = new InstanceDetailViewModel(record, _services, shell);
+        await viewModel.RefreshModsAsync();
+        viewModel.ModQuery = "sodium";
+
+        var window = new Window
+        {
+            Content = new InstanceDetailView { DataContext = viewModel },
+            Width = 1200,
+            Height = 900,
+        };
+        window.Show();
+
+        window.GetVisualDescendants().OfType<TabControl>().First().SelectedIndex = 1;
+
+        var frame = window.CaptureRenderedFrame();
+        Assert.NotNull(frame);
+
+        var texts = Texts(window);
+        Assert.Contains("Sodium", texts);
+        Assert.DoesNotContain("Lithium", texts);
+        Assert.Contains(texts, text => text.Contains("Showing 1 of 2 mods", StringComparison.Ordinal));
+        Assert.Contains(texts, text => text.Contains("All loaders", StringComparison.Ordinal));
+
+        Save(frame!, "instance-mods-filter");
+    }
+
     private MainWindow ShowShell(out MainWindowViewModel viewModel)
     {
         viewModel = new MainWindowViewModel(_services);

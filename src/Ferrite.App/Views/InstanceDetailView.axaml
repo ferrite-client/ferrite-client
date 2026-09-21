@@ -104,20 +104,70 @@
       </TabItem>
 
       <TabItem Header="{DynamicResource L.Instance.TabMods}">
-        <Grid RowDefinitions="Auto,*" Margin="0,16,0,0">
+        <Grid RowDefinitions="Auto,Auto,Auto,*" Margin="0,16,0,0">
           <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,12">
             <TextBlock Grid.Column="0" Classes="muted"
                      Text="{DynamicResource L.Instance.DropModsHint}" VerticalAlignment="Center" />
             <Button Grid.Column="1" Content="{DynamicResource L.Instance.AddMods}" Click="OnAddModsClick" />
           </Grid>
 
-          <ScrollViewer Grid.Row="1">
+          <StackPanel Grid.Row="1" Spacing="6" Margin="0,0,0,12">
+            <Grid ColumnDefinitions="*,200,200" ColumnSpacing="12">
+              <TextBox Grid.Column="0" Text="{Binding ModQuery}"
+                       PlaceholderText="{DynamicResource L.Instance.ModSearchPlaceholder}" />
+              <ComboBox Grid.Column="1" ItemsSource="{Binding ModLoaderChoices}"
+                        SelectedItem="{Binding SelectedModLoader}" HorizontalAlignment="Stretch">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate DataType="vm:ModFilterChoice">
+                    <TextBlock Text="{Binding Label}" />
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+              <ComboBox Grid.Column="2" ItemsSource="{Binding ModSortChoices}"
+                        SelectedItem="{Binding SelectedModSort}" HorizontalAlignment="Stretch">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate DataType="vm:ModFilterChoice">
+                    <TextBlock Text="{Binding Label}" />
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+            </Grid>
+            <TextBlock Classes="faint" Text="{Binding ModFilterNote}"
+                       IsVisible="{Binding HasModFilterNote}" />
+          </StackPanel>
+
+          <Grid Grid.Row="2" ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="8"
+                HorizontalAlignment="Left" Margin="0,0,0,12">
+            <Button Content="{DynamicResource L.Instance.SelectAllMods}"
+                    Command="{Binding SelectAllModsCommand}"
+                    IsEnabled="{Binding HasAnyMods}" />
+            <Button Grid.Column="1" Content="{DynamicResource L.Instance.ClearModSelection}"
+                    Command="{Binding ClearModSelectionCommand}"
+                    IsEnabled="{Binding HasModSelection}" />
+            <Button Grid.Column="2" Content="{DynamicResource L.Instance.DisableSelected}"
+                    Command="{Binding DisableSelectedModsCommand}"
+                    IsEnabled="{Binding HasModSelection}" />
+            <Button Grid.Column="3" Content="{DynamicResource L.Instance.EnableSelected}"
+                    Command="{Binding EnableSelectedModsCommand}"
+                    IsEnabled="{Binding HasModSelection}" />
+            <Button Grid.Column="4" Classes="danger" Content="{DynamicResource L.Instance.RemoveSelected}"
+                    Command="{Binding RemoveSelectedModsCommand}"
+                    IsEnabled="{Binding HasModSelection}" />
+            <TextBlock Grid.Column="5" Classes="muted" VerticalAlignment="Center"
+                       Text="{Binding SelectedModSummary}"
+                       IsVisible="{Binding HasSelectedModSummary}" />
+          </Grid>
+
+          <ScrollViewer Grid.Row="3">
             <ItemsControl ItemsSource="{Binding Mods}">
               <ItemsControl.ItemTemplate>
                 <DataTemplate DataType="vm:ModItemViewModel">
                   <Border Classes="card" Margin="0,0,0,8">
-                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
-                      <StackPanel Grid.Column="0" Spacing="2">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="16">
+                      <CheckBox Grid.Column="0" VerticalAlignment="Top" Margin="0,2,0,0"
+                                IsChecked="{Binding IsSelected}"
+                                AutomationProperties.Name="{Binding DisplayName}" />
+                      <StackPanel Grid.Column="1" Spacing="2">
                         <TextBlock Classes="h2" Text="{Binding DisplayName}" />
                         <TextBlock Classes="muted" Text="{Binding VersionText}" />
                         <TextBlock Classes="faint" Text="{Binding Description}" IsVisible="{Binding HasDescription}" />
@@ -128,11 +178,11 @@
                         </StackPanel>
                         <TextBlock Classes="faint" Text="{Binding Note}" />
                       </StackPanel>
-                      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                      <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                 <Button Content="{DynamicResource L.Instance.Disable}" IsVisible="{Binding IsEnabled}" Command="{Binding ToggleCommand}" />
                 <Button Content="{DynamicResource L.Instance.Enable}" IsVisible="{Binding !IsEnabled}" Command="{Binding ToggleCommand}" />
                 <Button Content="{DynamicResource L.Common.Folder}" Command="{Binding OpenFolderCommand}" />
-                <Button Classes="danger" Content="{DynamicResource L.Common.Remove}" Command="{Binding DeleteCommand}" />
+                <Button Classes="danger" Content="{DynamicResource L.Common.Remove}" Command="{Binding RemoveCommand}" />
                       </StackPanel>
                     </Grid>
                   </Border>
@@ -141,8 +191,10 @@
             </ItemsControl>
           </ScrollViewer>
 
-          <TextBlock Grid.Row="1" Classes="muted" IsVisible="{Binding !HasMods}"
+          <TextBlock Grid.Row="3" Classes="muted" IsVisible="{Binding !HasAnyMods}"
                      Text="{DynamicResource L.Instance.NoMods}" />
+          <TextBlock Grid.Row="3" Classes="muted" IsVisible="{Binding HasNoModMatches}"
+                     Text="{DynamicResource L.Instance.NoModMatches}" />
         </Grid>
       </TabItem>
 

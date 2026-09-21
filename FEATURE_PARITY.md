@@ -47,7 +47,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | B10 | Open instance folder | Shell-open the instance directory | VERIFIED | every instance card opens its folder |
 | B11 | Instance metadata editing | Name, icon, memory, resolution, JVM/game args, env vars | VERIFIED | V004 |
 | B12 | Per-instance Java selection | Bind a discovered or provisioned runtime to an instance | IMPLEMENTED | model + preflight |
-| B13 | Instance EULA and advanced toggles | `eula.txt` creation, demo and quick-play toggles | IMPLEMENTED | demo verified V001 |
+| B13 | Instance EULA and advanced toggles | `eula.txt` creation, demo and quick-play toggles | VERIFIED | V019.5; demo verified V001 |
 | B14 | Instance search, filter, sort | Library search across name/version/loader | IMPLEMENTED | library search box |
 | B15 | Instance disk usage | Per-instance size calculation off the UI thread | IMPLEMENTED | size on each card |
 | B16 | Protect user data on destructive ops | Backup-before-delete policy | IMPLEMENTED | B06 |
@@ -163,12 +163,12 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | I01 | Mod inventory scan | Off-thread scan with metadata extraction | VERIFIED | V003.2 |
 | I02 | Mod metadata parsing | fabric/quilt/forge/neoforge/legacy metadata | VERIFIED | V003.2, tests |
 | I03 | Enable / disable | Reversible rename, no data loss | VERIFIED | V003.3 |
-| I04 | Remove mods | Delete with confirmation | IMPLEMENTED | mod list remove |
-| I05 | Bulk operations | Multi-select enable/disable/delete | IMPLEMENTED | per-item actions |
-| I06 | Local JAR install | Drag and drop or file picker with validation | IMPLEMENTED | picker wired, drag-drop wired |
-| I07 | Mod search/filter/sort | Name, loader, version, source | IMPLEMENTED | list view |
+| I04 | Remove mods | Moved out of the instance, with the file kept in the launcher's backups | VERIFIED | V020.2 |
+| I05 | Bulk operations | Tick mods, then enable, disable, or remove them in one pass | VERIFIED | V020.3 |
+| I06 | Local JAR install | Drag and drop or file picker, with validation | VERIFIED | V020.2; drop handler uses the same install path |
+| I07 | Mod search/filter/sort | Query over name/file/version/loader/dependency, loader filter, name/size/loader order | VERIFIED | V020.1 |
 | I08 | Dependency display | Declared dependencies and conflicts | VERIFIED | V003.2 dependency list |
-| I09 | Update detection | Compare installed hash against providers | IMPLEMENTED | provider match by version, not wired in UI |
+| I09 | Update detection | Compare installed content against the providers that supplied it | VERIFIED | V010; instance Updates tab |
 | I10 | Resource pack management | List, enable/disable, delete, reorder | IMPLEMENTED | V004 content tab |
 | I11 | Shader pack management | List, enable/disable, delete | IMPLEMENTED | V004 content tab |
 | I12 | Datapack management | Per-world datapack listing | IMPLEMENTED | datapack folder listed as content |
@@ -244,9 +244,9 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | ID | Capability | Our implementation | Status | Evidence |
 | --- | --- | --- | --- | --- |
 | O01 | Settings screen | All persisted settings with validation | VERIFIED | V004 settings page |
-| O02 | Download concurrency setting | Bounded, applied live | IMPLEMENTED | settings value |
-| O03 | Mirror configuration | Per-endpoint host overrides | IMPLEMENTED | settings model |
-| O04 | Proxy configuration | Applied to the HTTP stack | IMPLEMENTED | HttpService proxy |
+| O02 | Download concurrency setting | Bounded, applied live | VERIFIED | V019.3, V019.4 |
+| O03 | Mirror configuration | Per-endpoint host overrides | VERIFIED | V019.1, V019.4 |
+| O04 | Proxy configuration | Applied to the HTTP stack | VERIFIED | V019.2, V019.4 |
 | O05 | Cache management | Size reporting and safe cleanup | VERIFIED | V004 storage section |
 | O06 | Data location control | Move the data root with validation | IMPLEMENTED | FERRITE_HOME |
 | O07 | Update check | Signed manifest over TLS; unsigned or altered feeds are refused | VERIFIED | V012.1, V012.2; `UpdateServiceTests` |
@@ -273,6 +273,12 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 ## Summary
 
 | Status | Count |
+| --- | --- |
+| NOT STARTED | 0 |
+| IN PROGRESS | 0 |
+| IMPLEMENTED | 37 |
+| VERIFIED | 120 |
+| BLOCKED EXTERNAL | 15 |
 | --- | --- |
 | NOT STARTED | 0 |
 | IN PROGRESS | 0 |

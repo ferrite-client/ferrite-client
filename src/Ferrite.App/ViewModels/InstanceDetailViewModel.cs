@@ -155,13 +155,7 @@ public sealed partial class InstanceDetailViewModel : ObservableObject
         try
         {
             var mods = await _services.Mods.ListModsAsync(GameDirectory, CancellationToken.None).ConfigureAwait(true);
-            Mods.Clear();
-            foreach (var mod in mods)
-            {
-                Mods.Add(new ModItemViewModel(mod, _services, () => _ = RefreshModsAsync()));
-            }
-
-            OnPropertyChanged(nameof(HasMods));
+            SetScannedMods(mods);
         }
         catch (Exception exception)
         {

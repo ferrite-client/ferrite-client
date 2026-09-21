@@ -1249,3 +1249,147 @@ The exact verification to perform afterwards is written in H1: enter the client 
 in, and confirm the account appears, a launch uses it, and a second account can be added and
 switched between. Until then those rows are `BLOCKED EXTERNAL` rather than `VERIFIED`, and the
 parity matrix says which dependency is missing for each one.
+
+---
+
+## V019 - Network settings and the instance EULA toggle (2026-09-21)
+
+**Environment.** Windows 11 x64; .NET SDK 10.0.201 (runtime 10.0.5). No live endpoint is contacted
+by this entry: every network step runs against a real loopback TCP server started by the test.
+
+**Why this entry exists.** The proxy, the mirror overrides, and the download concurrency were
+persisted settings that nothing read, and the instance EULA checkbox stored a flag that wrote no
+file. Each test below asserts the effect in the layer that does the work rather than the stored
+value.
+
+### V019.1 Mirror overrides reach the HTTP stack
+
+Command: `pwsh -File scripts/test.ps1` (`NetworkSettingsTests`)
+
+A loopback HTTP server stands in for the mirror. `HttpService` is constructed with a
+`MirrorResolver` that points `launchermeta.mojang.com` at that server, then asked for
+`https://launchermeta.mojang.com/manifest.json`.
+
+- The body the caller receives is the stand-in server's, not Mojang's.
+- The stand-in records exactly one request, at `/manifest.json`: the path survived the rewrite and
+  the request did not leak to the real host.
+- `A_download_uses_the_configured_mirror` repeats this through `DownloadEngine`: the file lands on
+  disk with the mirror's bytes and the stand-in records one hit at the original CDN path.
+- `An_unconfigured_host_and_a_bad_override_are_left_alone` and `Clearing_the_overrides_stops_rewriting`
+  cover the two ways an override can be wrong: a host with no entry, and an entry whose value is not
+  an absolute address. Both leave the original URL untouched.
+
+### V019.2 The proxy setting reaches the HTTP stack
+
+Command: same (`NetworkSettingsTests.A_proxy_setting_routes_requests_through_the_proxy`)
+
+A single-connection stand-in proxy on loopback answers any request. After
+`UpdateProxy("http://127.0.0.1:<port>")`, a request for `http://origin.invalid/metadata.json`
+returns the proxy's body, and the proxy's recorded request line contains `origin.invalid`. The
+origin host does not resolve, so a response can only have come through the proxy.
+
+### V019.3 The concurrency setting is live and bounded
+
+Command: same (`NetworkSettingsTests.The_concurrency_setting_bounds_simultaneous_transfers`)
+
+An engine built with `MaxConcurrency = 8` reports 8; setting `0` clamps to 1 and `999` to 64; six
+files then download with the limit set to 2 and the run reports six successes. The limit is read
+when a batch starts, so a settings change applies to the next download rather than the next restart.
+
+### V019.4 Saving settings in the UI pushes the values into the running services
+
+Command: `pwsh -File scripts/test.ps1` (`InstanceSettingsTests`)
+
+`SettingsViewModel.SaveCommand` is run against a real data root with concurrency 3, a loopback
+proxy, and a mirror line typed as `host=url`. Afterwards: `Downloads.MaxConcurrency` is 3, the
+resolver is no longer empty and rewrites the configured host, and a freshly constructed
+`SettingsStore` reads all three values back from the settings document on disk. This is what proves
+the settings screen is wired to the services rather than to a stored-only model.
+
+### V019.5 The EULA toggle writes the file it promises
+
+Command: same (`InstanceSettingsTests.Saving_an_instance_writes_the_eula_file_it_promised`,
+`EulaFileTests`)
+
+An instance is created on a real temp root, then saved through the instance view model with the
+toggle on. `eula.txt` exists in the instance's game directory and records acceptance. Turning the
+toggle off rewrites it as `eula=false`. `EulaFileTests` separately pin the file contract: the
+comment line and `eula=true` content, case-insensitive parsing, a comment containing `eula=true`
+not counting, directory creation for a fresh instance, and the safety rule that withdrawing
+acceptance does not touch a file the user wrote by hand.
+
+`InstanceLauncher` also applies the flag immediately before a launch, so a file deleted by hand
+comes back and a withdrawn acceptance is undone.
+
+**Limitations, stated precisely.**
+
+- The mirror tests use plain HTTP for the stand-in, so they prove the rewrite, the preserved path,
+  and the request routing. They do not prove a production mirror's TLS. An operator pointing a host
+  at a mirror must use an address whose certificate is valid for that mirror; the launcher does not
+  relax certificate validation for overrides.
+- Proxy credentials embedded in the proxy URL were not exercised; the value is handed to
+  `HttpClient` as the user entered it.
+- The EULA evidence is the file the launcher writes and the flag it derives it from. A launch was
+  not repeated for this entry, so the game's own read of that file is not covered here.
+
+---
+
+## V020 - Mod list: search, filtering, ordering, bulk actions, and reversible removal (2026-09-21)
+
+**Environment.** Windows 11 x64; .NET SDK 10.0.201 (runtime 10.0.5). Everything runs against a real
+temporary data root and real archive files; no network is involved.
+
+**Why this entry exists.** The mod tab had one unfiltered list, no bulk actions, and a Remove button
+that deleted the file outright. A pack with hundreds of files is unusable that way, and removing a
+mod a user dropped in is their data, not ours.
+
+### V020.1 The list is searched, filtered, and ordered
+
+Command: `dotnet run --project tests/Ferrite.App.Tests -- -class Ferrite.App.Tests.InstanceModTests`
+
+Four real archives are written into an instance's `mods` folder: a Fabric jar, a Forge jar with
+`META-INF/mods.toml`, a Fabric jar with a different declared dependency, and a plain zip that
+declares nothing. After a scan:
+
+- The loader filter offers exactly the loaders present (`all`, `fabric`, `forge`, `unknown`), so the
+  choices come from the instance rather than a fixed table.
+- `maps` narrows to the one mod named "Beta Maps"; `fabric` matches by loader; `fabric-api` matches
+  the mod that declares it even though the string appears nowhere in its name or file name.
+- A query that matches nothing reports "no match" while still knowing the instance has mods, which
+  is the difference between a filtered-out list and an empty folder.
+- Selecting the `forge` loader filter leaves the single Forge mod.
+- Ordering by size puts the largest file first; ordering by name gives
+  `Alpha Storage, Beta Maps, delta, Gamma Core`.
+
+`ShellRenderingTests.Instance_mods_tab_renders_the_search_and_filter` then renders the real view with
+two mods and the query `sodium`: the rendered tree contains the matching card, not the filtered-out
+one, and shows the "Showing 1 of 2 mods" count.
+
+### V020.2 Disable, re-enable, and removal that keeps the file
+
+Command: same (`A_mod_can_be_disabled_re_enabled_and_removed`)
+
+Two jars are handed to the same install path the file picker and the drop handler use, plus a
+`notes.txt` that must be refused. The two jars land in the instance's `mods` folder and the text file
+does not. Disabling the first renames it to `sodium.jar.disabled` on disk, the rescan reports it as
+disabled with its metadata still readable, and enabling it restores the original name.
+
+Removing it now moves the file into the launcher's backups folder instead of deleting it, and the
+bytes in the backup are compared with the original source file. The removed file is gone from the
+instance and present in backups, which is the property the old delete did not have.
+
+### V020.3 Bulk actions act on the selection
+
+Command: same (`Bulk_actions_apply_to_the_selected_mods_only`)
+
+With three mods, "select all shown" reports "3 selected" and disabling acts on all three at once,
+leaving three `.disabled` files on disk; the list is rebuilt by the single rescan that follows, so
+nothing stays ticked under an action that already ran. Enabling acts the same way. With the query
+`alpha` in place, "select all shown" takes the one visible mod and not the two it hid, and removing
+the selection moves only that file to backups.
+
+**Limitations, stated precisely.** The OS-level drag-and-drop gesture itself is not simulated in the
+headless tests; the drop handler in `InstanceDetailView.axaml.cs` calls the same validated
+`InstallModFilesAsync` path these tests exercise. Removing a mod moves it to
+`backups/removed-content/<instance>/` rather than the Windows Recycle Bin, because the launcher keeps
+its own recoverable copies instead of depending on shell behaviour.
