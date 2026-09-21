@@ -2055,3 +2055,81 @@ to read Mojang's launcher/quick-play behaviour from an authoritative source (or 
 list against a launch from the official launcher) and then either satisfy it or record it as an
 external limitation. Until that is done, H11 stays `IMPLEMENTED`: the arguments this launcher produces
 are correct and tested, the game entering a world is not demonstrated.
+
+### V032.3 The arguments match Mojang's own specification
+
+The authoritative source for this is the version document itself, and it was checked rather than
+recollected. `1.20.4.json` (as published by Mojang, fetched and cached by this launcher) declares:
+
+```json
+{ "rules": [ { "action": "allow", "features": { "has_quick_plays_support": true } } ],
+  "value": [ "--quickPlayPath", "${quickPlayPath}" ] },
+{ "rules": [ { "action": "allow", "features": { "is_quick_play_singleplayer": true } } ],
+  "value": [ "--quickPlaySingleplayer", "${quickPlaySingleplayer}" ] },
+{ "rules": [ { "action": "allow", "features": { "is_quick_play_multiplayer": true } } ],
+  "value": [ "--quickPlayMultiplayer", "${quickPlayMultiplayer}" ] }
+```
+
+The live command produced for that same version contains exactly those three, in that shape, with the
+world name as one argument. So the launcher's half is specification-correct; the client's half is the
+part that did not happen, and the cause is outside what this repository can determine.
+
+---
+
+## V033 - Switching an instance's mod loader version (2026-09-21)
+
+Commands: `LoaderSwitchTests` (App), then the live runs below.
+
+The row claimed "switch loader version safely" while the only way to change one was to create a new
+instance. The instance settings page now lists the published loader versions for the instance's own
+Minecraft version and can move the instance onto one of them.
+
+### V033.1 The order is the whole point
+
+`InstanceLoaderSwitcher` in Core does three things in this order, and nothing updates the instance
+until all three have succeeded:
+
+1. install the loader version into the store;
+2. install the instance's own layout for that version - which is what puts the natives for the new
+   version on disk;
+3. only then set the instance's loader and loader version and save it.
+
+The App tests pin that order: the injected step is called while the record still names the old version,
+and a step that throws leaves the stored record exactly as it was (still `0.19.5`, with the failure
+message on screen). Choosing the version the instance already runs is a no-op rather than a reinstall,
+and a vanilla instance has nothing to choose.
+
+**Defect found and fixed.** The first version of this switch only installed the loader into the store.
+The live run then failed preflight with `The natives directory is missing. Run repair on this
+instance.` - the instance had no natives for the version it had just been pointed at. Step 2 above is
+the fix, and the switch now lives in Core so the page and the verification harness run one sequence
+rather than two similar ones.
+
+### V033.2 A real switch, and the loader the game reports
+
+Commands: `Ferrite.Verify instance-launch 1.21.1 --instance verify-1.21.1 --loader-version 0.19.5`,
+then the same with `--loader-version 0.19.3` (75-second window).
+
+```
+Switching loader version: Fabric 0.19.5 -> 0.19.3
+[info] MinecraftInstaller: Installing fabric-loader-0.19.3-1.21.1: 3968 files, 920190296 bytes
+Launch version after switch: fabric-loader-0.19.3-1.21.1
+  -Djava.library.path=...\instances\2348aef1-...\natives\fabric-loader-0.19.3-1.21.1
+  -cp ...\libraries\net\fabricmc\fabric-loader\0.19.3\fabric-loader-0.19.3.jar;...
+PASS: the game ran on the pinned runtime (Eclipse Adoptium 21.0.10 X64).
+```
+
+The game's own log, from the instance that was just switched:
+
+```
+[09:26:33] [main/INFO]: Loading Minecraft 1.21.1 with Fabric Loader 0.19.3
+```
+
+That is the loader itself naming the version it booted with, from an instance that was running 0.19.5
+before the switch. Verifies G09.
+
+**Limitations, stated precisely.** The switch runs when the user asks for it and shows progress; it
+does not stop a running game first, so switching while the instance is running leaves the running
+process on the old version (the next launch uses the new one). Reinstalling or repairing the version an
+instance already runs stays where it was - the instance's Repair button, verified in V001.5 - rather
+than being folded into this control.

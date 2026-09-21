@@ -67,6 +67,13 @@ internal sealed class VerifyServices : IDisposable
             Paths,
             LoggerFactory.CreateLogger<ForgeLoaderService>(),
             LoggerFactory);
+        LoaderSwitcher = new InstanceLoaderSwitcher(
+            Instances,
+            Fabric,
+            Forge,
+            Installer,
+            Java,
+            LoggerFactory.CreateLogger<InstanceLoaderSwitcher>());
         Modrinth = new ModrinthClient(Http, LoggerFactory.CreateLogger<ModrinthClient>());
         Manifests = new ContentManifestStore(LoggerFactory.CreateLogger<ContentManifestStore>());
         Content = new ContentInstaller(
@@ -157,6 +164,9 @@ internal sealed class VerifyServices : IDisposable
 
     /// <summary>The product's own "press play" flow, rather than a harness re-implementation of it.</summary>
     public InstanceLauncher InstanceLauncher { get; }
+
+    /// <summary>Moving an instance onto another loader version, as the settings page does it.</summary>
+    public InstanceLoaderSwitcher LoaderSwitcher { get; }
 
     public InstanceStore Instances { get; }
 

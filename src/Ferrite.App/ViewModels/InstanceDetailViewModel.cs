@@ -47,6 +47,7 @@ public sealed partial class InstanceDetailViewModel : ObservableObject
         OnPropertyChanged(nameof(Name));
         OnPropertyChanged(nameof(VersionId));
         OnPropertyChanged(nameof(LoaderText));
+        OnPropertyChanged(nameof(LoaderSummary));
     }
 
     public string Name => Record.Name;

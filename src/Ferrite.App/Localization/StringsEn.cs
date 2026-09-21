@@ -222,6 +222,15 @@ internal static class StringsEn
             ["L.Instance.DropModsHint"] = "Drop mod files here, or use Add mods.",
             ["L.Instance.Loader"] = "LOADER",
             ["L.Instance.LoaderVanilla"] = "Vanilla (no loader)",
+            ["L.Instance.LoaderVersion"] = "MOD LOADER VERSION",
+            ["L.Instance.LoaderStable"] = "stable",
+            ["L.Instance.ApplyLoaderVersion"] = "Use this version",
+            ["L.Instance.NoLoaderToChange"] =
+                "This instance runs vanilla Minecraft, so there is no loader version to change.",
+            ["L.Instance.NoLoaderBuilds"] = "No loader build is published for Minecraft {0}.",
+            ["L.Instance.LoaderBuilds"] = "{0} loader build(s) available.",
+            ["L.Instance.LoaderAlreadyCurrent"] = "Already running {0}.",
+            ["L.Instance.LoaderSwitched"] = "This instance now runs {0} {1}.",
             ["L.Instance.InstallOptiFine"] = "Install OptiFine from a downloaded installer...",
             ["L.Instance.OptiFineHint"] =
                 "OptiFine publishes no API, so its installer runs on your machine and you click Install "

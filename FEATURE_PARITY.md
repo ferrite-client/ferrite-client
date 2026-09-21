@@ -135,7 +135,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | G06 | NeoForge installer run | Official installer processors with an argument list | VERIFIED | V002.2 |
 | G07 | Forge version discovery | Maven metadata per Minecraft version | VERIFIED | V017.3 |
 | G08 | Forge installer run | Official installer processors with an argument list | VERIFIED | V017.3; the classpath defect it found is covered by `LoaderInstallTests` |
-| G09 | Loader update / reinstall / repair | Switch loader version safely | IMPLEMENTED | reinstall by version id |
+| G09 | Loader update / reinstall / repair | Switch an instance to another loader version: install, lay out, then point | VERIFIED | V033; repair stays the instance's Repair button (V001.5) |
 | G10 | Loader launch behaviour | Loader main class, args, library ordering | VERIFIED | V002.1, V002.2 |
 | G11 | OptiFine install | Recognises OptiFine's own installer, runs it with the right Java in a launcher-owned directory, adopts the produced version into the store, and refuses a build for another Minecraft version | VERIFIED | V016. The user completes OptiFine's installer window: OptiFine publishes no headless entry point and no API |
 
@@ -273,6 +273,12 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 ## Summary
 
 | Status | Count |
+| --- | --- |
+| NOT STARTED | 0 |
+| IN PROGRESS | 0 |
+| IMPLEMENTED | 1 |
+| VERIFIED | 154 |
+| BLOCKED EXTERNAL | 17 |
 | --- | --- |
 | NOT STARTED | 0 |
 | IN PROGRESS | 0 |

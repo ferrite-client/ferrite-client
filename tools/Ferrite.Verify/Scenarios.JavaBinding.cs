@@ -1,4 +1,5 @@
 using Ferrite.Core.Java;
+using Ferrite.Core.Loaders;
 using Ferrite.Core.Minecraft;
 
 namespace Ferrite.Verify;
@@ -27,10 +28,22 @@ internal static partial class Scenarios
         bool viaDefault,
         string? world,
         string? joinServer,
+        string? loaderVersion,
+        string? instanceName,
         CancellationToken cancellationToken)
     {
-        var instance = await GetOrCreateInstanceAsync(services, versionId, cancellationToken)
-            .ConfigureAwait(false);
+        var instance = instanceName is { Length: > 0 }
+            ? (await services.Instances.LoadAllAsync(cancellationToken).ConfigureAwait(false))
+                .FirstOrDefault(record => string.Equals(
+                    record.Name,
+                    instanceName,
+                    StringComparison.OrdinalIgnoreCase))
+            : await GetOrCreateInstanceAsync(services, versionId, cancellationToken).ConfigureAwait(false);
+        if (instance is null)
+        {
+            Console.WriteLine($"No instance named '{instanceName}'.");
+            return 2;
+        }
         Console.WriteLine($"Instance: {instance.Name} ({instance.Id})");
 
         // A user-supplied path is probed by running it before anything else happens, which is the
@@ -85,6 +98,28 @@ internal static partial class Scenarios
                 : "  The pin differs from the automatic choice, so the run distinguishes them.");
 
         instance.JavaPath = viaDefault ? null : pinned.ExecutablePath;
+        if (loaderVersion is { Length: > 0 })
+        {
+            Console.WriteLine(
+                $"Switching loader version: {instance.Loader} {instance.LoaderVersion} -> {loaderVersion}");
+            // The same Core call the settings page makes: install the loader, lay out the instance for
+            // that version, then point the instance at it.
+            var switched = await services.LoaderSwitcher
+                .SwitchAsync(
+                    instance,
+                    new LoaderVersionInfo(
+                        instance.Loader,
+                        loaderVersion,
+                        instance.MinecraftVersion,
+                        Stable: true,
+                        Maven: null),
+                    progress: null,
+                    cancellationToken)
+                .ConfigureAwait(false);
+            instance = switched.Instance;
+            Console.WriteLine($"Launch version after switch: {switched.VersionId}");
+        }
+
         if (joinServer is { Length: > 0 })
         {
             instance.LastServerAddress = joinServer;

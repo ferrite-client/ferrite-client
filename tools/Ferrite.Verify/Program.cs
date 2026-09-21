@@ -43,6 +43,8 @@ internal static class Program
                     args.Contains("--default", StringComparer.OrdinalIgnoreCase),
                     GetOption(args, "--world"),
                     GetOption(args, "--join"),
+                    GetOption(args, "--loader-version"),
+                    GetOption(args, "--instance"),
                     cancellation.Token),
                 "manifest" => await Scenarios.ManifestAsync(services, cancellation.Token),
                 "install" => await Scenarios.InstallAsync(services, versionId, cancellation.Token),

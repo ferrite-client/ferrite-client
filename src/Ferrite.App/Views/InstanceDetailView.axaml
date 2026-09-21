@@ -40,6 +40,30 @@
               <TextBlock Classes="muted" TextWrapping="Wrap" Text="{Binding LoaderStatus}" />
             </StackPanel>
 
+            <StackPanel Spacing="4" IsVisible="{Binding CanChangeLoader}">
+              <TextBlock Classes="label" Text="{DynamicResource L.Instance.LoaderVersion}" />
+              <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                <ComboBox Grid.Column="0" HorizontalAlignment="Stretch"
+                          ItemsSource="{Binding LoaderVersions}"
+                          SelectedItem="{Binding SelectedLoaderVersion}"
+                          AutomationProperties.Name="{DynamicResource L.Instance.LoaderVersion}">
+                  <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                      <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="{Binding Version}" />
+                        <TextBlock Classes="faint" Text="{DynamicResource L.Instance.LoaderStable}"
+                                   IsVisible="{Binding Stable}" />
+                      </StackPanel>
+                    </DataTemplate>
+                  </ComboBox.ItemTemplate>
+                </ComboBox>
+                <Button Grid.Column="1" Content="{DynamicResource L.Instance.ApplyLoaderVersion}"
+                        Command="{Binding ApplyLoaderVersionCommand}"
+                        IsEnabled="{Binding !IsLoaderSwitchBusy}" />
+              </Grid>
+              <TextBlock Classes="faint" TextWrapping="Wrap" Text="{Binding LoaderSwitchStatus}" />
+            </StackPanel>
+
             <StackPanel Spacing="4">
               <TextBlock Classes="label" Text="{DynamicResource L.Instance.FieldJavaRuntime}" />
               <ComboBox ItemsSource="{Binding JavaRuntimes}" SelectedItem="{Binding SelectedJava}"

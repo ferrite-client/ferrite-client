@@ -82,6 +82,13 @@ public sealed class AppServices : IDisposable
             loggerFactory.CreateLogger<ForgeLoaderService>(),
             loggerFactory);
         Cache = new ContentCache(paths.CacheDirectory, loggerFactory.CreateLogger<ContentCache>());
+        LoaderSwitcher = new InstanceLoaderSwitcher(
+            Instances,
+            Fabric,
+            Forge,
+            Installer,
+            Java,
+            loggerFactory.CreateLogger<InstanceLoaderSwitcher>());
         Manifests = new ContentManifestStore(loggerFactory.CreateLogger<ContentManifestStore>());
         Modrinth = new CachedContentProvider(
             new ModrinthClient(
@@ -190,6 +197,9 @@ public sealed class AppServices : IDisposable
     public InstanceLauncher InstanceLauncher { get; }
 
     public InstanceStore Instances { get; }
+
+    /// <summary>Moves an instance onto another loader version, with the install done first.</summary>
+    public InstanceLoaderSwitcher LoaderSwitcher { get; }
 
     public InstanceManager InstanceManager { get; }
 

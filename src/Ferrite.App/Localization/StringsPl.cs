@@ -224,6 +224,15 @@ internal static class StringsPl
             ["L.Instance.DropModsHint"] = "Przeciągnij pliki modów tutaj lub użyj opcji Dodaj mody.",
             ["L.Instance.Loader"] = "LOADER",
             ["L.Instance.LoaderVanilla"] = "Vanilla (bez loadera)",
+            ["L.Instance.LoaderVersion"] = "WERSJA MOD LOADERA",
+            ["L.Instance.LoaderStable"] = "stabilna",
+            ["L.Instance.ApplyLoaderVersion"] = "Użyj tej wersji",
+            ["L.Instance.NoLoaderToChange"] =
+                "Ta instancja działa na czystym Minecrafcie, więc nie ma wersji loadera do zmiany.",
+            ["L.Instance.NoLoaderBuilds"] = "Nie opublikowano buildów loadera dla Minecrafta {0}.",
+            ["L.Instance.LoaderBuilds"] = "Dostępnych buildów loadera: {0}.",
+            ["L.Instance.LoaderAlreadyCurrent"] = "Już działa wersja {0}.",
+            ["L.Instance.LoaderSwitched"] = "Ta instancja działa teraz na {0} {1}.",
             ["L.Instance.InstallOptiFine"] = "Zainstaluj OptiFine z pobranego instalatora...",
             ["L.Instance.OptiFineHint"] =
                 "OptiFine nie udostępnia API, więc jego instalator działa na Twoim komputerze i to Ty "
