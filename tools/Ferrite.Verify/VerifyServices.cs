@@ -113,6 +113,7 @@ internal sealed class VerifyServices : IDisposable
         Servers = new ServerListService(LoggerFactory.CreateLogger<ServerListService>());
         Pinger = new ServerPinger(LoggerFactory.CreateLogger<ServerPinger>());
         LanWorlds = new LanWorldDiscovery(LoggerFactory.CreateLogger<LanWorldDiscovery>());
+        PackFormats = new ClientPackFormat(Paths, LoggerFactory.CreateLogger<ClientPackFormat>());
         Operations = new OperationLog(
             Path.Combine(Paths.LauncherLogsDirectory, "operations.jsonl"),
             LoggerFactory.CreateLogger<OperationLog>());
@@ -187,6 +188,8 @@ internal sealed class VerifyServices : IDisposable
     public ServerPinger Pinger { get; }
 
     public LanWorldDiscovery LanWorlds { get; }
+
+    public ClientPackFormat PackFormats { get; }
 
     public OperationLog Operations { get; }
 

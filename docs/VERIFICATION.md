@@ -909,3 +909,75 @@ world's own name.
 
 The listener is a shared socket, so leaving the detail page stops it; the detail page's Back action
 does that rather than leaving a socket open for the rest of the session.
+
+---
+
+## V014 - Content-pack metadata (2026-09-21)
+
+Environment: Windows 11 x64, .NET 10.0.5, real client files and a real modpack instance in the
+local Ferrite store.
+
+### V014.1 Reading each version's own pack format
+
+Command: `Ferrite.Verify packs`
+
+```
+  26.3: resource format 97.1, data format 121
+  fabric-loader-0.19.3-1.21.1: resource format 34, data format 48
+  fabric-loader-0.19.5-1.21.1: resource format 34, data format 48
+  neoforge-21.1.251: resource format 34, data format 48
+```
+
+These come from the `pack_version` block of each version's own `version.json` inside the installed
+client jar, which is why no version-to-format table is embedded in the source: the game states the
+answer, and a table would drift the first time Mojang changes it.
+
+### V014.2 A defect the first run caught
+
+The first run reported `26.3: no client file, so no pack format is known` even though the jar was
+present. The file uses a **newer** shape than older clients:
+
+```json
+"pack_version": { "resource_major": 97, "resource_minor": 1, "data_major": 121, "data_minor": 0 }
+```
+
+The parser only knew `resource`/`data` and a bare number. It now reads both shapes and carries the
+minor version for display (`97.1`), comparing a pack's `pack_format` against the major, which is what
+a pack's format field means. The message for a genuinely absent client file is now distinct from one
+whose shape is not recognised.
+
+### V014.3 Real packs evaluated against a real instance
+
+```
+Instance Fabulously Optimized (imported) (1.21.1)
+Instance resource pack format: 34
+  resourcepacks/Chat Reporting Helper.zip
+      formats 18–64
+      matches this version (format 34)
+  resourcepacks/Mod Menu Helper.zip
+      format 34
+      matches this version (format 34)
+  resourcepacks/SodiumTranslations.zip
+      formats 15–64
+      matches this version (format 34)
+```
+
+The three resource packs a real modpack ships are read from their own `pack.mcmeta` files and
+compared with the format the instance's client file declares. Two declare ranges, one declares a
+single format, and all three include it.
+
+### V014.4 What the parser accepts and refuses
+
+`PackMetadataTests` covers both `supported_formats` shapes (a list and a `min_inclusive`/
+`max_inclusive` object), a single `pack_format`, pack filters, a chat-component description,
+metadata inside a ZIP, an unpacked pack directory, a ZIP with no `pack.mcmeta`, and malformed input
+(not JSON, no `pack` object, a non-object `pack`). Comparisons are covered for a match, a mismatch,
+a range that contains the instance, and the case where the instance's format could not be
+determined — which reports as unknown rather than as a mismatch, so the launcher does not claim a
+pack is broken when it simply lacks the information.
+
+### V014.5 Interface
+
+`instance-files-packs.png` renders the Files tab with a pack that declares `format 15` against an
+instance using format 34: the file name, its declared format, and "does not list format 34, which
+this version uses". A file that is not a pack at all is still listed, without a compatibility claim.

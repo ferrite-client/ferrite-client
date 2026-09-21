@@ -164,6 +164,57 @@ public sealed class ShellRenderingTests : IDisposable
         Save(frame!, "instance-servers-lan");
     }
 
+    /// <summary>The Files tab reports what each resource pack declares about itself.</summary>
+    [AvaloniaFact]
+    public void Instance_files_tab_reports_pack_formats()
+    {
+        var record = _services.Instances
+            .CreateAsync(
+                new InstanceRecord
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Pack instance",
+                    MinecraftVersion = "1.21.1",
+                    Loader = LoaderKind.Vanilla,
+                },
+                CancellationToken.None)
+            .GetAwaiter()
+            .GetResult();
+
+        var shell = new MainWindowViewModel(_services);
+        var viewModel = new InstanceDetailViewModel(record, _services, shell);
+        viewModel.ResourcePacks.Add(new ContentFileEntry(
+            @"C:\packs\old-pack.zip",
+            "old-pack.zip",
+            1024,
+            true,
+            DateTimeOffset.UtcNow,
+            "format 15",
+            "does not list format 34, which this version uses",
+            IsPackMismatch: true));
+
+        var window = new Window
+        {
+            Content = new InstanceDetailView { DataContext = viewModel },
+            Width = 1200,
+            Height = 900,
+        };
+        window.Show();
+
+        var tabs = window.GetVisualDescendants().OfType<TabControl>().First();
+        tabs.SelectedIndex = 5;
+
+        var frame = window.CaptureRenderedFrame();
+        Assert.NotNull(frame);
+
+        var texts = Texts(window);
+        Assert.Contains("old-pack.zip", texts);
+        Assert.Contains("format 15", texts);
+        Assert.Contains(texts, text => text.Contains("does not list format 34", StringComparison.Ordinal));
+
+        Save(frame!, "instance-files-packs");
+    }
+
     [AvaloniaFact]
     public void Shell_renders_with_navigation_and_status_bar()
     {

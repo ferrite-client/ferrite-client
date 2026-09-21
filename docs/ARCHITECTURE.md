@@ -240,3 +240,17 @@ extraction path is checked for containment inside the intended destination.
   starts it, and leaving the page stops it.
 - A datagram is only ever read, never answered, and the sender address is used as reported: the
   launcher does not probe ports it discovers.
+
+## 15. Pack metadata
+
+- `PackMetadataReader` reads `pack.mcmeta` from a pack ZIP or an unpacked directory: the declared
+  `pack_format`, a `supported_formats` list or `min_inclusive`/`max_inclusive` object, pack filters,
+  and a description that may be a string or a chat component. Malformed input yields "no metadata"
+  rather than an exception, because a pack the launcher cannot read is still a file the user has.
+- `ClientPackFormat` reads the formats a *version* uses from that version's own client file
+  (`version.json` → `pack_version`), supporting both the older `resource`/`data` shape and the
+  current `resource_major`/`resource_minor` shape. Nothing is embedded in a table, so a new game
+  version needs no launcher change to be read correctly.
+- `InstanceContentManager.ListPacks` combines the two and marks a pack whose declared formats
+  exclude the instance. When the instance's format cannot be determined the result is "unknown", not
+  "incompatible": a claim that a pack is broken needs evidence.

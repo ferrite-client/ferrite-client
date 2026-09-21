@@ -32,6 +32,8 @@ What has been exercised end to end against live services (evidence in `docs/VERI
   hand-off script.
 - Finding worlds other players have opened to LAN, straight from the game's own announcement
   broadcast, and adding one to an instance's server list in a click.
+- Reading what each installed resource pack declares and comparing it with the format the instance's
+  own client file uses, so a pack the game will ignore is labelled rather than silently listed.
 - Java discovery across PATH, vendor installs, and the Minecraft launcher's own runtimes.
 
 Content browsing covers Modrinth and CurseForge through one browser. CurseForge needs a

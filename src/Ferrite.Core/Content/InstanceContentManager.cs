@@ -44,6 +44,42 @@ public sealed class InstanceContentManager
     }
 
     /// <summary>
+    /// Lists a pack folder with what each pack declares. A pack that ships a <c>pack.mcmeta</c> whose
+    /// formats exclude this instance is marked, because the game will silently ignore it.
+    /// </summary>
+    public static IReadOnlyList<ContentFileEntry> ListPacks(
+        string gameDirectory,
+        string folder,
+        int? instanceFormat)
+    {
+        var entries = new List<ContentFileEntry>();
+        foreach (var entry in ListFolder(gameDirectory, folder))
+        {
+            // A disabled pack is renamed, not modified, so it is still a readable ZIP.
+            var name = entry.FileName.EndsWith(DisabledSuffix, StringComparison.OrdinalIgnoreCase)
+                ? entry.FileName[..^DisabledSuffix.Length]
+                : entry.FileName;
+            var metadata = name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase)
+                ? PackMetadataReader.ReadFromZip(entry.FilePath)
+                : entry.Enabled
+                    ? PackMetadataReader.ReadFromDirectory(entry.FilePath)
+                    : null;
+
+            var compatibility = PackMetadataReader.Evaluate(metadata, instanceFormat);
+            entries.Add(entry with
+            {
+                PackFormatText = metadata?.FormatText,
+                CompatibilityText = metadata is null
+                    ? null
+                    : PackMetadataReader.DescribeCompatibility(compatibility, instanceFormat),
+                IsPackMismatch = compatibility == PackCompatibility.Mismatch,
+            });
+        }
+
+        return entries;
+    }
+
+    /// <summary>
     /// Enables or disables a content file by renaming it, returning the new path so callers can
     /// update selection state.
     /// </summary>

@@ -165,8 +165,11 @@ public sealed partial class InstanceDetailViewModel : ObservableObject
 
     private void RefreshFolders()
     {
-        Replace(ResourcePacks, InstanceContentManager.ListFolder(GameDirectory, "resourcepacks"));
-        Replace(ShaderPacks, InstanceContentManager.ListFolder(GameDirectory, "shaderpacks"));
+        // Pack formats come from the version's own client file, so an unknown version stays unknown
+        // rather than being guessed from a table that would drift.
+        var formats = _services.PackFormats.Read(Record.MinecraftVersion);
+        Replace(ResourcePacks, InstanceContentManager.ListPacks(GameDirectory, "resourcepacks", formats?.Resource));
+        Replace(ShaderPacks, InstanceContentManager.ListPacks(GameDirectory, "shaderpacks", null));
         Replace(Screenshots, InstanceContentManager.ListFolder(GameDirectory, "screenshots"));
         OnPropertyChanged(nameof(HasResourcePacks));
         OnPropertyChanged(nameof(HasShaderPacks));

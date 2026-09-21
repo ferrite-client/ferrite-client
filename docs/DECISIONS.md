@@ -276,3 +276,18 @@ anyone watching the network.
 
 **Why.** The datagram is already being sent to every device on the segment; reading it adds nothing
 to what the network already exposes. Everything beyond reading it would.
+
+## D025 - Pack compatibility comes from the version's own file, not a table
+
+**Decision.** The format an instance expects is read from `pack_version` in that version's client
+jar, and a pack's declared formats are compared against it. When the client file is missing, or
+declares a shape this build does not recognise, the result is reported as unknown.
+
+**Rejected.** A hardcoded game-version-to-pack-format table. It is the obvious approach and it is
+already stale: a real run reported "no pack format known" for Minecraft 26.3, whose file uses
+`resource_major`/`resource_minor` rather than the older `resource`/`data`. A table would have been
+wrong for every release after the one it was written from, and wrong silently.
+
+**Why.** The game already states the answer in a file the launcher installs. Reading it costs one
+ZIP entry, needs no maintenance, and degrades to "unknown" — which is honest — instead of to a
+confident wrong answer.

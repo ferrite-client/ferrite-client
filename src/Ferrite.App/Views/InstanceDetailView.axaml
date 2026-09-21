@@ -278,7 +278,12 @@
               <ItemsControl ItemsSource="{Binding ResourcePacks}">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate>
-                    <TextBlock Text="{Binding FileName}" />
+                    <StackPanel Spacing="2" Margin="0,0,0,6">
+                      <TextBlock Text="{Binding FileName}" />
+                      <TextBlock Classes="faint" Text="{Binding PackFormatText}" />
+                      <TextBlock Classes="faint" TextWrapping="Wrap"
+                                 Text="{Binding CompatibilityText}" />
+                    </StackPanel>
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>

@@ -142,6 +142,7 @@ public sealed class AppServices : IDisposable
         Servers = new ServerListService(loggerFactory.CreateLogger<ServerListService>());
         Pinger = new ServerPinger(loggerFactory.CreateLogger<ServerPinger>());
         LanWorlds = new LanWorldDiscovery(loggerFactory.CreateLogger<LanWorldDiscovery>());
+        PackFormats = new ClientPackFormat(paths, loggerFactory.CreateLogger<ClientPackFormat>());
         Operations = new OperationLog(
             Path.Combine(paths.LauncherLogsDirectory, "operations.jsonl"),
             loggerFactory.CreateLogger<OperationLog>());
@@ -237,6 +238,9 @@ public sealed class AppServices : IDisposable
     public ServerPinger Pinger { get; }
 
     public LanWorldDiscovery LanWorlds { get; }
+
+    /// <summary>Reads the pack formats a Minecraft version uses, from its installed client file.</summary>
+    public ClientPackFormat PackFormats { get; }
 
     public OperationLog Operations { get; }
 

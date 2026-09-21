@@ -38,4 +38,10 @@ public sealed record ContentFileEntry(
     string FileName,
     long Size,
     bool Enabled,
-    DateTimeOffset ModifiedAt);
+    DateTimeOffset ModifiedAt,
+    /// <summary>Formats the pack declares, when the entry is a pack that declares any.</summary>
+    string? PackFormatText = null,
+    /// <summary>How the pack's formats relate to this instance, when that could be determined.</summary>
+    string? CompatibilityText = null,
+    /// <summary>True when the pack declares formats that exclude the instance's format.</summary>
+    bool IsPackMismatch = false);
