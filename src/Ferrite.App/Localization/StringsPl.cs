@@ -316,6 +316,28 @@ internal static class StringsPl
             ["L.Instance.TabAssistant"] = "Asystent",
             ["L.Instance.TabLocalServer"] = "Serwer lokalny",
             ["L.Instance.TabMap"] = "Mapa",
+            ["L.Instance.TabStructure"] = "Struktura",
+            ["L.Instance.StructureInWorlds"] = "STRUKTURY W TEJ INSTANCJI",
+            ["L.Instance.StructureLoad"] = "Podgląd",
+            ["L.Instance.StructureChoose"] = "Wybierz plik struktury",
+            ["L.Instance.StructureMaterials"] = "MATERIAŁY",
+            ["L.Instance.StructureReading"] = "Odczytywanie struktury...",
+            ["L.Instance.StructureLoaded"] = "Podgląd {0}",
+            ["L.Instance.StructureNoneFound"] =
+                "Ta instancja nie ma jeszcze plików struktur. Wybierz plik albo wygeneruj je w grze.",
+            ["L.Instance.StructureSummary"] =
+                "{0} x {1} x {2} bloków · {3} blok(ów) · {4} materiał(ów)",
+            ["L.Instance.StructureSameVersion"] =
+                "Zapisana w tej samej wersji gry: wczyta się tutaj.",
+            ["L.Instance.StructureOlder"] =
+                "Zapisana w starszej wersji gry: powinna się wczytać, a gra ją zaktualizuje.",
+            ["L.Instance.StructureNewer"] =
+                "Zapisana w nowszej wersji gry: nieznane bloki mogą zostać zastąpione.",
+            ["L.Instance.StructureNoVersion"] =
+                "Plik nie deklaruje wersji danych, więc zgodności nie można sprawdzić.",
+            ["L.Instance.StructureNoGame"] =
+                "Nie znaleziono pliku klienta tej instancji, więc zgodności nie można sprawdzić.",
+            ["L.Instance.StructureUnknown"] = "Nie udało się ustalić zgodności.",
             ["L.Instance.MapWorld"] = "ŚWIAT",
             ["L.Instance.MapCopyTo"] = "KOPIUJ CHUNKI DO",
             ["L.Instance.MapRefresh"] = "Wygeneruj mapę",

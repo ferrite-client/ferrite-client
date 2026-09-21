@@ -2672,3 +2672,73 @@ there is no block colouring, no biome colouring, and no lighting. Selection is p
 clicking; there is no drag-rectangle or brush yet. Copying places chunks at the same coordinates in
 the target world (no offset control in the interface, though the editor takes one), and the game must
 not be running on either world while chunks are edited.
+
+## V044 - Structure preview (2026-09-21)
+
+Commands: `StructureTests` (Core), `InstanceStructureTests` (App), the live run below, and the whole
+suite (`420` Core tests, `100` App tests, all passing).
+
+XMCL's catalogue has "Blueprint Preview - preview a structure in 3D and verify compatibility and
+materials before placing it in-game". The first inventory did not list it. Ferrite now reads a
+structure file, draws it, lists what it is made of, and says whether the instance's own game can load
+it.
+
+### V044.1 A real structure, from a jar Mojang shipped
+
+Command: `Ferrite.Verify structure --jar "<1.21.1 client jar>" --entry
+"data/minecraft/structure/village/plains/houses/plains_library_1.nbt"`.
+
+```
+Client world_version: 3955
+Structures in the jar: 1180
+Reading data/minecraft/structure/village/plains/houses/plains_library_1.nbt
+Structure: 11 x 10 x 17, 1870 block(s), DataVersion 3955
+Distinct materials: 13
+   1239  minecraft:air
+    212  minecraft:oak_planks
+    160  minecraft:oak_stairs
+    126  minecraft:cobblestone
+     88  minecraft:oak_log
+     10  minecraft:wall_torch
+      8  minecraft:bookshelf
+      7  minecraft:glass_pane
+Compatibility: SameVersion
+Preview: 164x116 pixels, 19024 pixel(s)
+Distinct colours drawn: 10
+PASS: a real structure was read, previewed, and checked against the game version.
+```
+
+The input is Mojang's own file, not a fixture, and the material list is what a village library is
+actually built from. The preview is an isometric software projection - each block's top face and two
+side faces, painted back to front - so a structure's shape and proportions are visible; the rendered
+image was also saved and looked at, and reads as a floor with walls rather than a flat wash of colour.
+
+### V044.2 Compatibility compares two real numbers
+
+The game's own data version comes from the `version.json` inside the client jar (`world_version`), and
+the structure's own `DataVersion` comes from the file. Comparing them needs no table that would drift
+with every release: an identical number is `SameVersion`, a lower one is a structure the game will
+update, and a higher one is called out because blocks this version does not know may be replaced. The
+Core tests pin all five outcomes, including both "cannot be checked" cases.
+
+### V044.3 What the tests pin
+
+`StructureReader` is exercised against files written through the same NBT writer the format uses: the
+size, the palette and its block-state properties, the per-block positions, the material counts and
+their order, and the refusal of a file that declares no size. Air is recognised so a preview does not
+draw it, a structure of nothing but air renders nothing rather than an empty frame, a large structure
+is downscaled to fit, a familiar block has its own colour while an unknown one keeps a stable colour
+derived from its name, and a text file handed in as a structure is reported rather than throwing.
+
+### V044.4 The interface
+
+The instance page gains a `Structure` tab: the structures the instance's worlds already ship are
+listed, a file picker takes any `.nbt`, and the pane shows the preview, the size and material count,
+the material list, and the compatibility sentence. Every new label exists in English and Polish; the
+localisation tests pass.
+
+**Limitations, stated precisely.** The preview is an isometric software render, not a GPU scene:
+there is no free camera, no zoom, no lighting model, and block colour comes from the block's name
+rather than from textures, so two modded blocks of the same colour family may look alike. Block
+entities and jigsaw blocks are drawn as ordinary blocks. Placement in a world is not offered - the
+preview is read-only, which is what the row claims.

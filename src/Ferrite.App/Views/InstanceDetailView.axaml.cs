@@ -170,6 +170,33 @@ public partial class InstanceDetailView : UserControl
         }
     }
 
+    /// <summary>Picks a structure file to preview, from anywhere on disk.</summary>
+    private async void OnPickStructureFileClick(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not InstanceDetailViewModel viewModel)
+        {
+            return;
+        }
+
+        var storage = TopLevel.GetTopLevel(this)?.StorageProvider;
+        if (storage is null)
+        {
+            return;
+        }
+
+        var files = await storage.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Choose a structure",
+            AllowMultiple = false,
+            FileTypeFilter =
+            [
+                new FilePickerFileType("Minecraft structure") { Patterns = ["*.nbt"] },
+            ],
+        });
+
+        await viewModel.LoadStructureAsync(files.FirstOrDefault()?.TryGetLocalPath());
+    }
+
     /// <summary>
     /// A click on the map selects the chunk under the pointer. The image is drawn at its own pixel
     /// size, so the pointer's position in the control is a position in the map.

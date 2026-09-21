@@ -160,6 +160,7 @@ public sealed partial class InstanceDetailViewModel : ObservableObject
         await RefreshCrashReportsAsync().ConfigureAwait(true);
         await RefreshWorldsAsync().ConfigureAwait(true);
         RefreshServers();
+        await RefreshStructuresAsync().ConfigureAwait(true);
     }
 
     private async Task LoadJavaRuntimesAsync()

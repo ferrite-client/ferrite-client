@@ -313,6 +313,28 @@ internal static class StringsEn
             ["L.Instance.TabAssistant"] = "Assistant",
             ["L.Instance.TabLocalServer"] = "Local server",
             ["L.Instance.TabMap"] = "Map",
+            ["L.Instance.TabStructure"] = "Structure",
+            ["L.Instance.StructureInWorlds"] = "STRUCTURES IN THIS INSTANCE",
+            ["L.Instance.StructureLoad"] = "Preview",
+            ["L.Instance.StructureChoose"] = "Choose a structure file",
+            ["L.Instance.StructureMaterials"] = "MATERIALS",
+            ["L.Instance.StructureReading"] = "Reading the structure...",
+            ["L.Instance.StructureLoaded"] = "Previewing {0}",
+            ["L.Instance.StructureNoneFound"] =
+                "This instance has no structure files yet. Choose one, or generate some in game.",
+            ["L.Instance.StructureSummary"] =
+                "{0} x {1} x {2} blocks · {3} block(s) · {4} material(s)",
+            ["L.Instance.StructureSameVersion"] =
+                "Saved by this exact game version: it will load here.",
+            ["L.Instance.StructureOlder"] =
+                "Saved by an older game version: it should load, and the game will update it.",
+            ["L.Instance.StructureNewer"] =
+                "Saved by a newer game version: blocks this version does not know may be replaced.",
+            ["L.Instance.StructureNoVersion"] =
+                "The file declares no data version, so compatibility cannot be checked.",
+            ["L.Instance.StructureNoGame"] =
+                "This instance's client file was not found, so compatibility cannot be checked.",
+            ["L.Instance.StructureUnknown"] = "Compatibility could not be determined.",
             ["L.Instance.MapWorld"] = "WORLD",
             ["L.Instance.MapCopyTo"] = "COPY CHUNKS INTO",
             ["L.Instance.MapRefresh"] = "Render the map",

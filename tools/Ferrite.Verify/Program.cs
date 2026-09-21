@@ -85,6 +85,12 @@ internal static class Program
                     GetOption(args, "--world"),
                     int.TryParse(GetOption(args, "--delete"), out var mapDeletes) ? mapDeletes : 0,
                     cancellation.Token),
+                "structure" => await Scenarios.StructureAsync(
+                    services,
+                    GetOption(args, "--jar"),
+                    GetOption(args, "--entry"),
+                    GetOption(args, "--out"),
+                    cancellation.Token),
                 "content" => await Scenarios.InstallContentAsync(
                     services,
                     versionId,
