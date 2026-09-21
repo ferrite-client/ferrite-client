@@ -140,7 +140,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | G09 | Loader update / reinstall / repair | Switch an instance to another loader version: install, lay out, then point | VERIFIED | V033; repair stays the instance's Repair button (V001.5) |
 | G10 | Loader launch behaviour | Loader main class, args, library ordering | VERIFIED | V002.1, V002.2 |
 | G11 | OptiFine install | Recognises OptiFine's own installer, runs it with the right Java in a launcher-owned directory, adopts the produced version into the store, and refuses a build for another Minecraft version | VERIFIED | V016. The user completes OptiFine's installer window: OptiFine publishes no headless entry point and no API |
-| G12 | LabyMod install | Recognise LabyMod's own installer and adopt the produced version | NOT STARTED | XMCL feature catalogue 02 |
+| G12 | LabyMod install | Install LabyMod 4 from its published manifest, library list, and version document, then launch on it | VERIFIED | V042.2 live install (131-entry profile) and launch (exit 0); no key needed |
 | G13 | Bedrock edition instances | Bedrock is a Microsoft Store package with no public install manifest, no version document, and no loader pipeline | BLOCKED EXTERNAL | `HUMAN_ACTION_REQUIRED.md` H7: it needs a distribution channel from Microsoft, or a decision to keep it out of scope |
 
 ## H. Launch pipeline
@@ -287,8 +287,8 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 
 | Status | Count |
 | --- | --- |
-| NOT STARTED | 3 |
+| NOT STARTED | 2 |
 | IN PROGRESS | 0 |
 | IMPLEMENTED | 0 |
-| VERIFIED | 163 |
+| VERIFIED | 164 |
 | BLOCKED EXTERNAL | 19 |

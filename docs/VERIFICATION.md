@@ -2528,3 +2528,72 @@ installer rather than the archive path, since there is no archive to download.
 only "any" and filtering happens on the browser's own version and loader fields. FTB does not publish
 per-version changelogs in the endpoint used here, so the changelog panel is empty for an FTB version.
 Optional pack files are not installed; the pack's own optional list is not offered as a choice yet.
+
+## V042 - LabyMod (2026-09-21)
+
+Commands: `LabyModInstallerTests` (Core), the live run below, and the whole suite (`392` Core tests,
+`89` App tests, all passing).
+
+XMCL's catalogue lists LabyMod among the loaders it installs; the first inventory did not. Ferrite
+installs LabyMod 4 and launches on it. LabyMod needs no key and no account, so nothing here is
+externally blocked.
+
+### V042.1 How LabyMod is installed, and why it is not an installer
+
+LabyMod publishes a manifest (`api/v1/manifest/production/latest.json`), a library list
+(`api/v1/libraries/production.json`), and one complete version document per Minecraft version. That is
+metadata a launcher installs from, so nothing runs an installer window: Ferrite fetches the three
+documents, adds LabyMod's libraries for that version and its client jar to the published version
+document, writes the result into the version store as `<version>-LabyMod-4-<commit>`, and hands it to
+the same installer every other version goes through. LabyMod's own assets are then fetched into the
+instance's `labymod-neo/assets`, which is where LabyMod looks for them.
+
+### V042.2 A real install and a real launch
+
+Command: `Ferrite.Verify labymod 1.21.1 --launch --seconds 75 --instance verify-labymod-1.21.1`.
+
+```
+LabyMod 4.6.21 (commit 5842ece0)
+Assets published: 6
+[info] LabyModInstaller: Wrote the LabyMod profile 1.21.1-LabyMod-4-5842ece0: 131 library entry(ies)
+[info] MinecraftInstaller: Installing 1.21.1-LabyMod-4-5842ece0: 4019 files, 966902548 bytes
+[info] LabyModInstaller: Installed LabyMod 4.6.21 for instance ea742d04-...: 6 asset(s)
+Installed version id: 1.21.1-LabyMod-4-5842ece0
+Assets downloaded: 6
+Profile written: True (...\store\versions\1.21.1-LabyMod-4-5842ece0\1.21.1-LabyMod-4-5842ece0.json)
+Launching the instance on LabyMod...
+  ...-cp ...\net\labymod\LabyMod\4.6.21\LabyMod-4.6.21.jar -Dnet.labymod.running-version=1.21.1
+     net.minecraft.launchwrapper.Launch --username FerriteVerify ...
+PASS: the game ran on the pinned runtime (Eclipse Adoptium 21.0.10 X64).
+[info] LaunchService: Instance ea742d04-... exited with code 0 after 00:01:15.9838739
+```
+
+The classpath is the merged profile's: LabyMod's jar and its `net.laby`/`net.labymod` libraries beside
+Minecraft's own, launched through `net.minecraft.launchwrapper.Launch` with LabyMod's own
+`-Dnet.labymod.running-version` argument, and the game ran to exit code 0.
+
+### V042.3 Two defects the live run found
+
+**The library URL was treated as a repository base.** LabyMod's library URLs are the file's own
+address, but Ferrite's loader profiles (Fabric, Quilt) use the field as a maven *repository*, so the
+planner appended the maven path to the full URL and every library 404ed
+(`.../asm-util-9.9.1.jar/org/ow2/asm/asm-util/9.9.1/asm-util-9.9.1.jar`). The fix puts the complete
+address in an explicit artifact together with the maven path the file would occupy, which is what the
+field means when it is not a repository. The Core test pins both the URL and the path.
+
+**The manifest's size is stale.** The published `size` for the client jar is 14 bytes short of the
+file it serves (`30,058,779` against `30,058,793`), so a size-checked download failed as a checksum
+mismatch. The SHA-1 was checked against the live file and does match, so the hash is enforced and the
+size is deliberately not passed; the code says so where the request is built.
+
+### V042.4 The interface
+
+The instance's settings tab gains an `Install LabyMod` control beside the OptiFine one. Unlike
+OptiFine it needs no file from the user, so it is one button. Installing points the instance at the
+new version and the library card shows `LabyMod 4.6.21`-style text through the existing loader label.
+
+**Limitations, stated precisely.** LabyMod is installed for the instance's own Minecraft version, and
+LabyMod publishes builds for a fixed list of versions - a version it does not publish is refused with
+that reason rather than attempted. The six shared assets are fetched and stored but cannot be verified
+against a checksum, because LabyMod publishes none. Bundled add-ons inside LabyMod are not managed
+from Ferrite.

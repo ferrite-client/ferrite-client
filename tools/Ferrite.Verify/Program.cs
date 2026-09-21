@@ -73,6 +73,13 @@ internal static class Program
                     GetOption(args, "--version"),
                     args.Contains("--force", StringComparer.OrdinalIgnoreCase),
                     cancellation.Token),
+                "labymod" => await Scenarios.LabyModAsync(
+                    services,
+                    versionId,
+                    seconds,
+                    args.Contains("--launch", StringComparer.OrdinalIgnoreCase),
+                    GetOption(args, "--instance"),
+                    cancellation.Token),
                 "content" => await Scenarios.InstallContentAsync(
                     services,
                     versionId,

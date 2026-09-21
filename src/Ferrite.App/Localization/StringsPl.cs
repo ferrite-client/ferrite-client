@@ -271,6 +271,11 @@ internal static class StringsPl
             ["L.Instance.LoaderAlreadyCurrent"] = "Już działa wersja {0}.",
             ["L.Instance.LoaderSwitched"] = "Ta instancja działa teraz na {0} {1}.",
             ["L.Instance.InstallOptiFine"] = "Zainstaluj OptiFine z pobranego instalatora...",
+            ["L.Instance.InstallLabyMod"] = "Zainstaluj LabyMod",
+            ["L.Instance.LabyModHint"] =
+                "LabyMod publikuje własną kompilację dla każdej wersji Minecrafta; Ferrite ją instaluje i uruchamia.",
+            ["L.Instance.LabyModInstalling"] = "Instalowanie LabyMod...",
+            ["L.Instance.LabyModInstalled"] = "Zainstalowano LabyMod {0} jako {1}",
             ["L.Instance.OptiFineHint"] =
                 "OptiFine nie udostępnia API, więc jego instalator działa na Twoim komputerze i to Ty "
                 + "klikasz Zainstaluj w jego oknie. Ferrite uruchamia go z właściwą Javą, a następnie "

@@ -269,6 +269,11 @@ internal static class StringsEn
             ["L.Instance.LoaderAlreadyCurrent"] = "Already running {0}.",
             ["L.Instance.LoaderSwitched"] = "This instance now runs {0} {1}.",
             ["L.Instance.InstallOptiFine"] = "Install OptiFine from a downloaded installer...",
+            ["L.Instance.InstallLabyMod"] = "Install LabyMod",
+            ["L.Instance.LabyModHint"] =
+                "LabyMod publishes its own build per Minecraft version, which Ferrite installs and runs.",
+            ["L.Instance.LabyModInstalling"] = "Installing LabyMod...",
+            ["L.Instance.LabyModInstalled"] = "Installed LabyMod {0} as {1}",
             ["L.Instance.OptiFineHint"] =
                 "OptiFine publishes no API, so its installer runs on your machine and you click Install "
                 + "in its own window. Ferrite starts it with the right Java, then adopts what it "

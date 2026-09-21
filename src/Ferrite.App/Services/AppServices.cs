@@ -174,6 +174,12 @@ public sealed class AppServices : IDisposable
         LanWorlds = new LanWorldDiscovery(loggerFactory.CreateLogger<LanWorldDiscovery>());
         PackFormats = new ClientPackFormat(paths, loggerFactory.CreateLogger<ClientPackFormat>());
         OptiFine = new OptiFineInstaller(paths, loggerFactory.CreateLogger<OptiFineInstaller>());
+        LabyMod = new LabyModInstaller(
+            Http,
+            Downloads,
+            Installer,
+            paths,
+            loggerFactory.CreateLogger<LabyModInstaller>());
         Operations = new OperationLog(
             Path.Combine(paths.LauncherLogsDirectory, "operations.jsonl"),
             loggerFactory.CreateLogger<OperationLog>());
@@ -293,6 +299,9 @@ public sealed class AppServices : IDisposable
 
     /// <summary>Invokes OptiFine's own installer and adopts what it produced into the store.</summary>
     public OptiFineInstaller OptiFine { get; }
+
+    /// <summary>Installs LabyMod 4 by merging its published metadata into the version store.</summary>
+    public LabyModInstaller LabyMod { get; }
 
     public OperationLog Operations { get; }
 

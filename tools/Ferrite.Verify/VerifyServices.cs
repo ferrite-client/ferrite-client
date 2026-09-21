@@ -144,6 +144,12 @@ internal sealed class VerifyServices : IDisposable
         Pinger = new ServerPinger(LoggerFactory.CreateLogger<ServerPinger>());
         LanWorlds = new LanWorldDiscovery(LoggerFactory.CreateLogger<LanWorldDiscovery>());
         PackFormats = new ClientPackFormat(Paths, LoggerFactory.CreateLogger<ClientPackFormat>());
+        LabyMod = new LabyModInstaller(
+            Http,
+            Downloads,
+            Installer,
+            Paths,
+            LoggerFactory.CreateLogger<LabyModInstaller>());
         Operations = new OperationLog(
             Path.Combine(Paths.LauncherLogsDirectory, "operations.jsonl"),
             LoggerFactory.CreateLogger<OperationLog>());
@@ -235,6 +241,9 @@ internal sealed class VerifyServices : IDisposable
     public LanWorldDiscovery LanWorlds { get; }
 
     public ClientPackFormat PackFormats { get; }
+
+    /// <summary>Installs LabyMod 4 from its published manifest, library list, and version document.</summary>
+    public LabyModInstaller LabyMod { get; }
 
     public OperationLog Operations { get; }
 

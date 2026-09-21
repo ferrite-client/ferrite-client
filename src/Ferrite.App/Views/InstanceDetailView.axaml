@@ -43,9 +43,14 @@
                 <TextBlock Text="{Binding LoaderSummary}" VerticalAlignment="Center" />
                 <Button Content="{DynamicResource L.Instance.InstallOptiFine}"
                         Click="OnInstallOptiFineClick" />
+                <Button Content="{DynamicResource L.Instance.InstallLabyMod}"
+                        Command="{Binding InstallLabyModCommand}"
+                        IsEnabled="{Binding !IsInstallingLoader}" />
               </StackPanel>
               <TextBlock Classes="faint" TextWrapping="Wrap"
                          Text="{DynamicResource L.Instance.OptiFineHint}" />
+              <TextBlock Classes="faint" TextWrapping="Wrap"
+                         Text="{DynamicResource L.Instance.LabyModHint}" />
               <TextBlock Classes="muted" TextWrapping="Wrap" Text="{Binding LoaderStatus}" />
             </StackPanel>
 

@@ -8,6 +8,12 @@ public enum LoaderKind
     NeoForge = 3,
     Forge = 4,
     OptiFine = 5,
+
+    /// <summary>
+    /// LabyMod 4. Its loader version stores the whole installed version id, like OptiFine, because the
+    /// published profile is a standalone version document rather than a patch of a vanilla one.
+    /// </summary>
+    LabyMod = 6,
 }
 
 public static class LoaderKindExtensions
@@ -20,6 +26,7 @@ public static class LoaderKindExtensions
         LoaderKind.NeoForge => "NeoForge",
         LoaderKind.Forge => "Forge",
         LoaderKind.OptiFine => "OptiFine",
+        LoaderKind.LabyMod => "LabyMod",
         _ => kind.ToString(),
     };
 
@@ -32,6 +39,8 @@ public static class LoaderKindExtensions
         LoaderKind.Forge => "forge",
         LoaderKind.Vanilla => null,
         LoaderKind.OptiFine => "optifine",
+        // No content provider publishes mods tagged for LabyMod, so there is no token to filter on.
+        LoaderKind.LabyMod => null,
         _ => null,
     };
 }
