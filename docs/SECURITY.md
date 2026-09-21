@@ -96,7 +96,7 @@ Every path that consumes untrusted input was re-read after the feature work, wit
 | Credential disclosure | The central redactor is applied to every log line and to the launch-command preview; both are covered by tests. Third-party logging (NeoForge's ModLauncher) was observed redacting tokens itself, which is why the launcher must not rely on it. |
 | Temporary files | Downloads write to a `.part` sibling and are moved into place only after verification. Installer working directories are deleted in a `finally` block. |
 | HTTP handling | HTTPS everywhere, bounded response sizes, per-attempt timeouts, retry classification, and no plaintext endpoints in the default configuration. |
-| Update installation | Not implemented, so there is no updater attack surface yet. When it is added it must follow the staging and verification rules above. |
+| Update installation | Manifests are fetched over TLS and accepted only when their detached signature verifies against a key embedded in this build (ECDSA P-256 or RSA, SHA-256); the package's SHA-256 is checked before it is unpacked, extraction uses the same containment-checked extractor as every other archive, and staging happens outside the install root. The launcher never replaces its own running files: it writes a hand-off script whose body is a constant and which receives every path as a named argument, so no value from the feed is interpolated into script text. Covered by tests. |
 
 **Residual risks accepted for now**
 

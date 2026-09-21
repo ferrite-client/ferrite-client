@@ -38,6 +38,15 @@ What has been exercised end to end against live services (evidence in `docs/VERI
 - OptiFine support: Ferrite recognises the installer you download, runs it with the right Java in
   its own working directory, and adopts the resulting version into the launcher's store.
 - Java discovery across PATH, vendor installs, and the Minecraft launcher's own runtimes.
+- Browsing content with the provider's own facets: a category, loader, and game-version filter, a
+  project panel with licence, tags, description and gallery, and the changelog of the version chosen.
+- Managing what is installed in an instance: mods with search, filtering, ordering, and bulk actions;
+  resource packs, shader packs, and per-world datapacks that can be disabled or removed (removal keeps
+  the file in the launcher's backups); a screenshot gallery; and each world's own icon.
+- Switching an instance's mod loader version, which installs the version, lays the instance out for
+  it, and only then points the instance at it.
+- Moving the launcher's data folder from Settings, with the choice remembered for the next start.
+- Applying a modpack over an existing instance, with everything it replaces moved to a named backup.
 
 Content browsing covers Modrinth and CurseForge through one browser. CurseForge needs a
 user-issued API key; until one is stored, that provider reports a configuration state rather
@@ -128,3 +137,29 @@ Neither secret is ever committed to this repository.
 | `docs/VERIFICATION.md` | Recorded evidence for verified capabilities |
 | `docs/DEVELOPMENT.md` | Build, test, package, conventions |
 | `docs/HUMAN_ACTION_REQUIRED.md` | Externally blocked items and exact user steps |
+
+## Troubleshooting
+
+**The launcher refuses to start a version.** Open the instance, press Verify; if it reports damaged
+files, press Repair. A version that is not installed at all is downloaded on the next launch.
+
+**"No compatible Java runtime is installed."** Open the Java page: every discovered runtime is
+listed, and a runtime can be added by path. The page also downloads a suitable runtime for a chosen
+Minecraft version.
+
+**The game does not open the world a quick-play launch asked for.** The launch is passed the
+arguments the version document and the wiki describe, which is verified; the game's own response is
+recorded as blocked, and `docs/HUMAN_ACTION_REQUIRED.md` H6 says exactly what to check.
+
+**A modpack or a mod will not install from CurseForge.** That provider needs an API key: Settings ->
+Content providers. Modrinth needs no key.
+
+**Something went wrong and there is nothing useful on screen.** Settings -> Diagnostics writes a
+support bundle: launcher logs with secrets redacted, the operation history, Java and platform
+information, and the instance's own recent output.
+
+**The launcher's data is on a drive that is filling up.** Settings -> Storage -> Move data folder
+copies it elsewhere and remembers the choice for the next start.
+
+**Windows shows a warning on first run.** The package is not code-signed; `docs/HUMAN_ACTION_REQUIRED.md`
+H5 describes signing.
