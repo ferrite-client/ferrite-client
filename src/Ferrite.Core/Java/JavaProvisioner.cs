@@ -68,7 +68,8 @@ public sealed class JavaProvisioner
     {
         var catalog = await GetCatalogAsync(forceRefresh: false, cancellationToken).ConfigureAwait(false);
         var osKey = OsKey();
-        if (!catalog.TryGetValue(osKey, out var components)
+        if (osKey is null
+            || !catalog.TryGetValue(osKey, out var components)
             || !components.TryGetValue(component, out var releases)
             || releases.Count == 0)
         {
@@ -136,7 +137,8 @@ public sealed class JavaProvisioner
 
         var catalog = await GetCatalogAsync(forceRefresh: false, cancellationToken).ConfigureAwait(false);
         var osKey = OsKey();
-        if (!catalog.TryGetValue(osKey, out var components)
+        if (osKey is null
+            || !catalog.TryGetValue(osKey, out var components)
             || !components.TryGetValue(component, out var releases)
             || releases.Count == 0)
         {
@@ -237,11 +239,22 @@ public sealed class JavaProvisioner
         return runtime;
     }
 
-    public static string OsKey() => PlatformInfo.Os switch
+    /// <summary>
+    /// The key Mojang's catalog uses for this host. It is architecture-specific — the catalog is
+    /// keyed by <c>windows-x64</c>, <c>windows-arm64</c>, <c>linux-i386</c>, <c>mac-os</c> — so a
+    /// bare OS name never matches and provisioning would always report "nothing published".
+    /// </summary>
+    /// <returns>The catalog key, or null when Mojang publishes nothing for this architecture.</returns>
+    public static string? OsKey() => (PlatformInfo.Os, PlatformInfo.Arch) switch
     {
-        OperatingSystemKind.Windows => "windows",
-        OperatingSystemKind.Linux => "linux",
-        _ => "macos",
+        (OperatingSystemKind.Windows, CpuArchitecture.X64) => "windows-x64",
+        (OperatingSystemKind.Windows, CpuArchitecture.X86) => "windows-x86",
+        (OperatingSystemKind.Windows, CpuArchitecture.Arm64) => "windows-arm64",
+        (OperatingSystemKind.Linux, CpuArchitecture.X64) => "linux",
+        (OperatingSystemKind.Linux, CpuArchitecture.X86) => "linux-i386",
+        (OperatingSystemKind.MacOs, CpuArchitecture.Arm64) => "mac-os-arm64",
+        (OperatingSystemKind.MacOs, _) => "mac-os",
+        _ => null,
     };
 
     private static string? NormalizeEntryPath(string entryPath, string component)

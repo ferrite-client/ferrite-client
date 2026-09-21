@@ -220,24 +220,7 @@ internal sealed class ForgeProcessorRunner
             throw new LoaderException($"Processor jar is missing: {processorJar}");
         }
 
-        var classpathEntries = new List<string>();
-        foreach (var entry in processor.Classpath)
-        {
-            var path = LibraryPathFor(entry);
-            if (File.Exists(path))
-            {
-                classpathEntries.Add(path);
-            }
-            else
-            {
-                _logger.LogWarning("Processor classpath entry missing: {Path}", path);
-            }
-        }
-
-        if (classpathEntries.Count == 0)
-        {
-            classpathEntries.Add(processorJar);
-        }
+        var classpathEntries = BuildClasspath(processorJar, processor.Classpath.Select(LibraryPathFor));
 
         var mainClass = ReadMainClass(processorJar);
         var arguments = new List<string>
@@ -354,6 +337,32 @@ internal sealed class ForgeProcessorRunner
         return Path.Combine(
             _paths.LibrariesDirectory,
             coordinates.RelativePath.Replace('/', Path.DirectorySeparatorChar));
+    }
+
+    /// <summary>
+    /// Assembles a processor's classpath. The processor jar is always first: Forge's own install
+    /// profiles list only the processor's dependencies in "classpath", so leaving it to that list
+    /// means the JVM is asked to run a class that is not on the classpath at all.
+    /// </summary>
+    internal static List<string> BuildClasspath(string processorJar, IEnumerable<string> declaredEntries)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(processorJar);
+        ArgumentNullException.ThrowIfNull(declaredEntries);
+
+        var entries = new List<string> { processorJar };
+        foreach (var path in declaredEntries)
+        {
+            if (string.IsNullOrWhiteSpace(path)
+                || !File.Exists(path)
+                || entries.Contains(path, StringComparer.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            entries.Add(path);
+        }
+
+        return entries;
     }
 
     /// <summary>

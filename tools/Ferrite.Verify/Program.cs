@@ -30,6 +30,11 @@ internal static class Program
             return command switch
             {
                 "java" => await Scenarios.ListJavaAsync(services, cancellation.Token),
+                "provision-java" => await Scenarios.ProvisionJavaAsync(
+                    services,
+                    GetOption(args, "--minecraft"),
+                    GetOption(args, "--component"),
+                    cancellation.Token),
                 "manifest" => await Scenarios.ManifestAsync(services, cancellation.Token),
                 "install" => await Scenarios.InstallAsync(services, versionId, cancellation.Token),
                 "verify" => await Scenarios.VerifyAsync(services, versionId, cancellation.Token),

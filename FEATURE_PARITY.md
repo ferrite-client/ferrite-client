@@ -27,7 +27,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | A05 | Crash-safe settings persistence | Atomic JSON write, schema version, migration, backup on damage | IMPLEMENTED | tests |
 | A06 | Storage layout separation | config / data / store / instances / cache / logs / tmp / backups | VERIFIED | V001 |
 | A07 | Nullable-clean, warning-free build | `TreatWarningsAsErrors`, analyzer-clean | VERIFIED | V001 |
-| A08 | Automated test suite | xUnit projects `Ferrite.Core.Tests` and `Ferrite.App.Tests` | VERIFIED | 281 tests (2026-09-21) |
+| A08 | Automated test suite | xUnit projects `Ferrite.Core.Tests` and `Ferrite.App.Tests` | VERIFIED | 285 tests (2026-09-21) |
 | A09 | Windows packaging | `scripts/package.ps1` publishes framework-dependent and self-contained win-x64 builds with zips | VERIFIED | V011.1, V011.2; unsigned (see `HUMAN_ACTION_REQUIRED.md`) |
 | A10 | Clean-checkout build script | `scripts/build.ps1`, `test.ps1`, `package.ps1`, `verify-live.ps1` | VERIFIED | V011.1; the earlier claim that `package.ps1` existed was wrong and is now true |
 
@@ -59,7 +59,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | C01 | Version manifest retrieval + cache | Cached manifest with age policy and offline fallback | VERIFIED | V001.2 |
 | C02 | Version listing by channel | release / snapshot / old_beta / old_alpha | VERIFIED | V001.2 |
 | C03 | Version metadata resolution | Per-version document fetch + cache + staleness by hash | VERIFIED | V001.3 |
-| C04 | Version inheritance | Recursive `inheritsFrom` merge with cycle guard | IMPLEMENTED | tests; live with Fabric pending |
+| C04 | Version inheritance | Recursive `inheritsFrom` merge with cycle guard | VERIFIED | V017.2 Quilt install resolved and installed the inherited 1.21.1 document and verified 3973 files |
 | C05 | Rule evaluation | OS, arch, version-range, and feature rules | VERIFIED | V001.3 |
 | C06 | Client JAR acquisition | `downloads.client` with SHA-1 verification | VERIFIED | V001.3 |
 | C07 | Library acquisition | Explicit `path` or derived maven path | VERIFIED | V001.3 |
@@ -100,7 +100,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | E05 | Global default Java | Persisted launcher default | IMPLEMENTED | settings model |
 | E06 | Per-instance Java | Instance override field + preflight | IMPLEMENTED | - |
 | E07 | Custom Java path | User path validated by probing | IMPLEMENTED | - |
-| E08 | Automatic Java provisioning | Mojang runtime catalog, file manifest, download, verify | IMPLEMENTED | not yet run live |
+| E08 | Automatic Java provisioning | Mojang runtime catalog, file manifest, download, verify | VERIFIED | V017.1 live download of java-runtime-gamma, probed by running it, reused on a second call |
 | E09 | Runtime validation | Runs the runtime before use | VERIFIED | V001.1 |
 | E10 | JVM/RAM editor | Memory and custom JVM argument model | IMPLEMENTED | tests |
 
@@ -129,12 +129,12 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | --- | --- | --- | --- | --- |
 | G01 | Fabric version discovery | `/v2/versions/loader/{game}` catalogue | VERIFIED | V002.1 |
 | G02 | Fabric profile install | Merge loader profile, resolve maven libraries | VERIFIED | V002.1 |
-| G03 | Quilt version discovery | `/v3/versions/loader` catalogue | IMPLEMENTED | same path as Fabric |
-| G04 | Quilt profile install | Merge loader profile, resolve maven libraries | IMPLEMENTED | same path as Fabric |
+| G03 | Quilt version discovery | `/v3/versions/loader` catalogue | VERIFIED | V017.2 |
+| G04 | Quilt profile install | Merge loader profile, resolve maven libraries | VERIFIED | V017.2 `quilt-loader-0.17.0-beta.1-1.21.1` installed |
 | G05 | NeoForge version discovery | Maven metadata per Minecraft version | VERIFIED | V002.2 |
 | G06 | NeoForge installer run | Official installer processors with an argument list | VERIFIED | V002.2 |
-| G07 | Forge version discovery | Maven metadata per Minecraft version | IMPLEMENTED | same path as NeoForge |
-| G08 | Forge installer run | Official installer processors with an argument list | IMPLEMENTED | same path as NeoForge |
+| G07 | Forge version discovery | Maven metadata per Minecraft version | VERIFIED | V017.3 |
+| G08 | Forge installer run | Official installer processors with an argument list | VERIFIED | V017.3; the classpath defect it found is covered by `LoaderInstallTests` |
 | G09 | Loader update / reinstall / repair | Switch loader version safely | IMPLEMENTED | reinstall by version id |
 | G10 | Loader launch behaviour | Loader main class, args, library ordering | VERIFIED | V002.1, V002.2 |
 | G11 | OptiFine install | Recognises OptiFine's own installer, runs it with the right Java in a launcher-owned directory, adopts the produced version into the store, and refuses a build for another Minecraft version | VERIFIED | V016. The user completes OptiFine's installer window: OptiFine publishes no headless entry point and no API |
@@ -273,6 +273,12 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 ## Summary
 
 | Status | Count |
+| --- | --- |
+| NOT STARTED | 0 |
+| IN PROGRESS | 0 |
+| IMPLEMENTED | 57 |
+| VERIFIED | 110 |
+| BLOCKED EXTERNAL | 5 |
 | --- | --- |
 | NOT STARTED | 0 |
 | IN PROGRESS | 0 |

@@ -1117,3 +1117,98 @@ downloaded installer...* action, and the explanation of what happens — includi
 completes OptiFine's own window. The message is there because a launcher that silently opens a
 third-party installer window would be confusing; a launcher that claims to install OptiFine without
 that window would be lying.
+
+---
+
+## V017 - Java provisioning, and two loader defects (2026-09-21)
+
+Environment: Windows 11 x64, .NET 10.0.5, live Mojang and Forge services. Scratch data roots; the
+loader runs share the launcher's artifact store so the game files are not downloaded twice.
+
+### V017.1 Automatic Java provisioning never worked, and now does
+
+Command: `Ferrite.Verify provision-java --minecraft 1.21.1 --component java-runtime-gamma`
+
+First run:
+
+```
+Mojang publishes no runtime for windows.
+```
+
+Mojang's runtime catalog is keyed by **architecture**: `windows-x64`, `windows-x86`, `windows-arm64`,
+`linux`, `linux-i386`, `mac-os`, `mac-os-arm64`. The provisioner asked for `windows`, so the lookup
+could never match and every provisioning attempt failed before downloading anything. The method now
+maps the host's OS and architecture onto the catalog's key, and returns null only for an
+architecture Mojang does not publish for (Linux arm64), where the honest answer is "no runtime",
+not a wrong one.
+
+After the fix:
+
+```
+Mojang publishes 6 runtime component(s) for windows-x64: ...
+Component java-runtime-gamma: 2 published build(s)
+Provisioning java-runtime-gamma (17.0.15)...
+Provisioned: Microsoft 17.0.15 X64
+  executable: <root>\data\store\runtimes\java-runtime-gamma\bin\java.exe
+  version:    17.0.15
+  vendor:     Microsoft
+  source:     ManagedRuntime
+  exists:     True
+  reused on a second call: True
+```
+
+The runtime manifest was fetched, every file downloaded, the build extracted, and the result probed
+by running it — the version and vendor in the output come from the JVM itself, not from the
+catalog. A second call reuses it instead of downloading again.
+
+### V017.2 Quilt installs, and proves version inheritance
+
+Command: `Ferrite.Verify quilt 1.21.1`
+
+```
+Instance install complete: 3973 files, 875.7 MiB
+```
+
+The store gained `quilt-loader-0.17.0-beta.1-1.21.1`, whose version document declares
+`inheritsFrom: 1.21.1` and the Quilt `KnotClient` main class. Resolving and installing that version
+is the version-inheritance path running for real: the vanilla client, libraries, and assets came
+from the inherited document.
+
+### V017.3 Forge failed, and the reason was a real defect
+
+Command: `Ferrite.Verify forge 1.21.1`
+
+First run:
+
+```
+Processor net.minecraftforge.installertools.ConsoleTool failed with 1: Error: Could not find or load
+main class net.minecraftforge.installertools.ConsoleTool
+```
+
+The jar was present and did contain that class. Forge's install profile lists a processor's
+**dependencies** in `classpath` and does not list the processor's own jar — Ferrite added those
+dependencies and treated the list as complete, so the JVM was handed a classpath without the class
+it had been asked to run. NeoForge's profile happens to include the processor jar, which is why the
+shared path looked correct until it was run against Forge.
+
+The classpath is now built by `ForgeProcessorRunner.BuildClasspath`, which always places the
+processor jar first, skips entries that were not downloaded, and deduplicates. `LoaderInstallTests`
+covers all three behaviours.
+
+After the fix:
+
+```
+Instance install complete: 3996 files, 911.3 MiB
+```
+
+The seven processors ran, the binary patcher produced a 28 MB patched client, and the store now
+holds `1.21.1-forge-52.1.16` with `mainClass: net.minecraftforge.bootstrap.ForgeBootstrap`, 49
+libraries, and `inheritsFrom: 1.21.1`. One processor declares `sides: ["server"]` and is skipped for
+a client install; its outputs are `win_args.txt`/`unix_args.txt`, and the client version document
+references no `args.txt` at all, so nothing is missing.
+
+### V017.4 What this says about the remaining `IMPLEMENTED` rows
+
+Both defects were in rows marked `IMPLEMENTED` with evidence like "same path as Fabric" or "same path
+as NeoForge". Those claims were plausible and wrong. The audit continues row by row: a row moves to
+`VERIFIED` only when the workflow has actually been run, which is how these two were found.
