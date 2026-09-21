@@ -2186,3 +2186,43 @@ localisation tests enforce by failing on a missing, unused, or placeholder-misma
 **Limitations, stated precisely.** Folders are a flat, single-level grouping: an instance is in one
 folder or none, and folders have no nesting, colour, or ordering of their own. That matches what the
 library filter needs; the parity row does not claim anything more.
+
+## V035 - Custom mod groups (2026-09-21)
+
+Commands: `ModGroupTests` (Core), `InstanceModGroupTests` (App), and the whole suite
+(`334` Core tests, `72` App tests, all passing).
+
+XMCL's catalogue has "Custom Mod Groups - build your own groups and save the rules that organize a
+complex instance". The first inventory did not list it. Ferrite now lets an instance carry named mod
+groups and filters the mod list by one.
+
+### V035.1 A group is a rule, not a stored list
+
+A `ModGroup` is a name plus a substring; a mod belongs to it when its display name or its file name
+contains that substring, case-insensitively. The Core tests pin the rule (display name, file name,
+either, neither, and an empty rule matching nothing), the add-or-replace semantics of `Upsert`, the
+refusal of a blank name or rule, `Remove` by name ignoring case, and a round trip through the
+instance record. Because membership is derived, a group cannot go stale when the pack underneath it
+changes - the same reason the instance's own list is a view over a scan rather than a cache.
+
+### V035.2 The mod tab's filter and editor
+
+The App tests drive the real view model. The group filter is built from the instance's own groups
+behind an "all groups" entry; choosing one narrows the list, and it composes with the search box
+rather than replacing it. The editor refuses a group with a blank name or rule with an on-screen
+message instead of silently accepting something that would match every mod, saves an accepted group
+to disk so a reload still has it, adds it to the filter, and removes both the group and its filter
+entry when asked. "Remove" is disabled for the "all groups" entry, so the only way to delete a real
+group is to select a real one.
+
+### V035.3 The interface and its effect on the layout
+
+The mods tab gains a fourth filter control (group) beside query, loader, and order, and a `Groups`
+button in its header that opens the editor. Adding the control meant widening that row rather than
+adding an action to the already-full bulk-action row, so the tab keeps its existing button budget.
+Every new label exists in English and Polish; the localisation tests fail on a missing, unused, or
+placeholder-mismatched key, and they pass.
+
+**Limitations, stated precisely.** Groups match on substrings of the mod's name or file name only;
+there is no expression language, no per-group ordering, and no cross-instance group sharing. A mod
+can be in several groups at once, which is a property of the rule rather than a stored membership.

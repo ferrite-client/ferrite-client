@@ -271,6 +271,18 @@ internal static class StringsPl
             ["L.Instance.NoModMatches"] = "Żaden zainstalowany mod nie pasuje do wyszukiwania.",
             ["L.Instance.ModSearchPlaceholder"] = "Szukaj modów",
             ["L.Instance.ModLoaderAll"] = "Wszystkie loadery",
+            ["L.Instance.ModGroupAll"] = "Wszystkie grupy",
+            ["L.Instance.ModGroups"] = "Grupy",
+            ["L.Instance.ModGroupHint"] =
+                "Grupa to nazwa i reguła: mod trafia do niej, gdy jego nazwa lub nazwa pliku zawiera "
+                + "wpisany tekst. Grupy to tylko widok na to, co zainstalowane, więc nie przenoszą plików.",
+            ["L.Instance.ModGroupExisting"] = "ISTNIEJĄCA GRUPA",
+            ["L.Instance.ModGroupName"] = "NAZWA",
+            ["L.Instance.ModGroupMatch"] = "NAZWA LUB NAZWA PLIKU ZAWIERA",
+            ["L.Instance.FieldModGroup"] = "GRUPA",
+            ["L.Instance.ModGroupNeedsBoth"] = "Grupa wymaga zarówno nazwy, jak i reguły.",
+            ["L.Instance.ModGroupSaved"] = "Zapisano grupę {0}",
+            ["L.Instance.ModGroupRemoved"] = "Usunięto grupę {0}",
             ["L.Instance.SortName"] = "Sortuj według nazwy",
             ["L.Instance.SortSize"] = "Sortuj według rozmiaru",
             ["L.Instance.SortLoader"] = "Sortuj według loadera",

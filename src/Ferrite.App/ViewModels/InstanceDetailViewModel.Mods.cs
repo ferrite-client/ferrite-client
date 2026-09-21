@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Ferrite.App.Localization;
 using Ferrite.Core.Content;
+using Ferrite.Core.Storage;
 
 namespace Ferrite.App.ViewModels;
 
@@ -14,6 +15,9 @@ public sealed partial class InstanceDetailViewModel
 {
     /// <summary>The loader filter value that matches every mod.</summary>
     internal const string AllLoaders = "all";
+
+    /// <summary>The group filter value that matches every mod.</summary>
+    internal const string AllModGroups = "all";
 
     private readonly List<ModMetadata> _scannedMods = [];
 
@@ -36,8 +40,42 @@ public sealed partial class InstanceDetailViewModel
     [ObservableProperty]
     private ChoiceOption? _selectedModSort;
 
+    /// <summary>The user's mod groups, with an entry that matches all of them.</summary>
+    public ObservableCollection<ChoiceOption> ModGroupChoices { get; } = [];
+
+    [ObservableProperty]
+    private ChoiceOption? _selectedModGroup;
+
     [ObservableProperty]
     private string? _modFilterNote;
+
+    /// <summary>The "manage groups" prompt: a name and a rule, plus the groups already defined.</summary>
+    [ObservableProperty]
+    private bool _isManagingModGroups;
+
+    [ObservableProperty]
+    private string _newModGroupName = string.Empty;
+
+    [ObservableProperty]
+    private string _newModGroupMatch = string.Empty;
+
+    [ObservableProperty]
+    private string? _modGroupError;
+
+    [ObservableProperty]
+    private ChoiceOption? _selectedManagedGroup;
+
+    public bool HasModGroupError => !string.IsNullOrEmpty(ModGroupError);
+
+    partial void OnModGroupErrorChanged(string? value) => OnPropertyChanged(nameof(HasModGroupError));
+
+    /// <summary>True when a real group (not the "all groups" entry) is selected for removal.</summary>
+    public bool CanRemoveManagedGroup =>
+        SelectedManagedGroup is { } selected
+        && !string.Equals(selected.Value, AllModGroups, StringComparison.OrdinalIgnoreCase);
+
+    partial void OnSelectedManagedGroupChanged(ChoiceOption? value) =>
+        OnPropertyChanged(nameof(CanRemoveManagedGroup));
 
     /// <summary>True when the instance holds mods at all, whether or not the filter shows them.</summary>
     public bool HasAnyMods => _scannedMods.Count > 0;
@@ -52,6 +90,8 @@ public sealed partial class InstanceDetailViewModel
     partial void OnSelectedModLoaderChanged(ChoiceOption? value) => ApplyModFilter();
 
     partial void OnSelectedModSortChanged(ChoiceOption? value) => ApplyModFilter();
+
+    partial void OnSelectedModGroupChanged(ChoiceOption? value) => ApplyModFilter();
 
     /// <summary>
     /// Replaces the scan behind the list and rebuilds the loader choices from what was actually
@@ -79,7 +119,31 @@ public sealed partial class InstanceDetailViewModel
             ?? ModLoaderChoices[0];
         SelectedModSort ??= ModSortChoices[0];
 
+        RebuildModGroupChoices(previousGroup: SelectedModGroup?.Value);
         ApplyModFilter();
+    }
+
+    /// <summary>
+    /// Rebuilds the group filter and the manage prompt's list from the instance's own groups, keeping
+    /// the selection when that group still exists.
+    /// </summary>
+    private void RebuildModGroupChoices(string? previousGroup = null)
+    {
+        var previous = previousGroup ?? SelectedModGroup?.Value ?? AllModGroups;
+
+        ModGroupChoices.Clear();
+        ModGroupChoices.Add(new ChoiceOption(AllModGroups, Localizer.Get("L.Instance.ModGroupAll")));
+        foreach (var group in Record.ModGroups)
+        {
+            ModGroupChoices.Add(new ChoiceOption(group.Name, group.Name));
+        }
+
+        SelectedModGroup = ModGroupChoices.FirstOrDefault(choice =>
+                string.Equals(choice.Value, previous, StringComparison.OrdinalIgnoreCase))
+            ?? ModGroupChoices[0];
+        SelectedManagedGroup = ModGroupChoices.FirstOrDefault(choice =>
+                                  !string.Equals(choice.Value, AllModGroups, StringComparison.OrdinalIgnoreCase))
+                              ?? null;
     }
 
     /// <summary>Recomputes the visible list from the query, the loader filter, and the order.</summary>
@@ -98,6 +162,15 @@ public sealed partial class InstanceDetailViewModel
         if (!string.IsNullOrEmpty(query))
         {
             visible = visible.Where(mod => Matches(mod, query));
+        }
+
+        if (SelectedModGroup?.Value is { Length: > 0 } groupName
+            && !string.Equals(groupName, AllModGroups, StringComparison.OrdinalIgnoreCase))
+        {
+            var group = Record.ModGroups.FirstOrDefault(candidate =>
+                string.Equals(candidate.Name, groupName, StringComparison.OrdinalIgnoreCase));
+            visible = visible.Where(mod =>
+                group is not null && group.Matches(mod.DisplayName, mod.FileName));
         }
 
         visible = (SelectedModSort?.Value ?? "name") switch
@@ -234,6 +307,84 @@ public sealed partial class InstanceDetailViewModel
         || Contains(mod.Version, query)
         || Contains(mod.Loader, query)
         || mod.Dependencies.Any(dependency => Contains(dependency, query));
+
+    /// <summary>Opens the group editor, pre-filled with the next unused name and an empty rule.</summary>
+    [RelayCommand]
+    private void OpenModGroups()
+    {
+        ModGroupError = null;
+        NewModGroupName = string.Empty;
+        NewModGroupMatch = string.Empty;
+        RebuildModGroupChoices();
+        IsManagingModGroups = true;
+    }
+
+    [RelayCommand]
+    private void CloseModGroups()
+    {
+        IsManagingModGroups = false;
+        ModGroupError = null;
+    }
+
+    /// <summary>
+    /// Saves a group. A blank name or rule is refused with a message rather than silently ignored,
+    /// because a group with an empty rule would match every mod.
+    /// </summary>
+    [RelayCommand]
+    private async Task AddModGroupAsync()
+    {
+        if (!ModGroup.Upsert(Record.ModGroups, NewModGroupName, NewModGroupMatch))
+        {
+            ModGroupError = Localizer.Get("L.Instance.ModGroupNeedsBoth");
+            return;
+        }
+
+        var added = NewModGroupName.Trim();
+        ModGroupError = null;
+        NewModGroupName = string.Empty;
+        NewModGroupMatch = string.Empty;
+        await PersistModGroupsAsync().ConfigureAwait(true);
+
+        var choice = ModGroupChoices.FirstOrDefault(candidate =>
+            string.Equals(candidate.Value, added, StringComparison.OrdinalIgnoreCase));
+        if (choice is not null)
+        {
+            SelectedManagedGroup = choice;
+            SelectedModGroup = choice;
+        }
+
+        StatusNote = Localizer.Format("L.Instance.ModGroupSaved", added);
+    }
+
+    [RelayCommand]
+    private async Task RemoveModGroupAsync()
+    {
+        if (SelectedManagedGroup is not { } selected
+            || string.Equals(selected.Value, AllModGroups, StringComparison.OrdinalIgnoreCase)
+            || !ModGroup.Remove(Record.ModGroups, selected.Value))
+        {
+            return;
+        }
+
+        ModGroupError = null;
+        await PersistModGroupsAsync().ConfigureAwait(true);
+        StatusNote = Localizer.Format("L.Instance.ModGroupRemoved", selected.Value);
+    }
+
+    /// <summary>Writes the group list back to the instance and refreshes what the tab shows.</summary>
+    private async Task PersistModGroupsAsync()
+    {
+        try
+        {
+            await _services.Instances.SaveAsync(Record, CancellationToken.None).ConfigureAwait(true);
+            RebuildModGroupChoices();
+            ApplyModFilter();
+        }
+        catch (Exception exception)
+        {
+            ModGroupError = exception.Message;
+        }
+    }
 
     private static bool Contains(string? value, string query) =>
         value is not null && value.Contains(query, StringComparison.CurrentCultureIgnoreCase);

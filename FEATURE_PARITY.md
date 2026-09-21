@@ -178,7 +178,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | I12 | Datapack management | Per-world listing, enable/disable, removal to backups | VERIFIED | V022.2 |
 | I13 | Screenshot gallery | Gallery with decoded thumbnails and open-file | VERIFIED | V022.3 |
 | I14 | Content-pack metadata parsing | `pack.mcmeta` formats read and compared with the instance's own format from its client file | VERIFIED | V014 |
-| I15 | Custom mod groups | User-defined groups that organise a complex instance | NOT STARTED | XMCL feature catalogue 14 |
+| I15 | Custom mod groups | Named groups, each a substring rule over a mod's name or file name, with a filter | VERIFIED | V035 |
 
 ## J. Modrinth integration
 
@@ -287,8 +287,8 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 
 | Status | Count |
 | --- | --- |
-| NOT STARTED | 12 |
+| NOT STARTED | 11 |
 | IN PROGRESS | 0 |
 | IMPLEMENTED | 0 |
-| VERIFIED | 155 |
+| VERIFIED | 156 |
 | BLOCKED EXTERNAL | 18 |

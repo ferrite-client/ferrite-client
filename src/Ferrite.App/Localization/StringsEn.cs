@@ -268,6 +268,18 @@ internal static class StringsEn
             ["L.Instance.NoModMatches"] = "No installed mod matches the search.",
             ["L.Instance.ModSearchPlaceholder"] = "Search mods",
             ["L.Instance.ModLoaderAll"] = "All loaders",
+            ["L.Instance.ModGroupAll"] = "All groups",
+            ["L.Instance.ModGroups"] = "Groups",
+            ["L.Instance.ModGroupHint"] =
+                "A group is a name plus a rule: a mod joins it when its name or file name contains the "
+                + "text you type. Groups are only a view over what is installed, so they never move a file.",
+            ["L.Instance.ModGroupExisting"] = "EXISTING GROUP",
+            ["L.Instance.ModGroupName"] = "NAME",
+            ["L.Instance.ModGroupMatch"] = "NAME OR FILE NAME CONTAINS",
+            ["L.Instance.FieldModGroup"] = "GROUP",
+            ["L.Instance.ModGroupNeedsBoth"] = "A group needs both a name and a rule.",
+            ["L.Instance.ModGroupSaved"] = "Group {0} saved",
+            ["L.Instance.ModGroupRemoved"] = "Group {0} removed",
             ["L.Instance.SortName"] = "Sort by name",
             ["L.Instance.SortSize"] = "Sort by size",
             ["L.Instance.SortLoader"] = "Sort by loader",

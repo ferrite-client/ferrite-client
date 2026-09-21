@@ -54,6 +54,9 @@ public sealed class InstanceManager
             Group = source.Group,
             AccountId = source.AccountId,
             Notes = source.Notes,
+            ModGroups = source.ModGroups
+                .Select(group => new ModGroup { Name = group.Name, Match = group.Match })
+                .ToList(),
             CreatedAt = DateTimeOffset.UtcNow,
             Modpack = source.Modpack is null
                 ? null

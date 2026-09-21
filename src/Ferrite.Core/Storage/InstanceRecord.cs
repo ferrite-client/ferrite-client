@@ -66,6 +66,9 @@ public sealed class InstanceRecord
 
     public ModpackIdentity? Modpack { get; set; }
 
+    /// <summary>User-defined mod groups, each a name plus a substring that decides membership.</summary>
+    public List<ModGroup> ModGroups { get; set; } = [];
+
     public string? Notes { get; set; }
 
     public string? LastServerAddress { get; set; }

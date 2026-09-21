@@ -53,3 +53,6 @@ desktop.ini
 # Local tooling
 .dotnet/
 *.nupkg
+
+# Isolated build output used when the default bin/ is held open by a running build.
+.buildcheck/
