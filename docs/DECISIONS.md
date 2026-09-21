@@ -311,3 +311,18 @@ three real ones, including a `Ready` literal hidden in a field initializer.
 
 **Boundary.** Strings produced inside `Ferrite.Core` remain English and are recorded as such in
 `FEATURE_PARITY.md` row O10 rather than being presented as translated.
+
+## D027 - OptiFine is recognised and adopted, not reimplemented
+
+**Decision.** Ferrite identifies OptiFine's own installer, runs it with the correct Java in a
+directory the launcher owns, and adopts the version it produced into the launcher's store. The
+Install click happens in OptiFine's window, and the interface says so.
+
+**Rejected.** Patching a Minecraft version by applying OptiFine's transformations ourselves, and
+claiming an "automatic OptiFine install" that silently opens a window the user then has to complete.
+
+**Why.** OptiFine publishes no API, no headless entry point, and no licence allowing a launcher to
+redistribute or reimplement its patcher. Reimplementing it would mean chasing a closed, obfuscated
+transform for every game version. Running the official installer keeps the licence intact and the
+result byte-identical to what a user would get by hand; the honest label keeps the user from
+wondering what happened when a window appears.

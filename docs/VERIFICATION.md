@@ -1047,3 +1047,73 @@ failures, HTTP messages — stays in English, and the parity matrix says so inst
 fully translated product. Those strings come from the engines that produce them and are often
 embedded in exceptions; translating them would mean threading a language through every subsystem
 for the smallest part of what a user reads.
+
+---
+
+## V016 - OptiFine (2026-09-21)
+
+Environment: Windows 11 x64, .NET 10.0.5, against real OptiFine files already on this machine.
+
+### V016.1 Recognising real OptiFine files
+
+Command: `Ferrite.Verify optifine`
+
+```
+  OptiFine HD_U_M6_pre2 for Minecraft 1.8.9
+      version id: 1.8.9-OptiFine_HD_U_M6_pre2
+      file:       ...\.minecraft\feather-mods\preview_OptiFine_1.8.9_HD_U_M6_pre2.temp.jar
+  OptiFine HD_U_M6_pre2 for Minecraft 1.8.9
+      version id: 1.8.9-OptiFine_HD_U_M6_pre2
+      file:       ...\.minecraft\libraries\java\preview_OptiFine_1.8.9_HD_U_M6_pre2.jar
+
+2 OptiFine installer(s) recognised.
+```
+
+Identification is OptiFine's own `Main-Class: optifine.InstallerFrame` in the JAR manifest, which is
+what distinguishes the installer from a mod JAR carrying the same classes. The version comes from
+OptiFine's artifact name, which is the only naming OptiFine publishes.
+
+### V016.2 Two defects the real files exposed
+
+Neither would have been found by a fixture written from the documentation:
+
+- The files are named `preview_OptiFine_...`, and the parser assumed the name starts with
+  `OptiFine`. It now locates the OptiFine token and reads the version from the tokens after it.
+- One file carries the partial-download marker **before** the extension
+  (`..._pre2.temp.jar`), which produced the version `HD_U_M6_pre2.temp`. Stripping the extension
+  first is what caused it; the marker is now removed from the full name before the extension is
+  stripped, and both files yield the same version id.
+
+With those fixed, both real files resolve to `1.8.9-OptiFine_HD_U_M6_pre2`, which is exactly the
+version directory name OptiFine's installer creates.
+
+### V016.3 What was implemented
+
+OptiFine publishes no API and no headless installer entry point: its installer is a window with an
+Install button. Ferrite therefore does everything around that click:
+
+1. **Recognise** the installer the user downloaded, and refuse a file that is not one, with the
+   download site named in the message.
+2. **Refuse a version mismatch**: an installer for Minecraft 1.8.9 cannot be adopted into a 1.21.1
+   instance, because the patched version would not launch.
+3. **Run the official installer** with the Java the target version needs, in a working directory
+   the launcher owns (`tmp/optifine-<version>`), so OptiFine never writes into the instance or the
+   game's own directory.
+4. **Adopt the result** into the launcher's version store: the version document is copied, and its
+   OptiFine library is copied with it, so the instance launches from the store.
+5. **Set the instance's loader** to OptiFine with the adopted version id, which is what the launch
+   pipeline then composes and verifies.
+
+`OptiFineTests` covers each step: installer recognition by manifest and name, the `preview_` prefix,
+the marker before the extension, refusal of a mod JAR of the same vintage, adoption copying the
+document and library into the store, adoption reporting a missing library instead of claiming
+success, a clear failure for a version that is not installed, and discovery of installed OptiFine
+versions in a game directory.
+
+### V016.4 Interface
+
+`instance-detail.png` shows the new Loader section: the current loader, an *Install OptiFine from a
+downloaded installer...* action, and the explanation of what happens — including that the user
+completes OptiFine's own window. The message is there because a launcher that silently opens a
+third-party installer window would be confusing; a launcher that claims to install OptiFine without
+that window would be lying.

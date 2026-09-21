@@ -271,3 +271,19 @@ extraction path is checked for containment inside the intended destination.
   stays English. Those strings belong to the engine that produced them and frequently travel inside
   exceptions; localising them would push a language dependency through every subsystem. The parity
   matrix records this as the boundary of the feature rather than hiding it.
+
+## 17. OptiFine
+
+- `OptiFineInstaller.Inspect` identifies an OptiFine installer by the `Main-Class` in its manifest
+  and reads the version from OptiFine's artifact name, tolerating the `preview_` prefix and the
+  `.temp` marker a partial download leaves. A mod JAR of the same vintage carries the same classes
+  but no installer entry point, so it is not accepted as one.
+- `RunInstallerAsync` starts the official installer with the Java the target Minecraft version needs
+  and a working directory under the launcher's own temporary storage, so the installer never writes
+  into an instance or into the game's directory. The install itself is a click in OptiFine's window:
+  OptiFine publishes no headless entry point, and the launcher says so rather than implying it
+  installed OptiFine itself.
+- `Adopt` copies the version document OptiFine produced into the launcher's version store together
+  with its OptiFine library, and reports a missing library instead of claiming success. The instance
+  is then set to `LoaderKind.OptiFine` with the adopted version id, which the launch pipeline already
+  knows how to compose, verify, and install missing artefacts for.

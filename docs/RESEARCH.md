@@ -185,6 +185,26 @@ locally. Forge and NeoForge depend on running the official installer processors.
 legitimate, but it must be invoked with an argument list, never a shell string, and its
 working directory must stay inside the instance and library store.
 
+### OptiFine — **VERIFIED (recognition and adoption), LIMIT (installer interaction)**
+
+Read from real files already on this machine (2026-09-21):
+
+- OptiFine publishes **no API**. Its artifact is a downloadable JAR; there is no metadata endpoint
+  and no way to enumerate versions.
+- The installer JAR declares `Main-Class: optifine.InstallerFrame` in `META-INF/MANIFEST.MF`. That,
+  not the file name, is what distinguishes an installer from a mod JAR carrying the same
+  `net/optifine/**` classes.
+- The installer class names the layout it writes: `libraries/optifine/...`, `versions/<MC>-OptiFine_<ver>/`,
+  and a launchwrapper profile using `--tweakClass`. It takes its target from its working directory,
+  so running it with a working directory the launcher owns keeps OptiFine out of the game directory.
+- The version is only in the artifact name, in the form `OptiFine_<minecraft>_<edition>_<release>`,
+  which may carry a `preview_` prefix and a `.temp` partial-download marker.
+
+**Limit.** The installer's entry point is a window with an Install button. There is no headless
+switch and no documented argument list, so the click is the user's. Ferrite recognises the file,
+runs it with the right Java in a launcher-owned directory, and adopts what it produced; it does not
+pretend to install OptiFine by itself.
+
 ---
 
 ## 5. Content services

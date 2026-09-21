@@ -178,6 +178,26 @@ internal static class StringsEn
             ["L.Instance.FieldJvmArguments"] = "EXTRA JVM ARGUMENTS (one per line)",
             ["L.Instance.FieldGameArguments"] = "EXTRA GAME ARGUMENTS (one per line)",
             ["L.Instance.DropModsHint"] = "Drop mod files here, or use Add mods.",
+            ["L.Instance.Loader"] = "LOADER",
+            ["L.Instance.LoaderVanilla"] = "Vanilla (no loader)",
+            ["L.Instance.InstallOptiFine"] = "Install OptiFine from a downloaded installer...",
+            ["L.Instance.OptiFineHint"] =
+                "OptiFine publishes no API, so its installer runs on your machine and you click Install "
+                + "in its own window. Ferrite starts it with the right Java, then adopts what it "
+                + "produced into this launcher's own store.",
+            ["L.Instance.NotAnOptiFineInstaller"] =
+                "{0} is not an OptiFine installer. Download OptiFine_x.y.z_HD_U_x.jar from optifine.net.",
+            ["L.Instance.OptiFineVersionMismatch"] =
+                "That installer is for Minecraft {0}, but this instance runs {1}.",
+            ["L.Instance.OptiFineNeedsJava"] =
+                "Installing OptiFine for this version needs Java {0}, which is not installed.",
+            ["L.Instance.OptiFineRunning"] = "Waiting for the OptiFine installer ({0})",
+            ["L.Instance.OptiFineWaitingForInstaller"] =
+                "Complete the OptiFine installer window; Ferrite adopts the result when it closes.",
+            ["L.Instance.OptiFineInstallerFailed"] = "The OptiFine installer exited with code {0}.",
+            ["L.Instance.OptiFineInstalled"] = "Installed {0}; this instance now launches with OptiFine.",
+            ["L.Instance.OptiFineInstalledWithWarnings"] =
+                "Installed OptiFine with {0} warning(s); check the launcher log.",
             ["L.Instance.AddMods"] = "Add mods",
             ["L.Instance.Disable"] = "Disable",
             ["L.Instance.Enable"] = "Enable",

@@ -143,6 +143,7 @@ public sealed class AppServices : IDisposable
         Pinger = new ServerPinger(loggerFactory.CreateLogger<ServerPinger>());
         LanWorlds = new LanWorldDiscovery(loggerFactory.CreateLogger<LanWorldDiscovery>());
         PackFormats = new ClientPackFormat(paths, loggerFactory.CreateLogger<ClientPackFormat>());
+        OptiFine = new OptiFineInstaller(paths, loggerFactory.CreateLogger<OptiFineInstaller>());
         Operations = new OperationLog(
             Path.Combine(paths.LauncherLogsDirectory, "operations.jsonl"),
             loggerFactory.CreateLogger<OperationLog>());
@@ -241,6 +242,9 @@ public sealed class AppServices : IDisposable
 
     /// <summary>Reads the pack formats a Minecraft version uses, from its installed client file.</summary>
     public ClientPackFormat PackFormats { get; }
+
+    /// <summary>Invokes OptiFine's own installer and adopts what it produced into the store.</summary>
+    public OptiFineInstaller OptiFine { get; }
 
     public OperationLog Operations { get; }
 

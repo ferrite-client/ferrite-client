@@ -28,6 +28,18 @@
         <ScrollViewer>
           <StackPanel Spacing="16" Margin="0,16,0,0" MaxWidth="720" HorizontalAlignment="Left">
             <StackPanel Spacing="4">
+              <TextBlock Classes="label" Text="{DynamicResource L.Instance.Loader}" />
+              <StackPanel Orientation="Horizontal" Spacing="10">
+                <TextBlock Text="{Binding LoaderSummary}" VerticalAlignment="Center" />
+                <Button Content="{DynamicResource L.Instance.InstallOptiFine}"
+                        Click="OnInstallOptiFineClick" />
+              </StackPanel>
+              <TextBlock Classes="faint" TextWrapping="Wrap"
+                         Text="{DynamicResource L.Instance.OptiFineHint}" />
+              <TextBlock Classes="muted" TextWrapping="Wrap" Text="{Binding LoaderStatus}" />
+            </StackPanel>
+
+            <StackPanel Spacing="4">
               <TextBlock Classes="label" Text="{DynamicResource L.Instance.FieldJavaRuntime}" />
               <ComboBox ItemsSource="{Binding JavaRuntimes}" SelectedItem="{Binding SelectedJava}"
                         HorizontalAlignment="Stretch">

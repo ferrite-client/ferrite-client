@@ -35,6 +35,8 @@ What has been exercised end to end against live services (evidence in `docs/VERI
 - Reading what each installed resource pack declares and comparing it with the format the instance's
   own client file uses, so a pack the game will ignore is labelled rather than silently listed.
 - A complete Polish interface alongside English, switchable in Settings without a restart.
+- OptiFine support: Ferrite recognises the installer you download, runs it with the right Java in
+  its own working directory, and adopts the resulting version into the launcher's store.
 - Java discovery across PATH, vendor installs, and the Minecraft launcher's own runtimes.
 
 Content browsing covers Modrinth and CurseForge through one browser. CurseForge needs a

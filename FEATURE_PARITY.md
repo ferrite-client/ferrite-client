@@ -27,7 +27,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | A05 | Crash-safe settings persistence | Atomic JSON write, schema version, migration, backup on damage | IMPLEMENTED | tests |
 | A06 | Storage layout separation | config / data / store / instances / cache / logs / tmp / backups | VERIFIED | V001 |
 | A07 | Nullable-clean, warning-free build | `TreatWarningsAsErrors`, analyzer-clean | VERIFIED | V001 |
-| A08 | Automated test suite | xUnit projects `Ferrite.Core.Tests` and `Ferrite.App.Tests` | VERIFIED | 271 tests (2026-09-21) |
+| A08 | Automated test suite | xUnit projects `Ferrite.Core.Tests` and `Ferrite.App.Tests` | VERIFIED | 281 tests (2026-09-21) |
 | A09 | Windows packaging | `scripts/package.ps1` publishes framework-dependent and self-contained win-x64 builds with zips | VERIFIED | V011.1, V011.2; unsigned (see `HUMAN_ACTION_REQUIRED.md`) |
 | A10 | Clean-checkout build script | `scripts/build.ps1`, `test.ps1`, `package.ps1`, `verify-live.ps1` | VERIFIED | V011.1; the earlier claim that `package.ps1` existed was wrong and is now true |
 
@@ -137,7 +137,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | G08 | Forge installer run | Official installer processors with an argument list | IMPLEMENTED | same path as NeoForge |
 | G09 | Loader update / reinstall / repair | Switch loader version safely | IMPLEMENTED | reinstall by version id |
 | G10 | Loader launch behaviour | Loader main class, args, library ordering | VERIFIED | V002.1, V002.2 |
-| G11 | OptiFine install | Official installer invocation | NOT STARTED | - |
+| G11 | OptiFine install | Recognises OptiFine's own installer, runs it with the right Java in a launcher-owned directory, adopts the produced version into the store, and refuses a build for another Minecraft version | VERIFIED | V016. The user completes OptiFine's installer window: OptiFine publishes no headless entry point and no API |
 
 ## H. Launch pipeline
 
@@ -273,6 +273,12 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 ## Summary
 
 | Status | Count |
+| --- | --- |
+| NOT STARTED | 0 |
+| IN PROGRESS | 0 |
+| IMPLEMENTED | 63 |
+| VERIFIED | 104 |
+| BLOCKED EXTERNAL | 5 |
 | --- | --- |
 | NOT STARTED | 1 |
 | IN PROGRESS | 0 |

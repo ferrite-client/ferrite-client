@@ -97,6 +97,40 @@ public partial class InstanceDetailView : UserControl
         }
     }
 
+    /// <summary>
+    /// Picks an OptiFine installer the user downloaded. OptiFine requires a manual download, so the
+    /// launcher cannot fetch it; it can only run what the user already has.
+    /// </summary>
+    private async void OnInstallOptiFineClick(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not InstanceDetailViewModel viewModel)
+        {
+            return;
+        }
+
+        var storage = TopLevel.GetTopLevel(this)?.StorageProvider;
+        if (storage is null)
+        {
+            return;
+        }
+
+        var files = await storage.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Select the OptiFine installer",
+            AllowMultiple = false,
+            FileTypeFilter =
+            [
+                new FilePickerFileType("OptiFine installer") { Patterns = ["*.jar"] },
+            ],
+        });
+
+        var path = files.FirstOrDefault()?.TryGetLocalPath();
+        if (!string.IsNullOrEmpty(path))
+        {
+            await viewModel.InstallOptiFineAsync(path);
+        }
+    }
+
     private void OnOpenSavesClick(object? sender, RoutedEventArgs e)
     {
         if (DataContext is InstanceDetailViewModel viewModel)

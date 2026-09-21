@@ -180,6 +180,27 @@ internal static class StringsPl
             ["L.Instance.FieldJvmArguments"] = "DODATKOWE ARGUMENTY JVM (jeden na linię)",
             ["L.Instance.FieldGameArguments"] = "DODATKOWE ARGUMENTY GRY (jeden na linię)",
             ["L.Instance.DropModsHint"] = "Przeciągnij pliki modów tutaj lub użyj opcji Dodaj mody.",
+            ["L.Instance.Loader"] = "LOADER",
+            ["L.Instance.LoaderVanilla"] = "Vanilla (bez loadera)",
+            ["L.Instance.InstallOptiFine"] = "Zainstaluj OptiFine z pobranego instalatora...",
+            ["L.Instance.OptiFineHint"] =
+                "OptiFine nie udostępnia API, więc jego instalator działa na Twoim komputerze i to Ty "
+                + "klikasz Zainstaluj w jego oknie. Ferrite uruchamia go z właściwą Javą, a następnie "
+                + "przejmuje wynik do własnego magazynu launchera.",
+            ["L.Instance.NotAnOptiFineInstaller"] =
+                "{0} nie jest instalatorem OptiFine. Pobierz OptiFine_x.y.z_HD_U_x.jar z optifine.net.",
+            ["L.Instance.OptiFineVersionMismatch"] =
+                "Ten instalator jest dla Minecrafta {0}, a ta instancja używa {1}.",
+            ["L.Instance.OptiFineNeedsJava"] =
+                "Instalacja OptiFine dla tej wersji wymaga Javy {0}, która nie jest zainstalowana.",
+            ["L.Instance.OptiFineRunning"] = "Oczekiwanie na instalator OptiFine ({0})",
+            ["L.Instance.OptiFineWaitingForInstaller"] =
+                "Dokończ instalację w oknie OptiFine; Ferrite przejmie wynik po jego zamknięciu.",
+            ["L.Instance.OptiFineInstallerFailed"] = "Instalator OptiFine zakończył się kodem {0}.",
+            ["L.Instance.OptiFineInstalled"] =
+                "Zainstalowano {0}; ta instancja uruchamia się teraz z OptiFine.",
+            ["L.Instance.OptiFineInstalledWithWarnings"] =
+                "Zainstalowano OptiFine z ostrzeżeniami: {0}. Sprawdź log launchera.",
             ["L.Instance.AddMods"] = "Dodaj mody",
             ["L.Instance.Disable"] = "Wyłącz",
             ["L.Instance.Enable"] = "Włącz",

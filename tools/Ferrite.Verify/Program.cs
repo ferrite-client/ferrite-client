@@ -95,6 +95,12 @@ internal static class Program
                     services,
                     GetOption(args, "--game-dir"),
                     cancellation.Token),
+                "optifine" => await Scenarios.OptiFineAsync(
+                    services,
+                    GetOption(args, "--jar"),
+                    GetOption(args, "--game-dir"),
+                    GetOption(args, "--version"),
+                    cancellation.Token),
                 "sign-update" => await Scenarios.SignUpdateAsync(
                     services,
                     GetOption(args, "--out"),
