@@ -110,6 +110,79 @@ public sealed partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private string? _statusNote;
 
+    /// Where the root marker is written. The executable's folder in production; a test overrides it so
+    /// it never writes next to the running application.
+    internal string LauncherBaseDirectory { get; set; } = AppContext.BaseDirectory;
+
+    /// <summary>Outcome of a data-folder move, or why the chosen folder was refused.</summary>
+    [ObservableProperty]
+    private string? _dataRootStatus;
+
+    public bool HasDataRootStatus => !string.IsNullOrEmpty(DataRootStatus);
+
+    partial void OnDataRootStatusChanged(string? value) => OnPropertyChanged(nameof(HasDataRootStatus));
+
+    /// <summary>
+    /// Copies the launcher's data to another folder and records it as the root for the next start.
+    /// The running launcher keeps using the folder it started with, because everything it has open
+    /// points at that one.
+    /// </summary>
+    public async Task MoveDataRootAsync(string? targetFolder)
+    {
+        if (string.IsNullOrWhiteSpace(targetFolder))
+        {
+            return;
+        }
+
+        var current = _services.Paths.Root;
+        var validation = DataRootRelocator.Validate(current, targetFolder);
+        if (!validation.IsValid)
+        {
+            DataRootStatus = Localizer.Format("L.Settings.DataFolderInvalid", validation.Summary ?? string.Empty);
+            _shell.ReportError(DataRootStatus);
+            return;
+        }
+
+        IsBusy = true;
+        try
+        {
+            _shell.BeginActivity("Moving the launcher's data folder...");
+            // The move reports plain text, which the status bar shows without a progress fraction.
+            var progress = new Progress<string>(message => DataRootStatus = message);
+            var result = await DataRootRelocator
+                .MoveAsync(current, targetFolder, progress, CancellationToken.None)
+                .ConfigureAwait(true);
+            DataRootRelocator.WriteRootMarker(result.Target, LauncherBaseDirectory);
+
+            DataRootStatus = Localizer.Format(
+                "L.Settings.DataFolderMoved",
+                result.FilesCopied,
+                ByteSize.Format(result.BytesCopied),
+                result.Target);
+            _shell.ReportStatus(DataRootStatus);
+        }
+        catch (Exception exception)
+        {
+            DataRootStatus = exception.Message;
+            _shell.ReportError(exception.Message);
+        }
+        finally
+        {
+            IsBusy = false;
+            _shell.EndActivity();
+        }
+    }
+
+    /// <summary>Returns the launcher to its default or portable data location on the next start.</summary>
+    [RelayCommand]
+    private void UseDefaultDataFolder()
+    {
+        DataRootStatus = DataRootRelocator.ClearRootMarker(LauncherBaseDirectory)
+            ? Localizer.Get("L.Settings.DataFolderReverted")
+            : Localizer.Get("L.Settings.DataFolderAlreadyDefault");
+        _shell.ReportStatus(DataRootStatus);
+    }
+
     [ObservableProperty]
     private bool _isBusy;
 

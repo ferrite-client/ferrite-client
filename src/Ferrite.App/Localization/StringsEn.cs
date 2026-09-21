@@ -139,7 +139,17 @@ internal static class StringsEn
             ["L.Settings.Storage"] = "Storage",
             ["L.Settings.FieldDataRoot"] = "DATA ROOT",
             ["L.Settings.DataRootHint"] =
-                "Set the FERRITE_HOME environment variable to move the data root before launching.",
+                "Moving the folder copies the launcher's data and takes effect on the next start. The "
+                + "FERRITE_HOME environment variable still overrides this.",
+            ["L.Settings.MoveDataFolder"] = "Move data folder",
+            ["L.Settings.UseDefaultDataFolder"] = "Use default location",
+            ["L.Settings.DataFolderMoved"] =
+                "Copied {0} file(s) ({1}) to {2}. Restart Ferrite to use the new folder.",
+            ["L.Settings.DataFolderInvalid"] = "That folder cannot be used: {0}",
+            ["L.Settings.DataFolderReverted"] =
+                "The launcher will use its default data location on the next start.",
+            ["L.Settings.DataFolderAlreadyDefault"] =
+                "The launcher is already using its default data location.",
             ["L.Settings.FieldCacheSize"] = "LIBRARY AND CACHE SIZE",
             ["L.Settings.OpenDataFolder"] = "Open data folder",
             ["L.Settings.OpenLogs"] = "Open logs",

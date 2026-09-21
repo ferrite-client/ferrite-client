@@ -248,7 +248,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | O03 | Mirror configuration | Per-endpoint host overrides | VERIFIED | V019.1, V019.4 |
 | O04 | Proxy configuration | Applied to the HTTP stack | VERIFIED | V019.2, V019.4 |
 | O05 | Cache management | Size reporting and safe cleanup | VERIFIED | V004 storage section |
-| O06 | Data location control | Move the data root with validation | IMPLEMENTED | FERRITE_HOME |
+| O06 | Data location control | Move the data folder from Settings, with validation, or select it with `FERRITE_HOME` | VERIFIED | V029 |
 | O07 | Update check | Signed manifest over TLS; unsigned or altered feeds are refused | VERIFIED | V012.1, V012.2; `UpdateServiceTests` |
 | O08 | Update staging | Download, SHA-256 verify, unpack outside the install root, write a hand-off script | VERIFIED | V012.3, V012.4; `UpdateHandoffTests` |
 | O09 | Update feed | Requires externally hosted infrastructure | BLOCKED EXTERNAL | `HUMAN_ACTION_REQUIRED.md` H3 |
@@ -273,6 +273,12 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 ## Summary
 
 | Status | Count |
+| --- | --- |
+| NOT STARTED | 0 |
+| IN PROGRESS | 0 |
+| IMPLEMENTED | 4 |
+| VERIFIED | 151 |
+| BLOCKED EXTERNAL | 17 |
 | --- | --- |
 | NOT STARTED | 0 |
 | IN PROGRESS | 0 |

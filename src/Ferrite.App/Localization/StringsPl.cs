@@ -140,7 +140,17 @@ internal static class StringsPl
             ["L.Settings.Storage"] = "Pamięć",
             ["L.Settings.FieldDataRoot"] = "KATALOG DANYCH",
             ["L.Settings.DataRootHint"] =
-                "Ustaw zmienną środowiskową FERRITE_HOME, aby przenieść katalog danych przed uruchomieniem.",
+                "Przeniesienie kopiuje dane launchera i działa od następnego uruchomienia. Zmienna "
+                + "środowiskowa FERRITE_HOME nadal ma pierwszeństwo.",
+            ["L.Settings.MoveDataFolder"] = "Przenieś katalog danych",
+            ["L.Settings.UseDefaultDataFolder"] = "Użyj domyślnej lokalizacji",
+            ["L.Settings.DataFolderMoved"] =
+                "Skopiowano {0} plik(ów) ({1}) do {2}. Uruchom Ferrite ponownie, aby użyć nowego katalogu.",
+            ["L.Settings.DataFolderInvalid"] = "Nie można użyć tego katalogu: {0}",
+            ["L.Settings.DataFolderReverted"] =
+                "Launcher użyje domyślnej lokalizacji danych przy następnym uruchomieniu.",
+            ["L.Settings.DataFolderAlreadyDefault"] =
+                "Launcher już używa domyślnej lokalizacji danych.",
             ["L.Settings.FieldCacheSize"] = "ROZMIAR BIBLIOTEKI I PAMIĘCI PODRĘCZNEJ",
             ["L.Settings.OpenDataFolder"] = "Otwórz katalog danych",
             ["L.Settings.OpenLogs"] = "Otwórz logi",

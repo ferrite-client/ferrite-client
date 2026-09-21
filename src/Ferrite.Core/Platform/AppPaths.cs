@@ -8,6 +8,12 @@ public sealed class AppPaths
 {
     public const string EnvironmentVariableName = "FERRITE_HOME";
 
+    /// <summary>
+    /// A file next to the executable naming the data root. It is how the Settings page's "move data
+    /// folder" is remembered without asking the user to edit an environment variable.
+    /// </summary>
+    public const string RootMarkerFileName = "ferrite-root.txt";
+
     private AppPaths(string root)
     {
         Root = Path.GetFullPath(root);
@@ -60,7 +66,11 @@ public sealed class AppPaths
 
     public string SecretsFile => Path.Combine(ConfigDirectory, "accounts.bin");
 
-    public static AppPaths CreateDefault()
+    /// <param name="baseDirectory">
+    /// Where to look for the marker files. Defaults to the executable's directory; a test supplies its
+    /// own so it never touches the real installation.
+    /// </param>
+    public static AppPaths CreateDefault(string? baseDirectory = null)
     {
         var overridden = Environment.GetEnvironmentVariable(EnvironmentVariableName);
         if (!string.IsNullOrWhiteSpace(overridden))
@@ -68,10 +78,30 @@ public sealed class AppPaths
             return new AppPaths(overridden);
         }
 
-        var portableMarker = Path.Combine(AppContext.BaseDirectory, "ferrite-portable.txt");
+        var directory = baseDirectory ?? AppContext.BaseDirectory;
+
+        // A root the user chose wins over the portable layout, because it was chosen deliberately.
+        var rootMarker = Path.Combine(directory, RootMarkerFileName);
+        if (File.Exists(rootMarker))
+        {
+            try
+            {
+                var configured = File.ReadAllText(rootMarker).Trim();
+                if (configured.Length > 0 && Path.IsPathFullyQualified(configured))
+                {
+                    return new AppPaths(configured);
+                }
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+            {
+                // An unreadable marker falls through to the default rather than failing startup.
+            }
+        }
+
+        var portableMarker = Path.Combine(directory, "ferrite-portable.txt");
         if (File.Exists(portableMarker))
         {
-            return new AppPaths(Path.Combine(AppContext.BaseDirectory, "ferrite-data"));
+            return new AppPaths(Path.Combine(directory, "ferrite-data"));
         }
 
         return new AppPaths(DefaultRoot());

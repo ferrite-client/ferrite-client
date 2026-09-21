@@ -1877,3 +1877,61 @@ not say where the next keystroke lands.
 check mechanically. A screen-reader walkthrough, a full keyboard-only pass over every workflow, and OS
 text-scaling behaviour were not performed, so `O11` is verified for contrast, naming, and focus rather
 than for every assistive technology.
+
+---
+
+## V029 - Moving the launcher's data folder (2026-09-21)
+
+Commands: `DataRootRelocationTests` then `SettingsDataFolderTests`.
+
+The row claimed data-location control with `FERRITE_HOME` alone, which meant the only way to move the
+data folder was to set an environment variable before starting. There is now a Settings section that
+copies the data to a chosen folder, records it in `ferrite-root.txt` next to the executable, and asks
+the user to restart - because a running launcher cannot swap the root every open handle points at.
+
+### V029.1 What is refused
+
+| Choice | Result |
+| --- | --- |
+| the folder already in use | "That is already the launcher's data folder." |
+| a folder inside the current root | "The new folder cannot be inside the current one." |
+| a folder containing the current root | "The new folder cannot contain the current one." |
+| a relative path | "The folder path has to be absolute." |
+| a non-empty folder that is not Ferrite's | "That folder is not empty and was not created by Ferrite." |
+| a folder that already holds a Ferrite data set | refused rather than merged with the current one |
+
+Every one of these is decided before a single byte is copied, and the Settings test asserts the user's
+own folder is still untouched afterwards.
+
+### V029.2 What a move does
+
+The data is copied file by file through a temporary sibling and moved into place, so an interrupted
+move cannot leave a half-written file looking complete; the source is left in place, so a failed
+restart does not lose anything. A real move of a seeded data root (config, logs, an instance with a
+mod jar) copies every file, leaves no `.part-*` files behind, and the marker makes
+`AppPaths.CreateDefault` resolve to the new folder on the next start. Clearing the marker returns the
+launcher to its default location, and `FERRITE_HOME` still overrides the marker, which is verified
+separately.
+
+Verifies O06.
+
+**Limitations, stated precisely.** The move copies rather than relocating, so the old folder is left
+behind for the user to delete once the launcher has started successfully from the new one; nothing
+here deletes a user's data. Free-space checking is limited to reporting what would be copied, since a
+reliable free-space query for an arbitrary path is not available without a platform call for it.
+
+---
+
+## V030 - The intermittent update-test failure (2026-09-21)
+
+`UpdateServiceTests.A_feed_whose_manifest_was_altered_after_signing_is_refused` failed twice across
+full-suite runs, and never once in twelve consecutive runs of its own class. The pattern - only under
+the whole suite, only a test that asserts the reason a feed was refused - points at the test
+infrastructure rather than the product: every test class here starts its own loopback HTTP server, and
+with the entire suite connecting at once a request occasionally fails as a transport error, which
+produces a different exception message than the assertion expects.
+
+Twelve isolated runs of the class passed; two further full-suite runs with the core test project
+capped at four parallel collections passed. That cap is the change: it keeps the run parallel without
+making the machine compete with itself. No assertion was weakened - the test still requires the refusal
+to name the signature.
