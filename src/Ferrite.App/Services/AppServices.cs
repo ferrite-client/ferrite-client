@@ -9,6 +9,7 @@ using Ferrite.Core.Minecraft;
 using Ferrite.Core.Net;
 using Ferrite.Core.Platform;
 using Ferrite.Core.Storage;
+using Ferrite.Core.Update;
 using Microsoft.Extensions.Logging;
 
 namespace Ferrite.App.Services;
@@ -108,6 +109,12 @@ public sealed class AppServices : IDisposable
             Manifests,
             paths,
             loggerFactory.CreateLogger<ContentUpdater>());
+        Updates = new UpdateService(
+            Http,
+            Downloads,
+            paths,
+            loggerFactory.CreateLogger<UpdateService>(),
+            UpdateFeedKey.Load());
         ContentProviders = [Modrinth, CurseForge];
         Mods = new InstanceContentManager(new ModScanner(loggerFactory.CreateLogger<ModScanner>()));
         Modpacks = new MrpackInstaller(
@@ -202,6 +209,8 @@ public sealed class AppServices : IDisposable
     public ContentInstaller CurseForgeContent { get; }
 
     public ContentUpdater ContentUpdates { get; }
+
+    public UpdateService Updates { get; }
 
     /// <summary>Providers the browser can switch between, in display order.</summary>
     public IReadOnlyList<IContentProvider> ContentProviders { get; }

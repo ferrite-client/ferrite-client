@@ -340,6 +340,18 @@ The response's `description` arrives either as a plain string or as a chat compo
 ## 10. Launcher self-update — LIMIT
 
 - Best practice: check a signed manifest over TLS, download the new package into a staging
-  directory outside the install root, verify a hash, and hand off to an OS installer instead
-  of overwriting a running binary. Ferrite implements check, staging, verification, and
-  hand-off; publishing a feed requires externally hosted infrastructure.
+  directory outside the install root, verify a hash, and hand off to an OS installer instead of
+  overwriting a running binary. XMCL signs its Windows packages with appx/appinstaller, which needs
+  a certificate; Ferrite takes the portable route of a detached signature over the manifest plus a
+  hand-off script.
+- **Implemented (**VERIFIED**, V012):** `manifest.json` + `manifest.json.sig` fetched over TLS (or
+  loopback HTTP for a local feed), ECDSA P-256 or RSA detached signature verified over the exact
+  manifest bytes before it is parsed, dotted-version comparison, SHA-256 and size verification of
+  the package, unpacking into `<data root>/staging/<version>/payload` with the traversal-safe
+  extractor, and a generated hand-off script that waits for the launcher to exit, replaces the
+  install directory, starts the new build, and removes the staging directory and itself.
+- A feed names its packages by file name relative to the feed root, which keeps one signed manifest
+  valid on any host; absolute HTTPS URLs are also accepted. Package URLs may not use `file:`,
+  `ftp:`, an absolute path, or `..`.
+- **Remaining limit:** hosting the feed and the built packages. Nothing about that is code, so it
+  stays BLOCKED EXTERNAL (H3). The publisher tooling is `Ferrite.Verify sign-update`.

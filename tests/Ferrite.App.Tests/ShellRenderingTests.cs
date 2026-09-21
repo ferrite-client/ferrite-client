@@ -273,6 +273,42 @@ public sealed class ShellRenderingTests : IDisposable
     }
 
     /// <summary>
+    /// The launcher update section must render, and must say what a feed needs rather than looking
+    /// like a button that does nothing. This build carries no feed key, so the check explains that.
+    /// </summary>
+    [AvaloniaFact]
+    public async Task Settings_page_renders_the_launcher_update_section()
+    {
+        var shell = new MainWindowViewModel(_services);
+        var viewModel = new SettingsViewModel(_services, shell)
+        {
+            UpdateFeedUrl = "https://updates.example.invalid/stable/",
+        };
+
+        var window = new Window
+        {
+            Content = new SettingsView { DataContext = viewModel },
+            Width = 1000,
+            Height = 1800,
+        };
+        window.Show();
+
+        var texts = Texts(window);
+        Assert.Contains("Launcher updates", texts);
+        Assert.Contains("Check for updates", texts);
+        Assert.Contains("Download and verify", texts);
+
+        // A build with no embedded key must say so instead of pretending the check can work.
+        await viewModel.CheckForUpdatesCommand.ExecuteAsync(null);
+        Assert.Contains("signing key", viewModel.UpdateStatus, StringComparison.OrdinalIgnoreCase);
+
+        // Captured after the check so the screenshot shows the outcome, not an empty status line.
+        var frame = window.CaptureRenderedFrame();
+        Assert.NotNull(frame);
+        Save(frame!, "settings-updates");
+    }
+
+    /// <summary>
     /// With the provider unreachable and a populated cache, the browser must show the cached results
     /// and say where they came from.
     /// </summary>

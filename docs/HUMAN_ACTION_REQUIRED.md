@@ -68,13 +68,38 @@ the new instance's `mods/` folder).
 
 ## H3 - Update feed hosting
 
-**Needed.** A hosted update manifest and package location, and a signing certificate for
-release artefacts.
+**Needed.** An HTTPS location to host the feed and the release packages, plus a signing key pair whose
+public half is built into the shipped launcher.
 
-**Why.** Self-update requires a feed to read from and a signature to trust. Ferrite implements
-the check, staging, verification, and hand-off, but cannot publish a feed itself.
+**Why.** Self-update requires a feed to read from and a key to trust. Ferrite implements the check,
+signature verification, staging, SHA-256 verification, and hand-off, but it cannot host anything on
+the user's behalf and must not ship with a key nobody controls.
 
-**Blocked until then.** Live update delivery. Recorded as FEATURE_PARITY row O09.
+**Steps.**
+
+1. Package a release: `pwsh -File scripts/package.ps1 -Version 0.2.0`.
+2. Build the feed: `dotnet run --project tools/Ferrite.Verify -- sign-update --version 0.2.0
+   --package artifacts/ferrite-self-contained-win-x64.zip --out <feed> --kind self-contained`.
+   This writes `manifest.json`, `manifest.json.sig`, and (on first use) a fresh ECDSA P-256 key
+   pair. Reuse an existing key with `--private-key <pem>` on later releases.
+3. Keep `update-private-key.pem` offline. Never commit it.
+4. Copy `update-public-key.pem` to `src/Ferrite.App/Resources/update-public-key.pem` and rebuild, so
+   that the shipped launcher trusts only this feed.
+5. Upload the whole feed directory — `manifest.json`, `manifest.json.sig`, and the package zips —
+   to the HTTPS location.
+6. Enter that URL under Settings -> Launcher updates -> Update feed URL.
+
+**What to hand back.** Nothing is entered by the user at runtime beyond the feed URL. The key pair
+belongs to whoever publishes the release.
+
+**Already implemented.** The signed-feed check, detached signature verification (ECDSA P-256 or
+RSA), version comparison, SHA-256 and size verification of the package, staging outside the install
+root, and the generated hand-off script. The publisher tooling is part of the verification harness.
+`scripts/verify-live.ps1 update-check --feed <dir> --key <feed>/update-public-key.pem --current
+0.1.0 --stage` runs the whole flow against a local feed over loopback HTTP.
+
+**Blocked until then.** Delivering an update from a public host, which is a hosting and key-ownership
+step rather than a code change. Recorded as FEATURE_PARITY row O09.
 
 ---
 

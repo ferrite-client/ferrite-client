@@ -27,7 +27,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | A05 | Crash-safe settings persistence | Atomic JSON write, schema version, migration, backup on damage | IMPLEMENTED | tests |
 | A06 | Storage layout separation | config / data / store / instances / cache / logs / tmp / backups | VERIFIED | V001 |
 | A07 | Nullable-clean, warning-free build | `TreatWarningsAsErrors`, analyzer-clean | VERIFIED | V001 |
-| A08 | Automated test suite | xUnit projects `Ferrite.Core.Tests` and `Ferrite.App.Tests` | VERIFIED | 179 tests (2026-09-21) |
+| A08 | Automated test suite | xUnit projects `Ferrite.Core.Tests` and `Ferrite.App.Tests` | VERIFIED | 218 tests (2026-09-21) |
 | A09 | Windows packaging | `scripts/package.ps1` publishes framework-dependent and self-contained win-x64 builds with zips | VERIFIED | V011.1, V011.2; unsigned (see `HUMAN_ACTION_REQUIRED.md`) |
 | A10 | Clean-checkout build script | `scripts/build.ps1`, `test.ps1`, `package.ps1`, `verify-live.ps1` | VERIFIED | V011.1; the earlier claim that `package.ps1` existed was wrong and is now true |
 
@@ -249,8 +249,8 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | O04 | Proxy configuration | Applied to the HTTP stack | IMPLEMENTED | HttpService proxy |
 | O05 | Cache management | Size reporting and safe cleanup | VERIFIED | V004 storage section |
 | O06 | Data location control | Move the data root with validation | IMPLEMENTED | FERRITE_HOME |
-| O07 | Update check | Signed manifest check over TLS | NOT STARTED | - |
-| O08 | Update staging | Download, verify, prepare hand-off | NOT STARTED | - |
+| O07 | Update check | Signed manifest over TLS; unsigned or altered feeds are refused | VERIFIED | V012.1, V012.2; `UpdateServiceTests` |
+| O08 | Update staging | Download, SHA-256 verify, unpack outside the install root, write a hand-off script | VERIFIED | V012.3, V012.4; `UpdateHandoffTests` |
 | O09 | Update feed | Requires externally hosted infrastructure | BLOCKED EXTERNAL | `HUMAN_ACTION_REQUIRED.md` H3 |
 | O10 | Localisation | English and Polish, switchable | NOT STARTED | setting stored, no translated resources |
 | O11 | Accessibility | Keyboard navigation, focus, labels, contrast | IMPLEMENTED | keyboard reachable controls, themed focus |
@@ -273,6 +273,12 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 ## Summary
 
 | Status | Count |
+| --- | --- |
+| NOT STARTED | 4 |
+| IN PROGRESS | 0 |
+| IMPLEMENTED | 63 |
+| VERIFIED | 100 |
+| BLOCKED EXTERNAL | 5 |
 | --- | --- |
 | NOT STARTED | 6 |
 | IN PROGRESS | 0 |

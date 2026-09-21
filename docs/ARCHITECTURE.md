@@ -201,3 +201,27 @@ extraction path is checked for containment inside the intended destination.
 - `ContentUpdater.ApplyAsync` downloads and hash-verifies each replacement first and only then
   removes the file it replaces, so a failed download leaves the instance untouched. The manifest is
   rewritten only for the entries that succeeded.
+
+## 13. Launcher self-update
+
+- `UpdateSignature` verifies a detached signature over the exact manifest bytes with an ECDSA P-256
+  or RSA key. The public key is embedded in the assembly (`update-public-key.pem` as an embedded
+  resource), because a key read from the data directory could be swapped together with a forged
+  feed. A build with no key refuses to check rather than accepting anything.
+- `UpdateManifest` is parsed only after the signature verifies. It carries the version, notes, and
+  one entry per runtime and build shape with a SHA-256 and size. Package URLs may be absolute
+  (HTTPS, or loopback HTTP for a local feed) or a plain file name relative to the feed, so a signed
+  feed keeps working if it moves host.
+- `UpdateService.CheckAsync` fetches `manifest.json` and `manifest.json.sig` with the shared HTTP
+  stack, verifies, then compares versions. `CompareVersions` orders dotted numeric parts and treats
+  a suffixed version as older than the bare release.
+- `UpdateService.StageAsync` downloads the matching package with the SHA-256 the manifest declares,
+  unpacks it into `<data root>/staging/<version>/payload` with the traversal-safe extractor, and
+  refuses a package that does not contain the executable. Nothing outside the staging directory is
+  touched, and the staging directory carries a marker file.
+- `UpdateHandoff` writes the script that applies the update. It waits for the launcher's process id
+  to disappear, copies the payload over the install directory, starts the new build, and deletes the
+  staging directory and itself. Every value is passed as a named argument; the script body is a
+  constant, so nothing from a feed is ever interpolated into script text. The script refuses to act
+  unless the marker file is present, and the launcher never runs the hand-off itself: replacing a
+  running installation is the user's decision.

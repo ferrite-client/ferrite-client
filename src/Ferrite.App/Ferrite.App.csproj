@@ -38,4 +38,14 @@
     <ProjectReference Include="..\Ferrite.Core\Ferrite.Core.csproj" />
   </ItemGroup>
 
+  <!--
+    The update feed's public key ships inside the binary when the build supplies one. An operator
+    who publishes a feed drops the PEM at src/Ferrite.App/Resources/update-public-key.pem and
+    rebuilds; without it the launcher reports that updates cannot be verified.
+  -->
+  <ItemGroup Condition="Exists('Resources/update-public-key.pem')">
+    <EmbeddedResource Include="Resources/update-public-key.pem"
+                      LogicalName="Ferrite.App.update-public-key.pem" />
+  </ItemGroup>
+
 </Project>

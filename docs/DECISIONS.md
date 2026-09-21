@@ -233,3 +233,32 @@ the instance, the old rule skipped the check entirely and took the newest versio
 loader. The install would have succeeded and done nothing, which is the worst kind of failure —
 silent. The exception exists because Modrinth labels every resource pack with the `minecraft`
 loader, and treating that as a mod loader would refuse all of them on a vanilla instance.
+
+## D022 - A build with no feed key refuses to check for updates
+
+**Decision.** The update feed's public key is embedded in the assembly at build time. If the build
+carries no key, `UpdateService` refuses to check and says why, instead of accepting an unsigned or
+unverifiable manifest.
+
+**Rejected.** Reading the key from the data directory, and "warn but continue" when no key is
+present. The first lets anyone who can write the data directory pair a forged feed with their own
+key. The second turns a security property into a dialog nobody reads.
+
+**Why.** The updater downloads an executable and hands it to a script that replaces the installed
+program. Every path that reaches that outcome has to be authenticated end to end, and the key is
+the only thing that distinguishes the operator's feed from anyone else's.
+
+## D023 - The launcher stages; the user applies
+
+**Decision.** Ferrite verifies and unpacks an update, then prints the command that applies it. It
+does not run the hand-off itself, and the script it generates refuses to act on a directory that
+does not carry Ferrite's staging marker.
+
+**Rejected.** Restarting into the new build automatically on next launch. That is friendlier, but it
+means the launcher replaces its own installation without the user watching, on the strength of a
+feed they may never have configured deliberately.
+
+**Why.** A self-update that runs unattended is the largest privilege the product can exercise over
+its own machine state. Making the last step explicit, with the exact command shown in Settings,
+keeps the user in the loop without making the process manual: the script does the work, including
+waiting for Ferrite to exit and cleaning up the staging directory.

@@ -28,6 +28,8 @@ What has been exercised end to end against live services (evidence in `docs/VERI
   history.
 - Updating content the launcher installed: a real Sodium 0.5.11 install was updated to 0.8.13, with
   the old file removed only after the replacement was hash-verified.
+- Publishing and consuming a signed update feed, and applying a staged build through the generated
+  hand-off script.
 - Java discovery across PATH, vendor installs, and the Minecraft launcher's own runtimes.
 
 Content browsing covers Modrinth and CurseForge through one browser. CurseForge needs a
@@ -61,6 +63,27 @@ Note: .NET 10's `dotnet test` integration does not discover xunit v3 tests here,
 Produces `artifacts/framework-dependent` (about 31 MiB, needs the .NET 10 desktop runtime) and
 `artifacts/self-contained` (about 107 MiB, needs nothing), each with a zip beside it. Neither is
 code-signed.
+
+## Updates
+
+Ferrite checks a feed you host. The feed is a directory containing `manifest.json`,
+`manifest.json.sig`, and the package zips; the manifest is signed with a key whose public half is
+built into the launcher. A build with no embedded key refuses to check rather than trusting an
+unsigned feed.
+
+```powershell
+# Publish a release
+pwsh -File scripts/package.ps1 -Version 0.2.0
+dotnet run --project tools/Ferrite.Verify -- sign-update --version 0.2.0 `
+  --package artifacts/ferrite-self-contained-win-x64.zip --out .\feed --kind self-contained
+
+# Try it locally before hosting anything
+dotnet run --project tools/Ferrite.Verify -- update-check --feed .\feed `
+  --key .\feed\update-public-key.pem --current 0.1.0 --stage
+```
+
+Apply a staged update by running the command Ferrite prints under Settings -> Launcher updates; the
+launcher never replaces its own running files. Full steps are in `docs/HUMAN_ACTION_REQUIRED.md` (H3).
 
 ## Data locations
 

@@ -12,6 +12,9 @@ public sealed record DownloadRequest
 
     public string? ExpectedSha1 { get; init; }
 
+    /// <summary>Used by the updater, whose packages are published with SHA-256 digests.</summary>
+    public string? ExpectedSha256 { get; init; }
+
     public string? ExpectedSha512 { get; init; }
 
     public long? ExpectedSize { get; init; }

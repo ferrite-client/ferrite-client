@@ -48,6 +48,12 @@ public sealed class AppPaths
 
     public string BackupsDirectory => Path.Combine(Root, "backups");
 
+    /// <summary>
+    /// Where a downloaded update is unpacked before hand-off. It lives outside the install
+    /// directory so replacing a running build never touches the files that are in use.
+    /// </summary>
+    public string UpdateStagingDirectory => Path.Combine(Root, "staging");
+
     public string SettingsFile => Path.Combine(ConfigDirectory, "settings.json");
 
     public string AccountsFile => Path.Combine(ConfigDirectory, "accounts.json");
@@ -129,6 +135,7 @@ public sealed class AppPaths
         yield return LauncherLogsDirectory;
         yield return TemporaryDirectory;
         yield return BackupsDirectory;
+        yield return UpdateStagingDirectory;
     }
 
     private static string DefaultRoot()

@@ -4,7 +4,10 @@ using CommunityToolkit.Mvvm.Input;
 using Ferrite.App.Services;
 using Ferrite.Core.Content;
 using Ferrite.Core.Diagnostics;
+using Ferrite.Core.Minecraft;
+using Ferrite.Core.Platform;
 using Ferrite.Core.Storage;
+using Ferrite.Core.Update;
 using Ferrite.Core.Util;
 
 namespace Ferrite.App.ViewModels;
@@ -66,6 +69,20 @@ public sealed partial class SettingsViewModel : ObservableObject
     private string? _diagnosticsStatus;
 
     [ObservableProperty]
+    private string? _updateFeedUrl;
+
+    [ObservableProperty]
+    private bool _checkForUpdatesOnStartup;
+
+    [ObservableProperty]
+    private string? _updateStatus;
+
+    [ObservableProperty]
+    private string? _updateHandoffCommand;
+
+    private UpdateCheckResult? _pendingUpdate;
+
+    [ObservableProperty]
     private string _dataRoot = string.Empty;
 
     [ObservableProperty]
@@ -86,6 +103,8 @@ public sealed partial class SettingsViewModel : ObservableObject
         ProxyUrl = settings.ProxyUrl;
         MicrosoftClientId = settings.MicrosoftClientId;
         ShowSnapshots = settings.ShowSnapshotsInVersionList;
+        UpdateFeedUrl = settings.UpdateFeedUrl;
+        CheckForUpdatesOnStartup = settings.CheckForUpdatesOnStartup;
         DataRoot = _services.Paths.Root;
         NewCurseForgeApiKey = null;
         RefreshCurseForgeKeyStatus();
@@ -172,6 +191,8 @@ public sealed partial class SettingsViewModel : ObservableObject
         settings.ProxyUrl = string.IsNullOrWhiteSpace(ProxyUrl) ? null : ProxyUrl.Trim();
         settings.MicrosoftClientId = string.IsNullOrWhiteSpace(MicrosoftClientId) ? null : MicrosoftClientId.Trim();
         settings.ShowSnapshotsInVersionList = ShowSnapshots;
+        settings.UpdateFeedUrl = string.IsNullOrWhiteSpace(UpdateFeedUrl) ? null : UpdateFeedUrl.Trim();
+        settings.CheckForUpdatesOnStartup = CheckForUpdatesOnStartup;
 
         await _services.Settings.SaveAsync(CancellationToken.None).ConfigureAwait(true);
 
@@ -199,6 +220,109 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     [RelayCommand]
     private void OpenDataFolder() => ShellOpen.Directory(_services.Paths.Root);
+
+    /// <summary>
+    /// Checks the configured feed. Every failure mode is reported as text: an unsigned feed, an
+    /// unreachable host, and a feed that publishes nothing for this machine all stay distinct.
+    /// </summary>
+    [RelayCommand]
+    private async Task CheckForUpdatesAsync()
+    {
+        _pendingUpdate = null;
+        UpdateHandoffCommand = null;
+
+        if (string.IsNullOrWhiteSpace(UpdateFeedUrl))
+        {
+            UpdateStatus = "No update feed is configured.";
+            return;
+        }
+
+        IsBusy = true;
+        try
+        {
+            _shell.BeginActivity("Checking for launcher updates...");
+            var current = typeof(SettingsViewModel).Assembly.GetName().Version?.ToString(3) ?? "0.0.0";
+            var result = await _services.Updates
+                .CheckAsync(UpdateFeedUrl.Trim(), current, PlatformInfo.CurrentRuntimeIdentifier(), CancellationToken.None)
+                .ConfigureAwait(true);
+
+            _pendingUpdate = result;
+            var version = result.Manifest.Version;
+            if (!result.IsNewer)
+            {
+                UpdateStatus = $"Ferrite {current} is the newest release on this feed.";
+            }
+            else if (result.Package is null)
+            {
+                UpdateStatus = $"Ferrite {version} is available, but the feed publishes no build for this machine.";
+            }
+            else
+            {
+                UpdateStatus = $"Ferrite {version} is available ({ByteSize.Format(result.Package.Size)}).";
+            }
+
+            _shell.ReportStatus(UpdateStatus);
+        }
+        catch (Exception exception)
+        {
+            UpdateStatus = exception.Message;
+            _shell.ReportError(exception.Message);
+        }
+        finally
+        {
+            IsBusy = false;
+            _shell.EndActivity();
+        }
+    }
+
+    /// <summary>
+    /// Downloads and verifies the update, then prints the command that applies it. The launcher does
+    /// not run the hand-off itself: replacing a running executable is the user's call.
+    /// </summary>
+    [RelayCommand]
+    private async Task StageUpdateAsync()
+    {
+        if (_pendingUpdate is not { IsNewer: true } check || check.Package is null)
+        {
+            UpdateStatus = "Check for updates first.";
+            return;
+        }
+
+        IsBusy = true;
+        try
+        {
+            _shell.BeginActivity($"Downloading Ferrite {check.Manifest.Version}...");
+            var stage = await _services.Updates
+                .StageAsync(
+                    check,
+                    new Progress<InstallProgress>(_shell.ReportActivity),
+                    CancellationToken.None)
+                .ConfigureAwait(true);
+
+            var installDirectory = AppContext.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar);
+            UpdateHandoffCommand = UpdateHandoff.BuildCommandLine(
+                stage,
+                Environment.ProcessId,
+                installDirectory);
+            UpdateStatus =
+                $"Ferrite {stage.Version} is staged and verified ({ByteSize.Format(stage.Bytes)}). "
+                + "Close Ferrite, then run the command below.";
+            _shell.ReportStatus(UpdateStatus);
+        }
+        catch (Exception exception)
+        {
+            UpdateStatus = exception.Message;
+            _shell.ReportError(exception.Message);
+        }
+        finally
+        {
+            IsBusy = false;
+            _shell.EndActivity();
+        }
+    }
+
+    [RelayCommand]
+    private void OpenStagingFolder() => ShellOpen.Directory(_services.Paths.UpdateStagingDirectory);
 
     [RelayCommand]
     private void OpenLogsFolder() => ShellOpen.Directory(_services.Paths.LauncherLogsDirectory);

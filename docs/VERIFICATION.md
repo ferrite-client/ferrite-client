@@ -758,3 +758,104 @@ with no .NET installed. Both stayed up for the full window and were then stopped
 start of the packaged product rather than a successful `dotnet publish`.
 
 Neither build is code-signed; that remains an external dependency (see `HUMAN_ACTION_REQUIRED.md`).
+
+---
+
+## V012 - Launcher self-update (2026-09-21)
+
+Environment: Windows 11 x64, .NET 10.0.5. `docs/RESEARCH.md` said Ferrite implemented "check,
+staging, verification, and hand-off". It did not; that sentence described an intention. It is true
+now, and this is the evidence.
+
+### V012.1 Publishing a signed feed
+
+Command: `Ferrite.Verify sign-update --version 2.0.0 --package <build>.zip --out <feed> --kind framework-dependent`
+
+```
+Generated a new ECDSA P-256 key pair.
+  public key:  <feed>\update-public-key.pem
+  private key: written to the output directory; keep it offline, never commit it.
+Package:  <build>.zip
+  size:   12.7 MiB
+  sha256: 6b74f09d14619125737397593922922c96f1bfc52d6258aa50e4349e9034bfec
+Manifest:  <feed>\manifest.json
+Signature: <feed>\manifest.json.sig
+  signature verifies with the new key: True
+```
+
+The package was a real publish of this repository (`artifacts/framework-dependent`, 47 files,
+12.7 MiB zipped), so the feed contains a build a user could actually run.
+
+### V012.2 Checking it over real HTTP
+
+Command: `Ferrite.Verify update-check --feed <feed> --key <feed>\update-public-key.pem --current 0.1.0 --stage`
+
+```
+Serving <feed> on http://127.0.0.1:50062/
+Feed:    http://127.0.0.1:50062/
+Current: Ferrite 0.1.0
+Manifest verified. Newest release: 2.0.0 (2026-09-21 02:26:42Z)
+Notes: Second release
+Package: framework-dependent win-x64, 12.7 MiB
+  [Downloading] 100.0%  Ferrite 2.0.0
+Update 2.0.0 staged: 47 file(s) extracted to <root>\staging\2.0.0\payload
+```
+
+The feed files were served by a real (if minimal) HTTP server on the loopback interface; only a
+loopback host may use plain HTTP, which is what makes a local feed testable without a certificate.
+
+Then the manifest was altered after signing — its `version` changed from `2.0.0` to `9.9.9` — and
+the same check was run again:
+
+```
+FAILED: UpdateException: The update manifest from http://127.0.0.1:43965/manifest.json did not
+match its signature. Refusing to use it.
+```
+
+### V012.3 Applying the staged update
+
+The generated hand-off script was run against an install directory containing the previous build
+(`version.txt` = `0.1.0`, 46 files):
+
+```
+Waiting for Ferrite (pid 39068) to exit...
+Installing Ferrite into <root>\install...
+Starting <root>\install\whoami.exe
+Ferrite update complete.
+
+after: version.txt = 2.0.0
+after: files = 47
+staging exists = False
+script exists  = False
+```
+
+The install was replaced with the staged payload (46 → 47 files, the new `version.txt`), the
+staging directory and the script removed themselves, and a process was really started. The
+stand-in executable in this run exists because the payload is a real launcher: starting the actual
+Ferrite would have left a window running during an automated check. The production command starts
+`Ferrite.exe`; the mechanism under test is identical.
+
+`UpdateHandoffTests` runs the same script in the test suite, and also proves the guard: pointed at a
+directory without Ferrite's staging marker, the script exits non-zero and copies nothing.
+
+### V012.4 What is deliberately not accepted
+
+`UpdateServiceTests` covers the refusals, because an updater that is too trusting is a code
+execution path:
+
+- A build with no embedded key refuses to check at all rather than accepting an unsigned feed.
+- A manifest whose signature does not match is refused.
+- A signature from a different key is refused, as are empty and malformed signatures.
+- A feed that is not HTTPS is refused; HTTP is allowed only for a loopback host.
+- Package URLs may not use `file:`, `ftp:`, an absolute path, or `../`, and a relative name resolves
+  against the feed so a signed feed keeps working if it moves host.
+- A package whose SHA-256 does not match is refused before anything is unpacked.
+- A package without `Ferrite.exe` is refused, because it is not a build.
+- A manifest from a newer schema, or one missing a runtime, url, or hash, is refused.
+
+### V012.5 Interface
+
+`settings-updates.png` renders the *Launcher updates* section: feed URL, the startup-check toggle,
+the check and download actions, and the hand-off command once a build is staged. In a build with no
+embedded key it states that plainly — "This build carries no update signing key, so an update feed
+cannot be trusted" — rather than offering a check that cannot succeed.

@@ -82,6 +82,30 @@
 
       <Border Height="1" Background="{DynamicResource FerriteBorder}" />
 
+      <TextBlock Classes="h2" Text="Launcher updates" />
+      <StackPanel Spacing="6">
+        <StackPanel Spacing="4">
+          <TextBlock Classes="label" Text="UPDATE FEED URL" />
+          <TextBox Text="{Binding UpdateFeedUrl}" PlaceholderText="https://example.com/ferrite/" />
+        </StackPanel>
+        <CheckBox Content="Check for updates when Ferrite starts"
+                  IsChecked="{Binding CheckForUpdatesOnStartup}" />
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <Button Classes="primary" Content="Check for updates" Command="{Binding CheckForUpdatesCommand}" />
+          <Button Content="Download and verify" Command="{Binding StageUpdateCommand}" />
+          <Button Content="Open staging folder" Command="{Binding OpenStagingFolderCommand}" />
+        </StackPanel>
+        <TextBlock Classes="muted" TextWrapping="Wrap" Text="{Binding UpdateStatus}" />
+        <StackPanel Spacing="4" IsVisible="{Binding UpdateHandoffCommand, Converter={x:Static ObjectConverters.IsNotNull}}">
+          <TextBlock Classes="label" Text="CLOSE FERRITE, THEN RUN" />
+          <SelectableTextBlock Classes="mono" TextWrapping="Wrap" Text="{Binding UpdateHandoffCommand}" />
+        </StackPanel>
+        <TextBlock Classes="faint" TextWrapping="Wrap"
+                   Text="A feed must publish a manifest.json signed by the key built into this copy of Ferrite. Ferrite never replaces its own running files; the staged build is applied by the script above, which waits for Ferrite to close. See docs/HUMAN_ACTION_REQUIRED.md." />
+      </StackPanel>
+
+      <Border Height="1" Background="{DynamicResource FerriteBorder}" />
+
       <TextBlock Classes="h2" Text="Diagnostics" />
       <StackPanel Spacing="6">
         <TextBlock Classes="label" Text="RECENT OPERATIONS" />

@@ -47,6 +47,27 @@ public static class PlatformInfo
 
     public static bool IsWindows => Os == OperatingSystemKind.Windows;
 
+    /// <summary>
+    /// The .NET runtime identifier for this process, for example <c>win-x64</c>. Used to pick the
+    /// matching update package from a feed.
+    /// </summary>
+    public static string CurrentRuntimeIdentifier() =>
+        (Os switch
+        {
+            OperatingSystemKind.Windows => "win",
+            OperatingSystemKind.Linux => "linux",
+            _ => "osx",
+        })
+        + "-"
+        + (Arch switch
+        {
+            CpuArchitecture.X64 => "x64",
+            CpuArchitecture.Arm64 => "arm64",
+            CpuArchitecture.X86 => "x86",
+            CpuArchitecture.Arm32 => "arm",
+            _ => "x64",
+        });
+
     private static OperatingSystemKind DetectOs()
     {
         if (OperatingSystem.IsWindows())

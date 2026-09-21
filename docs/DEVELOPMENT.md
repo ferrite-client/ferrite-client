@@ -102,6 +102,18 @@ write frames to `$env:FERRITE_UI_SHOTS` when that variable is set.
 ./scripts/verify-live.ps1 fabric 1.21.1
 ./scripts/verify-live.ps1 neoforge 1.21.1
 ./scripts/verify-live.ps1 content 1.21.1 --slug sodium
+./scripts/verify-live.ps1 content 1.21.1 --slug sodium --version <id> --loader fabric
+./scripts/verify-live.ps1 updates --instance <name> --apply
+./scripts/verify-live.ps1 modpack <pack.mrpack or url>
+./scripts/verify-live.ps1 worlds --game-dir %APPDATA%\.minecraft
+./scripts/verify-live.ps1 ping mc.hypixel.net
+./scripts/verify-live.ps1 crash
+./scripts/verify-live.ps1 diagnostics --out <path>.zip
+./scripts/verify-live.ps1 cache sodium
+./scripts/verify-live.ps1 curseforge jei          # reports the blocked state without a key
+./scripts/verify-live.ps1 sign-update --version 2.0.0 --package <zip> --out <feed>
+./scripts/verify-live.ps1 update-check --feed <feed> --key <feed>/update-public-key.pem --current 0.1.0 --stage
 ```
 
-Results are recorded in `docs/VERIFICATION.md`.
+`update-check` accepts a local directory as `--feed`, which it serves over loopback HTTP, so a feed
+can be exercised before it is hosted. Results are recorded in `docs/VERIFICATION.md`.

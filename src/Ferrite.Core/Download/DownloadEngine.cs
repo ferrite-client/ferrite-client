@@ -324,6 +324,15 @@ public sealed class DownloadEngine
             }
         }
 
+        if (!string.IsNullOrEmpty(request.ExpectedSha256))
+        {
+            var sha256 = await Hashing.HashFileAsync(path, HashAlgorithmName.SHA256, cancellationToken).ConfigureAwait(false);
+            if (!string.Equals(sha256, request.ExpectedSha256, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+        }
+
         if (!string.IsNullOrEmpty(request.ExpectedSha512))
         {
             var sha512 = await Hashing.HashFileAsync(path, HashAlgorithmName.SHA512, cancellationToken).ConfigureAwait(false);
