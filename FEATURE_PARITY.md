@@ -282,6 +282,12 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | --- | --- |
 | NOT STARTED | 0 |
 | IN PROGRESS | 0 |
+| IMPLEMENTED | 32 |
+| VERIFIED | 125 |
+| BLOCKED EXTERNAL | 15 |
+| --- | --- |
+| NOT STARTED | 0 |
+| IN PROGRESS | 0 |
 | IMPLEMENTED | 37 |
 | VERIFIED | 120 |
 | BLOCKED EXTERNAL | 15 |
