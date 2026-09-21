@@ -80,6 +80,11 @@ internal static class Program
                     args.Contains("--launch", StringComparer.OrdinalIgnoreCase),
                     GetOption(args, "--instance"),
                     cancellation.Token),
+                "world-map" => await Scenarios.WorldMapAsync(
+                    services,
+                    GetOption(args, "--world"),
+                    int.TryParse(GetOption(args, "--delete"), out var mapDeletes) ? mapDeletes : 0,
+                    cancellation.Token),
                 "content" => await Scenarios.InstallContentAsync(
                     services,
                     versionId,

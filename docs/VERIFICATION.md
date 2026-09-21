@@ -2597,3 +2597,78 @@ LabyMod publishes builds for a fixed list of versions - a version it does not pu
 that reason rather than attempted. The six shared assets are fetched and stored but cannot be verified
 against a checksum, because LabyMod publishes none. Bundled add-ons inside LabyMod are not managed
 from Ferrite.
+
+## V043 - Save preview and chunk tools (2026-09-21)
+
+Commands: `WorldMapTests` (Core), `InstanceMapTests` (App), the live run below, and the whole suite
+(`405` Core tests, `94` App tests, all passing).
+
+XMCL's catalogue has "Save Preview and Chunk Tools - read a world visually before launching it and
+make precise chunk-level changes. Select, copy, or delete Chunks". The first inventory did not list
+it. Ferrite now reads a world's own region files, renders them, and edits chunks.
+
+### V043.1 A real world, read and rendered
+
+Command: `Ferrite.Verify world-map --world "<a real 1.20.4 world>" --delete 3`.
+
+```
+World: ...\instances\324e8c99-...\minecraft\saves\New World
+Region files: 16
+Map: 736x736 pixels, step 1, 2113 of 16384 possible chunk(s) present
+Chunk range: x -22..23, z -22..23
+Distinct blue values in the render (first 6): 126, 0, 109, 110, 111
+```
+
+That is a real world's Anvil files: 16 region files, 2113 chunks, and a 736x736 map whose shading
+comes from each chunk's own `Heightmaps` (nine-bit heights packed seven per long, exactly as the
+format stores them). A pixel with no chunk under it stays black, which is the honest reading of
+"nothing is generated there".
+
+### V043.2 Editing a copy, and what the backup holds
+
+```
+Copied the world to ...\world-map-copy so the original is untouched.
+[info] WorldChunkEditor: Deleted 3 chunk(s) from ...\world-map-copy, rewriting 3 region file(s)
+Deleted 3 chunk(s) from 3 region file(s): 2113 -> 2110 chunk(s) on disk
+Region backup: ...\backups\world-chunks\world-map-copy-20260921-093529
+Region files in the backup hold 482 chunk(s)
+Copied 2 chunk(s) into a new world, offset by 32,32: 2 chunk(s) on disk at (54,55), (55,55)
+PASS: a real world was read, rendered, and edited on a copy.
+```
+
+The count is exact in both directions: three chunks left the world, and the backup of the three
+region files that were rewritten still holds all 482 of their chunks, so the deleted chunks are
+recoverable. The copy landed at the source coordinates plus the offset, which means each copied
+chunk's own `xPos`/`zPos` was rewritten - a chunk still naming its old position would have been
+ignored by the game.
+
+### V043.3 Three defects the tests and the live run found
+
+**The data was written where the header said the next chunk was.** `Rewrite` computed the header
+offsets from sector two but wrote the first chunk's bytes at offset zero, so every file it produced
+was unreadable: the header pointed at data that was 8 KiB further along. The placeholder header is
+written first now.
+
+**The heightmap was read through the wrong accessor.** A heightmap is a `LongArray`, whose value is a
+`long[]`; the reader was using the NBT-list accessor, which returns null for anything else, so every
+chunk silently fell back to a flat height and the map came out uniform. The live run's "distinct blue
+values" line is what made that visible.
+
+**Stripping `./` everywhere instead of at the front** - a defect the FTB work found in the same
+shape - is guarded here too: a chunk path that climbs out of the world is refused rather than
+normalised.
+
+### V043.4 The interface
+
+The instance page gains a `Map` tab: a world picker, a copy-target picker, `Render the map`, and the
+map itself. Clicking the map selects or deselects the chunk under the pointer - the image is drawn at
+its own pixel size, so a pixel of the screen is a pixel of the map, and the selection is composited
+into the bitmap rather than drawn as an overlay, so it stays aligned. Selected chunks are tinted
+copper against the map's blues. `Delete selected chunks` and `Copy selected chunks` act on the
+selection, and the status line reports the chunk count. Every new label exists in English and Polish.
+
+**Limitations, stated precisely.** The map is a height-shaded chunk map, not the in-game renderer:
+there is no block colouring, no biome colouring, and no lighting. Selection is per chunk, by
+clicking; there is no drag-rectangle or brush yet. Copying places chunks at the same coordinates in
+the target world (no offset control in the interface, though the editor takes one), and the game must
+not be running on either world while chunks are edited.

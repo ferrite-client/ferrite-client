@@ -164,6 +164,10 @@ public sealed class AppServices : IDisposable
             paths,
             loggerFactory.CreateLogger<CurseForgePackInstaller>());
         Worlds = new WorldService(loggerFactory.CreateLogger<WorldService>());
+        WorldMaps = new WorldMapService();
+        WorldChunks = new WorldChunkEditor(
+            paths.BackupsDirectory,
+            loggerFactory.CreateLogger<WorldChunkEditor>());
         LocalServers = new LocalServerService(
             Downloads,
             paths,
@@ -282,6 +286,12 @@ public sealed class AppServices : IDisposable
     public CurseForgePackInstaller CurseForgePacks { get; }
 
     public WorldService Worlds { get; }
+
+    /// <summary>Renders a world's chunks into a bitmap for the map.</summary>
+    public WorldMapService WorldMaps { get; }
+
+    /// <summary>Deletes and copies chunks, backing up the region files it rewrites.</summary>
+    public WorldChunkEditor WorldChunks { get; }
 
     /// <summary>Prepares, starts, stops, and exports a local server for an instance.</summary>
     public LocalServerService LocalServers { get; }

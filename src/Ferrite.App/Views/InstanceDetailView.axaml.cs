@@ -2,6 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using Avalonia.VisualTree;
 using Ferrite.App.ViewModels;
 using Ferrite.Core.Util;
 
@@ -167,6 +168,22 @@ public partial class InstanceDetailView : UserControl
         {
             ShellOpen.Directory(Path.Combine(viewModel.GameDirectory, "saves"));
         }
+    }
+
+    /// <summary>
+    /// A click on the map selects the chunk under the pointer. The image is drawn at its own pixel
+    /// size, so the pointer's position in the control is a position in the map.
+    /// </summary>
+    private void OnWorldMapPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (DataContext is not InstanceDetailViewModel viewModel
+            || sender is not Control visual)
+        {
+            return;
+        }
+
+        var position = e.GetPosition(visual);
+        viewModel.ToggleChunkAt((int)position.X, (int)position.Y);
     }
 
     /// <summary>Exports the prepared local server, world included, as a zip the user chooses.</summary>
