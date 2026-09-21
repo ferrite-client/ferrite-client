@@ -103,6 +103,11 @@ internal static class StringsPl
             ["L.Settings.Network"] = "Sieć",
             ["L.Settings.FieldConcurrentDownloads"] = "RÓWNOLEGŁE POBIERANIA",
             ["L.Settings.FieldProxy"] = "PROXY HTTP",
+            ["L.Settings.FieldMirrors"] = "LUSTRA (jedno host=url na linię)",
+            ["L.Settings.MirrorsPlaceholder"] = "launchermeta.mojang.com=https://mirror.example/mojang",
+            ["L.Settings.MirrorsHint"] =
+                "Przekierowuje żądania artefaktów i metadanych dla danego hosta do zaufanego lustra. "
+                + "Ścieżka i parametry są zachowane, więc lustro musi mieć identyczny układ.",
             ["L.Settings.Accounts"] = "Konta",
             ["L.Settings.FieldClientId"] = "IDENTYFIKATOR KLIENTA MICROSOFT",
             ["L.Settings.ClientIdHint"] =
@@ -177,6 +182,10 @@ internal static class StringsPl
             ["L.Instance.WindowSizeHint"] = "szerokość x wysokość, puste dla domyślnego",
             ["L.Instance.FieldDefaultServer"] = "DOMYŚLNY SERWER (używany przy dołączaniu z biblioteki)",
             ["L.Instance.DemoMode"] = "Uruchom w trybie demo",
+            ["L.Instance.AcceptEula"] = "Akceptuj EULA Minecrafta dla tej instancji (zapisuje eula.txt)",
+            ["L.Instance.AcceptEulaHint"] =
+                "Minecraft wymaga tego, aby uruchomić serwer. Akceptacja umowy należy do Ciebie, więc "
+                + "Ferrite nigdy nie ustawia jej samodzielnie.",
             ["L.Instance.FieldJvmArguments"] = "DODATKOWE ARGUMENTY JVM (jeden na linię)",
             ["L.Instance.FieldGameArguments"] = "DODATKOWE ARGUMENTY GRY (jeden na linię)",
             ["L.Instance.DropModsHint"] = "Przeciągnij pliki modów tutaj lub użyj opcji Dodaj mody.",

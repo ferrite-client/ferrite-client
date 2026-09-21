@@ -71,12 +71,14 @@ public sealed partial class InstanceDetailViewModel
             Record.WindowWidth = WindowWidth is > 0 ? WindowWidth : null;
             Record.WindowHeight = WindowHeight is > 0 ? WindowHeight : null;
             Record.DemoMode = DemoMode;
+            Record.AcceptEula = AcceptEula;
             Record.JavaPath = SelectedJava?.ExecutablePath;
             Record.LastServerAddress = string.IsNullOrWhiteSpace(ServerAddress) ? null : ServerAddress.Trim();
             Record.JvmArguments = SplitArguments(JvmArgumentsText);
             Record.GameArguments = SplitArguments(GameArgumentsText);
 
             await _services.Instances.SaveAsync(Record, CancellationToken.None).ConfigureAwait(true);
+            EulaFile.Apply(GameDirectory, AcceptEula);
             StatusNote = Localizer.Get("L.Instance.SettingsSaved");
             _shell.ReportStatus(StatusNote);
             await _shell.Library.RefreshAsync().ConfigureAwait(true);

@@ -83,6 +83,12 @@
             <CheckBox Content="{DynamicResource L.Instance.DemoMode}" IsChecked="{Binding DemoMode}" />
 
             <StackPanel Spacing="4">
+              <CheckBox Content="{DynamicResource L.Instance.AcceptEula}" IsChecked="{Binding AcceptEula}" />
+              <TextBlock Classes="faint" TextWrapping="Wrap"
+                         Text="{DynamicResource L.Instance.AcceptEulaHint}" />
+            </StackPanel>
+
+            <StackPanel Spacing="4">
               <TextBlock Classes="label" Text="{DynamicResource L.Instance.FieldJvmArguments}" />
               <TextBox Text="{Binding JvmArgumentsText}" AcceptsReturn="True" Height="88" Classes="mono" />
             </StackPanel>

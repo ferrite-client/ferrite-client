@@ -41,6 +41,13 @@
         </StackPanel>
       </Grid>
 
+      <StackPanel Spacing="4">
+        <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldMirrors}" />
+        <TextBox Text="{Binding MirrorOverridesText}" AcceptsReturn="True" Height="72" Classes="mono"
+                 PlaceholderText="{DynamicResource L.Settings.MirrorsPlaceholder}" />
+        <TextBlock Classes="faint" TextWrapping="Wrap" Text="{DynamicResource L.Settings.MirrorsHint}" />
+      </StackPanel>
+
       <Border Height="1" Background="{DynamicResource FerriteBorder}" />
 
       <TextBlock Classes="h2" Text="{DynamicResource L.Settings.Accounts}" />

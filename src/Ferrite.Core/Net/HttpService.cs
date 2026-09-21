@@ -15,18 +15,78 @@ public sealed class HttpService : IDisposable
 {
     private readonly HttpServiceOptions _options;
     private readonly ILogger<HttpService> _logger;
-    private readonly HttpClient _client;
     private readonly bool _ownsClient;
+    private readonly MirrorResolver _mirrors;
+    private readonly List<HttpClient> _retired = [];
+    private readonly object _clientGate = new();
+    private HttpClient _client;
 
-    public HttpService(HttpServiceOptions options, ILogger<HttpService> logger, HttpClient? client = null)
+    public HttpService(
+        HttpServiceOptions options,
+        ILogger<HttpService> logger,
+        HttpClient? client = null,
+        MirrorResolver? mirrors = null)
     {
         _options = options;
         _logger = logger;
         _ownsClient = client is null;
+        _mirrors = mirrors ?? new MirrorResolver();
         _client = client ?? CreateClient(options);
     }
 
-    public HttpClient Client => _client;
+    public HttpClient Client
+    {
+        get
+        {
+            lock (_clientGate)
+            {
+                return _client;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Applies a proxy change to the HTTP stack. The replacement client takes over new requests; the
+    /// previous one is kept alive until the service is disposed, so a request already in flight is
+    /// not cancelled by the user saving settings.
+    /// </summary>
+    public void UpdateProxy(string? proxyUrl)
+    {
+        if (!_ownsClient)
+        {
+            return;
+        }
+
+        var normalized = string.IsNullOrWhiteSpace(proxyUrl) ? null : proxyUrl.Trim();
+        if (string.Equals(normalized, _options.ProxyUrl, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        var options = new HttpServiceOptions
+        {
+            UserAgent = _options.UserAgent,
+            ProxyUrl = normalized,
+            MaxConnectionsPerServer = _options.MaxConnectionsPerServer,
+            MetadataTimeout = _options.MetadataTimeout,
+            MaxAttempts = _options.MaxAttempts,
+            BaseRetryDelay = _options.BaseRetryDelay,
+        };
+
+        var replacement = CreateClient(options);
+        lock (_clientGate)
+        {
+            _retired.Add(_client);
+            _client = replacement;
+        }
+
+        _logger.LogInformation(
+            normalized is null ? "HTTP proxy cleared" : "HTTP proxy set to {Proxy}",
+            normalized ?? "-");
+    }
+
+    /// <summary>Rewrites an address onto a configured mirror, if one applies.</summary>
+    public string ResolveUrl(string url) => _mirrors.Resolve(url);
 
     /// <summary>Buffered GET with a hard size cap and per-attempt timeout. Retries transient failures.</summary>
     public async Task<byte[]> GetBytesAsync(string url, int maxBytes, CancellationToken cancellationToken)
@@ -140,7 +200,10 @@ public sealed class HttpService : IDisposable
         while (true)
         {
             attempt++;
-            using var request = new HttpRequestMessage(HttpMethod.Head, url);
+            using var request = await CloneAsync(
+                    new HttpRequestMessage(HttpMethod.Head, url),
+                    cancellationToken)
+                .ConfigureAwait(false);
             using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             timeout.CancelAfter(_options.MetadataTimeout);
 
@@ -360,9 +423,20 @@ public sealed class HttpService : IDisposable
 
     public void Dispose()
     {
-        if (_ownsClient)
+        if (!_ownsClient)
+        {
+            return;
+        }
+
+        lock (_clientGate)
         {
             _client.Dispose();
+            foreach (var retired in _retired)
+            {
+                retired.Dispose();
+            }
+
+            _retired.Clear();
         }
     }
 
@@ -433,11 +507,16 @@ public sealed class HttpService : IDisposable
         await Task.Delay(total, cancellationToken).ConfigureAwait(false);
     }
 
-    private static async Task<HttpRequestMessage> CloneAsync(
+    private async Task<HttpRequestMessage> CloneAsync(
         HttpRequestMessage request,
         CancellationToken cancellationToken)
     {
-        var clone = new HttpRequestMessage(request.Method, request.RequestUri);
+        // Every request funnels through here, so a configured mirror applies to metadata and to
+        // artifact downloads alike without each caller knowing about it.
+        var target = request.RequestUri is { } uri
+            ? new Uri(_mirrors.Resolve(uri.AbsoluteUri), UriKind.Absolute)
+            : null;
+        var clone = new HttpRequestMessage(request.Method, target);
         foreach (var header in request.Headers)
         {
             clone.Headers.TryAddWithoutValidation(header.Key, header.Value);

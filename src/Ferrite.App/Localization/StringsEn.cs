@@ -103,6 +103,11 @@ internal static class StringsEn
             ["L.Settings.Network"] = "Network",
             ["L.Settings.FieldConcurrentDownloads"] = "CONCURRENT DOWNLOADS",
             ["L.Settings.FieldProxy"] = "HTTP PROXY",
+            ["L.Settings.FieldMirrors"] = "MIRRORS (one host=url per line)",
+            ["L.Settings.MirrorsPlaceholder"] = "launchermeta.mojang.com=https://mirror.example/mojang",
+            ["L.Settings.MirrorsHint"] =
+                "Redirects artifact and metadata requests for a host to a mirror you trust. Path and "
+                + "query are preserved, so the mirror must use the same layout.",
             ["L.Settings.Accounts"] = "Accounts",
             ["L.Settings.FieldClientId"] = "MICROSOFT CLIENT ID",
             ["L.Settings.ClientIdHint"] =
@@ -175,6 +180,10 @@ internal static class StringsEn
             ["L.Instance.WindowSizeHint"] = "width x height, blank for the default",
             ["L.Instance.FieldDefaultServer"] = "DEFAULT SERVER (used when joining from the library)",
             ["L.Instance.DemoMode"] = "Launch in demo mode",
+            ["L.Instance.AcceptEula"] = "Accept Minecraft's EULA for this instance (writes eula.txt)",
+            ["L.Instance.AcceptEulaHint"] =
+                "Minecraft requires this before it will run a server. Accepting the agreement is your "
+                + "decision, so Ferrite never sets it without you.",
             ["L.Instance.FieldJvmArguments"] = "EXTRA JVM ARGUMENTS (one per line)",
             ["L.Instance.FieldGameArguments"] = "EXTRA GAME ARGUMENTS (one per line)",
             ["L.Instance.DropModsHint"] = "Drop mod files here, or use Add mods.",

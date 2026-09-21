@@ -34,8 +34,15 @@ public sealed class AppServices : IDisposable
         var secrets = new ProtectedSecretStore(paths.SecretsFile, loggerFactory.CreateLogger<ProtectedSecretStore>());
         secrets.Load();
         Settings = new SettingsStore(paths, loggerFactory.CreateLogger<SettingsStore>());
-        Http = new HttpService(new HttpServiceOptions(), loggerFactory.CreateLogger<HttpService>());
+        // Network settings are read when a request is made, so a change applies without a restart.
+        Mirrors = new MirrorResolver(Settings.Current.MirrorOverrides);
+        Http = new HttpService(
+            new HttpServiceOptions(),
+            loggerFactory.CreateLogger<HttpService>(),
+            client: null,
+            mirrors: Mirrors);
         Downloads = new DownloadEngine(Http, new DownloadEngineOptions(), loggerFactory.CreateLogger<DownloadEngine>());
+        ApplyNetworkSettings();
         Manifest = new VersionManifestService(Http, paths, loggerFactory.CreateLogger<VersionManifestService>());
         Resolver = new VersionResolver(Manifest, loggerFactory.CreateLogger<VersionResolver>());
         Planner = new InstallPlanner(Http, paths, loggerFactory.CreateLogger<InstallPlanner>());
@@ -165,6 +172,9 @@ public sealed class AppServices : IDisposable
 
     public HttpService Http { get; }
 
+    /// <summary>Host-to-mirror overrides, re-read from settings by the HTTP and download layers.</summary>
+    public MirrorResolver Mirrors { get; }
+
     public DownloadEngine Downloads { get; }
 
     public VersionManifestService Manifest { get; }
@@ -265,5 +275,18 @@ public sealed class AppServices : IDisposable
     {
         Http.Dispose();
         _loggerFactory.Dispose();
+    }
+
+    /// <summary>
+    /// Pushes the current network settings onto the running services. Called after settings load and
+    /// after the user saves, so the proxy, the mirrors, and the download concurrency are live values
+    /// rather than values read once at startup.
+    /// </summary>
+    public void ApplyNetworkSettings()
+    {
+        var settings = Settings.Current;
+        Http.UpdateProxy(settings.ProxyUrl);
+        Mirrors.Update(settings.MirrorOverrides);
+        Downloads.MaxConcurrency = settings.MaxConcurrentDownloads;
     }
 }

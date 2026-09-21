@@ -59,6 +59,10 @@ public sealed class InstanceLauncher
         var instance = request.Instance;
         var versionId = LaunchVersionId(instance);
 
+        // The instance's acceptance is the source of truth; the file is derived from it, so a file
+        // deleted by hand comes back on the next launch and a withdrawn acceptance is undone.
+        EulaFile.Apply(_paths.InstanceGameDirectory(instance.Id), instance.AcceptEula);
+
         var verification = await _installer
             .VerifyAsync(instance.Id, versionId, RuleContext.ForHost(), progress: null, cancellationToken)
             .ConfigureAwait(false);

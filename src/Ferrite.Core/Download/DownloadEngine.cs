@@ -18,12 +18,24 @@ public sealed class DownloadEngine
     private readonly HttpService _http;
     private readonly DownloadEngineOptions _options;
     private readonly ILogger<DownloadEngine> _logger;
+    private int _maxConcurrency;
 
     public DownloadEngine(HttpService http, DownloadEngineOptions options, ILogger<DownloadEngine> logger)
     {
         _http = http;
         _options = options;
         _logger = logger;
+        _maxConcurrency = Math.Clamp(options.MaxConcurrency, 1, 64);
+    }
+
+    /// <summary>
+    /// How many files may be transferred at once. Read when a batch starts, so a settings change
+    /// takes effect on the next download without rebuilding the engine.
+    /// </summary>
+    public int MaxConcurrency
+    {
+        get => Volatile.Read(ref _maxConcurrency);
+        set => Volatile.Write(ref _maxConcurrency, Math.Clamp(value, 1, 64));
     }
 
     public async Task<DownloadSummary> DownloadAsync(
@@ -62,7 +74,7 @@ public sealed class DownloadEngine
                 var failureGate = new object();
                 var parallelOptions = new ParallelOptions
                 {
-                    MaxDegreeOfParallelism = Math.Max(1, _options.MaxConcurrency),
+                    MaxDegreeOfParallelism = MaxConcurrency,
                     CancellationToken = cancellationToken,
                 };
 

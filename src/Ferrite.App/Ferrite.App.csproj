@@ -39,6 +39,16 @@
   </ItemGroup>
 
   <!--
+    The App test project drives a few internal helpers (settings parsing) directly instead of
+    widening the view model's public surface.
+  -->
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>Ferrite.App.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <!--
     The update feed's public key ships inside the binary when the build supplies one. An operator
     who publishes a feed drops the PEM at src/Ferrite.App/Resources/update-public-key.pem and
     rebuilds; without it the launcher reports that updates cannot be verified.

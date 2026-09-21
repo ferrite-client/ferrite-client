@@ -61,6 +61,10 @@ public sealed partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private string? _proxyUrl;
 
+    /// <summary>One <c>host=mirror-url</c> per line, as the settings store holds them.</summary>
+    [ObservableProperty]
+    private string _mirrorOverridesText = string.Empty;
+
     [ObservableProperty]
     private string? _microsoftClientId;
 
@@ -118,6 +122,7 @@ public sealed partial class SettingsViewModel : ObservableObject
             ?? Languages[0];
         MaxConcurrentDownloads = settings.MaxConcurrentDownloads;
         ProxyUrl = settings.ProxyUrl;
+        MirrorOverridesText = FormatMirrors(settings.MirrorOverrides);
         MicrosoftClientId = settings.MicrosoftClientId;
         ShowSnapshots = settings.ShowSnapshotsInVersionList;
         UpdateFeedUrl = settings.UpdateFeedUrl;
@@ -206,12 +211,16 @@ public sealed partial class SettingsViewModel : ObservableObject
         settings.Language = SelectedLanguage?.Code ?? Localizer.Language;
         settings.MaxConcurrentDownloads = Math.Clamp(MaxConcurrentDownloads, 1, 64);
         settings.ProxyUrl = string.IsNullOrWhiteSpace(ProxyUrl) ? null : ProxyUrl.Trim();
+        settings.MirrorOverrides = ParseMirrors(MirrorOverridesText);
         settings.MicrosoftClientId = string.IsNullOrWhiteSpace(MicrosoftClientId) ? null : MicrosoftClientId.Trim();
         settings.ShowSnapshotsInVersionList = ShowSnapshots;
         settings.UpdateFeedUrl = string.IsNullOrWhiteSpace(UpdateFeedUrl) ? null : UpdateFeedUrl.Trim();
         settings.CheckForUpdatesOnStartup = CheckForUpdatesOnStartup;
 
         await _services.Settings.SaveAsync(CancellationToken.None).ConfigureAwait(true);
+        // The proxy, mirrors, and download concurrency are read by the running services, so a saved
+        // change has to be pushed to them rather than waiting for a restart.
+        _services.ApplyNetworkSettings();
 
         if (!string.IsNullOrWhiteSpace(NewCurseForgeApiKey))
         {
@@ -237,6 +246,51 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     [RelayCommand]
     private void OpenDataFolder() => ShellOpen.Directory(_services.Paths.Root);
+
+    /// <summary>Renders the override map as editable lines, sorted so the order is stable.</summary>
+    internal static string FormatMirrors(IReadOnlyDictionary<string, string> overrides) =>
+        string.Join(
+            Environment.NewLine,
+            overrides.OrderBy(pair => pair.Key, StringComparer.OrdinalIgnoreCase)
+                .Select(pair => $"{pair.Key}={pair.Value}"));
+
+    /// <summary>
+    /// Reads the lines back. A line without a separator, or with an unusable address, is skipped
+    /// rather than failing the save: a typo should not make settings unsaveable.
+    /// </summary>
+    internal static Dictionary<string, string> ParseMirrors(string? text)
+    {
+        var overrides = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return overrides;
+        }
+
+        foreach (var line in text.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            if (line.StartsWith('#') || line.StartsWith("//", StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            var separator = line.IndexOf('=');
+            if (separator <= 0 || separator == line.Length - 1)
+            {
+                continue;
+            }
+
+            var host = line[..separator].Trim();
+            var mirror = line[(separator + 1)..].Trim();
+            if (host.Length == 0 || !Uri.TryCreate(mirror, UriKind.Absolute, out _))
+            {
+                continue;
+            }
+
+            overrides[host] = mirror;
+        }
+
+        return overrides;
+    }
 
     /// <summary>
     /// Checks the configured feed. Every failure mode is reported as text: an unsigned feed, an

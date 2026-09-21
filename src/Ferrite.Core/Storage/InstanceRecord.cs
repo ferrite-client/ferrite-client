@@ -46,6 +46,13 @@ public sealed class InstanceRecord
 
     public bool DemoMode { get; set; }
 
+    /// <summary>
+    /// Whether the user accepted Minecraft's end user licence agreement for this instance. Off by
+    /// default: the launcher writes <c>eula.txt</c> only because the user asked it to, because
+    /// accepting a licence is the user's act rather than the launcher's.
+    /// </summary>
+    public bool AcceptEula { get; set; }
+
     /// <summary>Relative path (inside the instance directory) to a custom icon image.</summary>
     public string? IconPath { get; set; }
 

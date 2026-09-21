@@ -27,6 +27,7 @@ public sealed partial class InstanceDetailViewModel : ObservableObject
         WindowWidth = record.WindowWidth;
         WindowHeight = record.WindowHeight;
         DemoMode = record.DemoMode;
+        AcceptEula = record.AcceptEula;
         JvmArgumentsText = string.Join(Environment.NewLine, record.JvmArguments);
         GameArgumentsText = string.Join(Environment.NewLine, record.GameArguments);
         ServerAddress = record.LastServerAddress;
@@ -68,6 +69,10 @@ public sealed partial class InstanceDetailViewModel : ObservableObject
 
     [ObservableProperty]
     private bool _demoMode;
+
+    /// <summary>Written to <c>eula.txt</c> so the game will run; off unless the user turns it on.</summary>
+    [ObservableProperty]
+    private bool _acceptEula;
 
     [ObservableProperty]
     private string _jvmArgumentsText = string.Empty;
