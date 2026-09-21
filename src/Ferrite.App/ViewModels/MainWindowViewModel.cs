@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Ferrite.App.Services;
+using Ferrite.Core.Diagnostics;
 using Ferrite.Core.Minecraft;
 using Microsoft.Extensions.Logging;
 
@@ -22,6 +23,7 @@ public enum AppPage
 public sealed partial class MainWindowViewModel : ObservableObject
 {
     private readonly AppServices _services;
+    private OperationLog.OperationScope? _currentOperation;
 
     [ObservableProperty]
     private AppPage _currentPage = AppPage.Library;
@@ -117,6 +119,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     public async Task InitializeAsync()
     {
+        await _services.Operations.LoadAsync(CancellationToken.None).ConfigureAwait(true);
         await Settings.LoadAsync().ConfigureAwait(true);
         Accounts.Load();
         RefreshActiveAccount();
@@ -141,6 +144,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     public void ReportError(string message)
     {
+        _currentOperation?.Fail(message);
         ErrorMessage = message;
         StatusText = "Something went wrong";
     }
@@ -149,6 +153,8 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     public void BeginActivity(string text, bool indeterminate = true)
     {
+        _currentOperation?.Dispose();
+        _currentOperation = _services.Operations.Begin(text);
         ActivityText = text;
         IsActivityVisible = true;
         IsActivityIndeterminate = indeterminate;
@@ -175,6 +181,13 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     public void EndActivity(string? message = null)
     {
+        if (_currentOperation is { } operation)
+        {
+            operation.Note(message ?? ActivityText);
+            operation.Dispose();
+            _currentOperation = null;
+        }
+
         IsActivityVisible = false;
         ActivityFraction = 0;
         if (message is not null)

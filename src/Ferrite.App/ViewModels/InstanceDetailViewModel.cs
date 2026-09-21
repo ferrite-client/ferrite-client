@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Ferrite.App.Services;
 using Ferrite.Core.Content;
+using Ferrite.Core.Diagnostics;
 using Ferrite.Core.Java;
 using Ferrite.Core.Minecraft;
 using Ferrite.Core.Storage;
@@ -82,6 +83,19 @@ public sealed partial class InstanceDetailViewModel : ObservableObject
     [ObservableProperty]
     private string _logText = string.Empty;
 
+    /// <summary>Parsed crash reports found in the instance, newest first.</summary>
+    public ObservableCollection<CrashReport> CrashReports { get; } = [];
+
+    [ObservableProperty]
+    private CrashReport? _selectedCrashReport;
+
+    [ObservableProperty]
+    private string _crashAnalysisSummary = string.Empty;
+
+    public bool HasCrashReports => CrashReports.Count > 0;
+
+    partial void OnSelectedCrashReportChanged(CrashReport? value) => _ = AnalyzeCrashAsync(value);
+
     [ObservableProperty]
     private string? _statusNote;
 
@@ -102,6 +116,7 @@ public sealed partial class InstanceDetailViewModel : ObservableObject
         await RefreshModsAsync().ConfigureAwait(true);
         RefreshFolders();
         await RefreshLogAsync().ConfigureAwait(true);
+        await RefreshCrashReportsAsync().ConfigureAwait(true);
         await RefreshWorldsAsync().ConfigureAwait(true);
         RefreshServers();
     }
@@ -207,5 +222,84 @@ public sealed partial class InstanceDetailViewModel : ObservableObject
         }
 
         return string.Join(Environment.NewLine, lines);
+    }
+
+    /// <summary>Reads and parses the instance's crash reports, newest first.</summary>
+    public async Task RefreshCrashReportsAsync()
+    {
+        var crashDirectory = Path.Combine(GameDirectory, "crash-reports");
+        var reports = await Task.Run(() => ReadCrashReports(crashDirectory), CancellationToken.None)
+            .ConfigureAwait(true);
+
+        var previous = SelectedCrashReport?.Path;
+        CrashReports.Clear();
+        foreach (var report in reports)
+        {
+            CrashReports.Add(report);
+        }
+
+        OnPropertyChanged(nameof(HasCrashReports));
+        SelectedCrashReport = CrashReports.FirstOrDefault(report => report.Path == previous)
+            ?? CrashReports.FirstOrDefault();
+        if (SelectedCrashReport is null)
+        {
+            CrashAnalysisSummary = string.Empty;
+            return;
+        }
+
+        await AnalyzeCrashAsync(SelectedCrashReport).ConfigureAwait(true);
+    }
+
+    private async Task AnalyzeCrashAsync(CrashReport? report)
+    {
+        if (report is null)
+        {
+            CrashAnalysisSummary = string.Empty;
+            return;
+        }
+
+        var mods = Mods.Select(item => item.Metadata).ToList();
+        var analysis = await Task
+            .Run(() => CrashAnalyzer.Analyze(report, mods), CancellationToken.None)
+            .ConfigureAwait(true);
+        CrashAnalysisSummary = CrashAnalysisText.Render(analysis, Record);
+    }
+
+    private static IReadOnlyList<CrashReport> ReadCrashReports(string crashDirectory)
+    {
+        if (!Directory.Exists(crashDirectory))
+        {
+            return [];
+        }
+
+        var reports = new List<CrashReport>();
+        try
+        {
+            foreach (var path in Directory
+                         .EnumerateFiles(crashDirectory, "*.txt")
+                         .OrderByDescending(File.GetLastWriteTimeUtc)
+                         .Take(20))
+            {
+                string text;
+                using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                using (var reader = new StreamReader(stream))
+                {
+                    var buffer = new char[512 * 1024];
+                    var read = reader.ReadBlock(buffer, 0, buffer.Length);
+                    text = new string(buffer, 0, read);
+                }
+
+                if (CrashReportParser.LooksLikeCrashReport(text))
+                {
+                    reports.Add(CrashReportParser.Parse(path, text));
+                }
+            }
+        }
+        catch (IOException)
+        {
+            return reports;
+        }
+
+        return reports;
     }
 }

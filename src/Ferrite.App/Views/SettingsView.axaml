@@ -80,6 +80,39 @@
         </StackPanel>
       </StackPanel>
 
+      <Border Height="1" Background="{DynamicResource FerriteBorder}" />
+
+      <TextBlock Classes="h2" Text="Diagnostics" />
+      <StackPanel Spacing="6">
+        <TextBlock Classes="label" Text="RECENT OPERATIONS" />
+        <ItemsControl ItemsSource="{Binding RecentOperations}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <Grid ColumnDefinitions="150,90,*,Auto" ColumnSpacing="10" Margin="0,2">
+                <TextBlock Grid.Column="0" Text="{Binding StartedAt, StringFormat='{}{0:MM-dd HH:mm:ss}'}" />
+                <TextBlock Grid.Column="1" Text="{Binding OutcomeText}" />
+                <TextBlock Grid.Column="2" Text="{Binding Operation}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="3" Classes="faint" Text="{Binding Duration}" />
+              </Grid>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <TextBlock Classes="faint" Text="No operations recorded yet." IsVisible="{Binding !HasRecentOperations}" />
+
+        <StackPanel Spacing="4" Margin="0,6,0,0">
+          <TextBlock Classes="label" Text="SUPPORT BUNDLE NOTES" />
+          <TextBox Text="{Binding DiagnosticsNotes}" AcceptsReturn="True" Height="60"
+                   PlaceholderText="What were you doing when it went wrong?" />
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Content="Export diagnostics bundle" Click="OnExportDiagnosticsClick" />
+            <Button Content="Refresh list" Command="{Binding RefreshOperationsCommand}" />
+          </StackPanel>
+          <TextBlock Classes="muted" TextWrapping="Wrap" Text="{Binding DiagnosticsStatus}" />
+          <TextBlock Classes="faint" TextWrapping="Wrap"
+                     Text="The bundle contains launcher logs, this operation list, and the newest crash report's analysis. Credentials are redacted before anything is written." />
+        </StackPanel>
+      </StackPanel>
+
       <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,6,0,0">
         <Button Classes="primary" Content="Save settings" Command="{Binding SaveCommand}" />
         <TextBlock Classes="muted" VerticalAlignment="Center" Text="{Binding StatusNote}" />

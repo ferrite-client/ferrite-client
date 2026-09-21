@@ -176,6 +176,98 @@ public sealed class ShellRenderingTests : IDisposable
         Save(frame!, "browse-curseforge");
     }
 
+    /// <summary>The diagnostics section must render, including the empty operation list state.</summary>
+    [AvaloniaFact]
+    public void Settings_page_renders_the_diagnostics_section()
+    {
+        var shell = new MainWindowViewModel(_services);
+        var viewModel = new SettingsViewModel(_services, shell);
+        var window = new Window
+        {
+            Content = new SettingsView { DataContext = viewModel },
+            Width = 1000,
+            Height = 1500,
+        };
+        window.Show();
+
+        var frame = window.CaptureRenderedFrame();
+        Assert.NotNull(frame);
+
+        var texts = Texts(window);
+        Assert.Contains("Diagnostics", texts);
+        Assert.Contains("Export diagnostics bundle", texts);
+        Assert.Contains("No operations recorded yet.", texts);
+
+        Save(frame!, "settings-diagnostics");
+    }
+
+    /// <summary>
+    /// A crash report on disk must produce an analysis on the Logs tab: the report's own fields, the
+    /// mod it names, and the frame that points at it.
+    /// </summary>
+    [AvaloniaFact]
+    public async Task Instance_detail_analyses_a_crash_report()
+    {
+        var record = await _services.Instances
+            .CreateAsync(
+                new InstanceRecord
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Crashy instance",
+                    MinecraftVersion = "1.21.1",
+                    Loader = LoaderKind.NeoForge,
+                    LoaderVersion = "21.1.72",
+                },
+                CancellationToken.None)
+            .ConfigureAwait(true);
+
+        var crashDirectory = Path.Combine(_services.Paths.InstanceGameDirectory(record.Id), "crash-reports");
+        Directory.CreateDirectory(crashDirectory);
+        File.WriteAllText(
+            Path.Combine(crashDirectory, "crash-2026-09-20_21.14.03-client.txt"),
+            """
+            ---- Minecraft Crash Report ----
+            // Why did you do that?
+
+            Time: 2026-09-20 21:14:03
+            Description: Ticking block entity
+
+            java.lang.IllegalStateException: Missing capability
+            	at com.example.examplemod.machine.MachineTick.tick(MachineTick.java:88)
+
+            -- System Details --
+            Details:
+            	Minecraft Version: 1.21.1
+            	Suspected Mods: examplemod
+            """);
+
+        var shell = new MainWindowViewModel(_services);
+        var viewModel = new InstanceDetailViewModel(record, _services, shell);
+        await viewModel.RefreshCrashReportsAsync().ConfigureAwait(true);
+
+        var report = Assert.Single(viewModel.CrashReports);
+        Assert.Equal("Ticking block entity", report.Description);
+        Assert.Contains("java.lang.IllegalStateException", viewModel.CrashAnalysisSummary, StringComparison.Ordinal);
+        Assert.Contains("examplemod", viewModel.CrashAnalysisSummary, StringComparison.Ordinal);
+        Assert.Contains("not a verdict", viewModel.CrashAnalysisSummary, StringComparison.Ordinal);
+
+        var window = new Window
+        {
+            Content = new InstanceDetailView { DataContext = viewModel },
+            Width = 1200,
+            Height = 900,
+        };
+        window.Show();
+
+        // Show the Logs tab so the crash list and analysis are actually rendered.
+        var tabs = window.GetVisualDescendants().OfType<TabControl>().First();
+        tabs.SelectedIndex = tabs.ItemCount - 1;
+
+        var frame = window.CaptureRenderedFrame();
+        Assert.NotNull(frame);
+        Save(frame!, "instance-logs");
+    }
+
     private MainWindow ShowShell(out MainWindowViewModel viewModel)
     {
         viewModel = new MainWindowViewModel(_services);

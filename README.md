@@ -23,6 +23,9 @@ What has been exercised end to end against live services (evidence in `docs/VERI
   launching it with 48 mods mounted by Fabric, exporting it, and re-importing the export.
 - Reading worlds and `servers.dat` from a real Minecraft installation and backing a world up.
 - Pinging production Minecraft servers for version, player counts, latency, and MOTD.
+- Parsing a real crash report, listing the mods it names, matching stack frames to installed mods
+  without overclaiming, and exporting a redacted support bundle with the launcher's operation
+  history.
 - Java discovery across PATH, vendor installs, and the Minecraft launcher's own runtimes.
 
 Content browsing covers Modrinth and CurseForge through one browser. CurseForge needs a

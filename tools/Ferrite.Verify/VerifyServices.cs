@@ -1,4 +1,5 @@
 using Ferrite.Core.Download;
+using Ferrite.Core.Diagnostics;
 using Ferrite.Core.Game;
 using Ferrite.Core.Content;
 using Ferrite.Core.Java;
@@ -101,6 +102,15 @@ internal sealed class VerifyServices : IDisposable
         WorldsArchive = new WorldArchive(Paths.BackupsDirectory, LoggerFactory.CreateLogger<WorldArchive>());
         Servers = new ServerListService(LoggerFactory.CreateLogger<ServerListService>());
         Pinger = new ServerPinger(LoggerFactory.CreateLogger<ServerPinger>());
+        Operations = new OperationLog(
+            Path.Combine(Paths.LauncherLogsDirectory, "operations.jsonl"),
+            LoggerFactory.CreateLogger<OperationLog>());
+        Diagnostics = new DiagnosticsBundleExporter(
+            Paths,
+            SecretRedactor.Shared,
+            Java,
+            Mods,
+            LoggerFactory.CreateLogger<DiagnosticsBundleExporter>());
     }
 
     public ILoggerFactory LoggerFactory { get; }
@@ -160,6 +170,10 @@ internal sealed class VerifyServices : IDisposable
     public ServerListService Servers { get; }
 
     public ServerPinger Pinger { get; }
+
+    public OperationLog Operations { get; }
+
+    public DiagnosticsBundleExporter Diagnostics { get; }
 
     public void Dispose()
     {

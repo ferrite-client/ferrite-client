@@ -178,3 +178,18 @@ reported as warnings.
 multiply rate-limit exposure. The retail restriction is a legitimate limitation of the
 distribution terms, so it is surfaced to the user rather than hidden behind a partial install
 that silently omits mods.
+
+## D018 - Crash attribution reports evidence, not verdicts
+
+**Decision.** A crash analysis shows what the report says, which installed mods' classes appear in
+the stack trace, and which mods the report lists that are no longer installed — as three separate
+sections, with an explicit note that a frame proves where code ran, not what caused the crash.
+
+**Rejected.** A single "the crash was caused by X" line. It reads better and would be wrong often:
+crash traces pass through framework and mixin code, and the last mod frame is frequently a
+victim rather than the cause.
+
+**Why.** This is the same rule the parity matrix uses for itself. A tool that overstates a
+diagnosis sends users to the wrong issue tracker and burns their trust the first time it is
+wrong. The negative result is reported too: an obfuscated 1.8.8 report matched none of the 48
+installed Fabric mods, and the analyzer says so rather than picking the closest name.

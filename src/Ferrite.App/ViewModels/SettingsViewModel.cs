@@ -1,7 +1,9 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Ferrite.App.Services;
 using Ferrite.Core.Content;
+using Ferrite.Core.Diagnostics;
 using Ferrite.Core.Storage;
 using Ferrite.Core.Util;
 
@@ -54,6 +56,15 @@ public sealed partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private string _curseForgeKeyStatus = string.Empty;
 
+    /// <summary>Most recent launcher operations, newest first.</summary>
+    public ObservableCollection<OperationEntry> RecentOperations { get; } = [];
+
+    [ObservableProperty]
+    private string? _diagnosticsNotes;
+
+    [ObservableProperty]
+    private string? _diagnosticsStatus;
+
     [ObservableProperty]
     private string _dataRoot = string.Empty;
 
@@ -78,7 +89,64 @@ public sealed partial class SettingsViewModel : ObservableObject
         DataRoot = _services.Paths.Root;
         NewCurseForgeApiKey = null;
         RefreshCurseForgeKeyStatus();
+        RefreshOperations();
         await RefreshCacheSizeAsync().ConfigureAwait(true);
+    }
+
+    private void RefreshOperations()
+    {
+        RecentOperations.Clear();
+        foreach (var entry in _services.Operations.Recent(12))
+        {
+            RecentOperations.Add(entry);
+        }
+
+        OnPropertyChanged(nameof(HasRecentOperations));
+    }
+
+    public bool HasRecentOperations => RecentOperations.Count > 0;
+
+    [RelayCommand]
+    private void RefreshOperationsCommand() => RefreshOperations();
+
+    /// <summary>
+    /// Writes a support bundle. Called by the view after the user picks a target file, so the view
+    /// model never touches platform storage APIs.
+    /// </summary>
+    public async Task ExportDiagnosticsAsync(string outputPath)
+    {
+        if (string.IsNullOrWhiteSpace(outputPath))
+        {
+            return;
+        }
+
+        IsBusy = true;
+        try
+        {
+            _shell.BeginActivity("Building diagnostics bundle...");
+            var result = await _services.Diagnostics
+                .ExportAsync(
+                    new DiagnosticsBundleRequest
+                    {
+                        OutputPath = outputPath,
+                        Notes = string.IsNullOrWhiteSpace(DiagnosticsNotes) ? null : DiagnosticsNotes.Trim(),
+                    },
+                    CancellationToken.None)
+                .ConfigureAwait(true);
+
+            DiagnosticsStatus =
+                $"Wrote {result.FileCount} file(s), {ByteSize.Format(result.Bytes)} to {Path.GetFileName(result.Path)}";
+            _shell.ReportStatus(DiagnosticsStatus);
+        }
+        catch (Exception exception)
+        {
+            _shell.ReportError(exception.Message);
+        }
+        finally
+        {
+            IsBusy = false;
+            _shell.EndActivity();
+        }
     }
 
     private void RefreshCurseForgeKeyStatus()

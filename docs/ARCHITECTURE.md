@@ -152,3 +152,25 @@ extraction path is checked for containment inside the intended destination.
 - The dependency resolver performs a breadth-first walk with a visited set, separating
   required from optional dependencies, and never installs a version whose loader or game
   version does not match the instance.
+
+## 10. Diagnostics
+
+- `CrashReportParser` reads a crash report as text: headline fields, stack frames, the report's own
+  mod list, and system details. The format is produced by the game rather than specified, so the
+  parser recognises the section shapes used by vanilla, Fabric, Forge, and NeoForge and ignores
+  anything it does not know. Identical frames are collapsed because the same trace appears both
+  inline and under `-- Head --`.
+- `CrashAnalyzer` keeps two signals apart: what the report claims (its `Suspected Mods`) and what
+  the stack frames actually reference (package segments matched against installed mod ids, jar
+  names, and their parts). Frames under game, loader, and JDK package roots are never attributed to
+  a mod. The rendered output says plainly that a frame is evidence that code ran, not proof of
+  cause.
+- `OperationLog` records what the launcher did: label, outcome, start time, and duration, one JSON
+  object per line, bounded in memory and trimmed on disk. `MainWindowViewModel` opens a scope in
+  `BeginActivity` and closes it in `EndActivity`/`ReportError`, so every existing action is covered
+  by one integration point instead of per-feature instrumentation.
+- `DiagnosticsBundleExporter` writes a support zip: system report, user notes, operation history,
+  launcher logs, and — when an instance is supplied — its metadata, game logs, crash reports, and
+  the analysis of the newest crash. Entry names are chosen by the exporter, so a hostile file name
+  inside an instance cannot escape the archive, and every text entry passes through
+  `SecretRedactor` before it is written.

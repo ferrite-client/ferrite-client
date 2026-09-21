@@ -484,3 +484,101 @@ The real views were rendered headlessly and inspected as images:
 
 The render pass also asserts the page text, so a regression that hides the explanation fails the
 test rather than only looking wrong.
+
+---
+
+## V008 - Crash analysis, diagnostics bundle, and operation history (2026-09-21)
+
+Environment: Windows 11 x64, .NET 10.0.5. The crash fixture is a real report that already existed
+on this machine from a 1.8.8 session; it is read, never modified.
+
+### V008.1 Parsing a real crash report
+
+Command: `Ferrite.Verify crash`
+
+```
+Report: C:\Users\wwmky\AppData\Roaming\.minecraft\crash-reports\crash-2026-05-25_02.34.22-client.txt
+  parsed: 13 frame(s), 0 listed mod(s)
+
+Crash report
+============
+File:        crash-2026-05-25_02.34.22-client.txt
+Time:        2026-05-25 02:34:00
+Description: Initializing game
+Cause:       java.lang.NullPointerException: Initializing game
+Game version in report: 1.8.8
+```
+
+The report writes its timestamp in US short form (`5/25/26 2:34 AM`), carries no line numbers in
+its frames (`at net.acx.a(acx.java)`), and repeats the trace under `-- Head --`. All of that is
+handled: the timestamp parses, frames keep class and file without inventing a line number, and
+identical frames collapse from 32 to 13. Fabric-style (`Fabric Mods:` inside the details block)
+and NeoForge-style (`-- Mod List --`) reports are covered by `CrashReportTests`.
+
+### V008.2 Attribution against 48 real mods, with no false positives
+
+Command: `Ferrite.Verify crash <report> --game-dir <instance>/minecraft`
+
+```
+Using mods from instance Fabulously Optimized (imported)
+Attributing against 48 installed mod(s)
+
+Mods referenced by the stack trace
+----------------------------------
+No installed mod's classes appear in the stack trace.
+(A frame is evidence that code ran, not proof of cause: treat this as a starting point, not a verdict.)
+```
+
+This is the negative case and it matters: the 1.8.8 report is obfuscated (`net.acx`, `net.a5q`),
+and none of the 48 Fabric mods are blamed for it. The positive case is covered by
+`CrashReportTests`, where a `net.caffeinemc.mods.sodium` frame is attributed to Sodium while the
+`net.minecraft` and `java.base` frames are never attributed, and by the rendered Logs tab in
+V008.5.
+
+### V008.3 Support bundle
+
+Command: `Ferrite.Verify diagnostics --out <path>`
+
+```
+Bundle: C:\Users\wwmky\AppData\Roaming\Ferrite\tmp\ferrite-diagnostics-20260921-012804.zip
+  instance: Fabulously Optimized (imported)
+  size:     1.7 KiB
+  entries:  4
+    system.txt
+    notes.txt
+    launcher/ferrite.log
+    instance/instance.json
+```
+
+`system.txt` was read back out of the archive and contains the launcher version, runtime, OS and
+architecture, data root, all six detected Java runtimes with vendor and architecture, and the
+instance's version, loader, Java override, memory, and modpack identity. `DiagnosticsTests` covers
+a populated bundle: a launcher log containing a registered secret, an instance log, a crash
+report, and the generated `crash-analysis.txt`, asserting that no entry contains the secret and
+that no entry name contains `..`.
+
+### V008.4 Operation history
+
+Every long-running action in the UI goes through `BeginActivity`/`EndActivity`, which now opens and
+closes an operation scope, so the history is produced by the same code path the user drives rather
+than by separate instrumentation that could drift. Entries record the label, outcome, start time,
+and duration, are appended as one JSON object per line, and are bounded in memory and on disk.
+`DiagnosticsTests` covers recording, newest-first ordering, the bound, persistence across a reload,
+and a damaged line being skipped instead of breaking the history. One real defect was found here:
+the file was written with the pretty-printing document options, so each entry spanned several
+lines and nothing could be read back. The history now uses a compact options instance, with a test
+asserting one entry per line.
+
+### V008.5 Interface: crash analysis and diagnostics section
+
+Command: `FERRITE_UI_SHOTS=<dir> dotnet run --project tests/Ferrite.App.Tests`
+
+The real views were rendered headlessly and inspected as images:
+
+- `instance-logs.png` — the Logs tab lists crash reports on the left and renders the analysis on
+  the right: description, cause, the report's own suspects, the frames that were attributed, the
+  mods listed but no longer installed, and the stack trace, with the caveat that a frame shows
+  where code ran rather than proving cause.
+- `settings-diagnostics.png` — Settings gained a *Diagnostics* section with the recent operation
+  list (including its empty state), a notes field for the user's own description, and the bundle
+  export action.

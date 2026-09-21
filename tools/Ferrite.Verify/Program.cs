@@ -67,6 +67,16 @@ internal static class Program
                     services,
                     args.Skip(1).Where(argument => !argument.StartsWith("--", StringComparison.Ordinal)).ToList(),
                     cancellation.Token),
+                "crash" => await Scenarios.AnalyzeCrashAsync(
+                    services,
+                    args.Length > 1 && !args[1].StartsWith("--", StringComparison.Ordinal) ? args[1] : null,
+                    GetOption(args, "--game-dir"),
+                    cancellation.Token),
+                "diagnostics" => await Scenarios.ExportDiagnosticsAsync(
+                    services,
+                    GetOption(args, "--instance"),
+                    GetOption(args, "--out"),
+                    cancellation.Token),
                 "fabric" => await Scenarios.InstallLoaderAsync(
                     services,
                     LoaderKind.Fabric,

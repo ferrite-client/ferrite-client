@@ -1,5 +1,6 @@
 using Ferrite.Core.Auth;
 using Ferrite.Core.Content;
+using Ferrite.Core.Diagnostics;
 using Ferrite.Core.Download;
 using Ferrite.Core.Game;
 using Ferrite.Core.Java;
@@ -106,6 +107,15 @@ public sealed class AppServices : IDisposable
         WorldsArchive = new WorldArchive(paths.BackupsDirectory, loggerFactory.CreateLogger<WorldArchive>());
         Servers = new ServerListService(loggerFactory.CreateLogger<ServerListService>());
         Pinger = new ServerPinger(loggerFactory.CreateLogger<ServerPinger>());
+        Operations = new OperationLog(
+            Path.Combine(paths.LauncherLogsDirectory, "operations.jsonl"),
+            loggerFactory.CreateLogger<OperationLog>());
+        Diagnostics = new DiagnosticsBundleExporter(
+            paths,
+            SecretRedactor.Shared,
+            Java,
+            Mods,
+            loggerFactory.CreateLogger<DiagnosticsBundleExporter>());
         Accounts = new AccountService(
             new AccountStore(paths, secrets, loggerFactory.CreateLogger<AccountStore>()),
             new MicrosoftAuthClient(Http, loggerFactory.CreateLogger<MicrosoftAuthClient>(), clientId: null),
@@ -176,6 +186,10 @@ public sealed class AppServices : IDisposable
     public ServerListService Servers { get; }
 
     public ServerPinger Pinger { get; }
+
+    public OperationLog Operations { get; }
+
+    public DiagnosticsBundleExporter Diagnostics { get; }
 
     public AccountService Accounts { get; }
 

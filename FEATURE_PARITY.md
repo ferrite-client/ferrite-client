@@ -27,7 +27,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | A05 | Crash-safe settings persistence | Atomic JSON write, schema version, migration, backup on damage | IMPLEMENTED | tests |
 | A06 | Storage layout separation | config / data / store / instances / cache / logs / tmp / backups | VERIFIED | V001 |
 | A07 | Nullable-clean, warning-free build | `TreatWarningsAsErrors`, analyzer-clean | VERIFIED | V001 |
-| A08 | Automated test suite | xUnit projects `Ferrite.Core.Tests` and `Ferrite.App.Tests` | VERIFIED | 143 tests (2026-09-21) |
+| A08 | Automated test suite | xUnit projects `Ferrite.Core.Tests` and `Ferrite.App.Tests` | VERIFIED | 160 tests (2026-09-21) |
 | A09 | Windows packaging | Framework-dependent + self-contained publish profiles | NOT STARTED | - |
 | A10 | Clean-checkout build script | `scripts/build.ps1`, `test.ps1`, `package.ps1` | VERIFIED | scripts/build.ps1, test.ps1, verify-live.ps1 |
 
@@ -233,11 +233,11 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | ID | Capability | Our implementation | Status | Evidence |
 | --- | --- | --- | --- | --- |
 | N01 | Instance log viewer | Tail logs with bounded memory | IMPLEMENTED | log tail in the instance Logs tab |
-| N02 | Crash report parsing | Description, cause, stack, affected mods | NOT STARTED | - |
-| N03 | Mod attribution from crash | Match stack frames to installed mods | NOT STARTED | - |
-| N04 | Diagnostics bundle export | Redacted zip of logs and system info | NOT STARTED | - |
+| N02 | Crash report parsing | Description, cause, stack frames, reported mod list, system details | VERIFIED | V008.1 real 1.8.8 report; `CrashReportTests` for Fabric and NeoForge shapes |
+| N03 | Mod attribution from crash | Stack frames matched to installed mods, with the report's own suspects kept separate | VERIFIED | V008.2 (48 real mods, no false positives); `CrashReportTests` |
+| N04 | Diagnostics bundle export | Redacted zip of launcher logs, operations, instance metadata, game logs, and crash analysis | VERIFIED | V008.3; `DiagnosticsTests` |
 | N05 | Installation diagnose + repair | Detect and fix missing/corrupt files | VERIFIED | V001.4, V001.5 |
-| N06 | Operation log | Recent operations with outcomes | NOT STARTED | - |
+| N06 | Operation log | Recent operations with outcome and duration, persisted and bounded | VERIFIED | V008.4; `DiagnosticsTests` |
 
 ## O. Launcher settings, storage, and updates
 
@@ -273,6 +273,12 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 ## Summary
 
 | Status | Count |
+| --- | --- |
+| NOT STARTED | 9 |
+| IN PROGRESS | 0 |
+| IMPLEMENTED | 63 |
+| VERIFIED | 95 |
+| BLOCKED EXTERNAL | 5 |
 | --- | --- |
 | NOT STARTED | 13 |
 | IN PROGRESS | 0 |

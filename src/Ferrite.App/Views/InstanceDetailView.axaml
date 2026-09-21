@@ -287,13 +287,38 @@
       </TabItem>
 
       <TabItem Header="Logs">
-        <Grid RowDefinitions="Auto,*" Margin="0,16,0,0">
+        <Grid RowDefinitions="Auto,*,Auto,Auto,*" Margin="0,16,0,0" RowSpacing="12">
           <Button Grid.Row="0" Content="Refresh" Command="{Binding RefreshLogCommand}" HorizontalAlignment="Left" />
-          <Border Grid.Row="1" Classes="card" Margin="0,12,0,0">
+          <Border Grid.Row="1" Classes="card">
             <ScrollViewer>
               <SelectableTextBlock Classes="mono" Text="{Binding LogText}" />
             </ScrollViewer>
           </Border>
+
+          <Grid Grid.Row="2" ColumnDefinitions="220,*" ColumnSpacing="12">
+            <StackPanel Grid.Column="0" Spacing="4">
+              <TextBlock Classes="label" Text="CRASH REPORTS" />
+              <ListBox ItemsSource="{Binding CrashReports}" SelectedItem="{Binding SelectedCrashReport}"
+                       MaxHeight="140" Background="Transparent">
+                <ListBox.ItemTemplate>
+                  <DataTemplate>
+                    <StackPanel Spacing="2">
+                      <TextBlock Text="{Binding FileName}" TextTrimming="CharacterEllipsis" />
+                      <TextBlock Classes="faint" Text="{Binding Summary}" MaxLines="1"
+                                 TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                  </DataTemplate>
+                </ListBox.ItemTemplate>
+              </ListBox>
+              <TextBlock Classes="faint" Text="No crash reports." IsVisible="{Binding !HasCrashReports}" />
+            </StackPanel>
+
+            <Border Grid.Column="1" Classes="card">
+              <ScrollViewer>
+                <SelectableTextBlock Classes="mono" Text="{Binding CrashAnalysisSummary}" />
+              </ScrollViewer>
+            </Border>
+          </Grid>
         </Grid>
       </TabItem>
 
