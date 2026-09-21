@@ -153,7 +153,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | H08 | Kill running instance | Graceful close then forced kill | VERIFIED | V001.6 |
 | H09 | Launch preflight | Java, files, account, memory validation | VERIFIED | V001.6 |
 | H10 | Command preview | Resolved command with credentials redacted | VERIFIED | V001.7 |
-| H11 | Quick play | Both arguments are generated correctly; the client did not act on them in this environment | IMPLEMENTED | V032: command verified, in-game entry not demonstrated |
+| H11 | Quick play | The arguments match Mojang's own specification; the client did not act on them here | BLOCKED EXTERNAL | V032 (launcher half verified); `HUMAN_ACTION_REQUIRED.md` H6 for the in-game half |
 | H12 | Demo mode | `--demo` toggle | VERIFIED | tests, V001 |
 
 ## I. Content: mods, resource packs, shaders
@@ -273,6 +273,12 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 ## Summary
 
 | Status | Count |
+| --- | --- |
+| NOT STARTED | 0 |
+| IN PROGRESS | 0 |
+| IMPLEMENTED | 0 |
+| VERIFIED | 154 |
+| BLOCKED EXTERNAL | 18 |
 | --- | --- |
 | NOT STARTED | 0 |
 | IN PROGRESS | 0 |

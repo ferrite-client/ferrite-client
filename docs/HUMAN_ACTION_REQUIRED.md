@@ -137,3 +137,34 @@ certificate itself must never be committed.
 
 **Blocked until then.** A download that does not warn on first run. Recorded as FEATURE_PARITY
 row A09.
+
+---
+
+## H6 - One observed session for quick play
+
+**Needed.** A person sitting at the machine for one launch, to say whether the game actually opens
+the world (or joins the server) it was told to.
+
+**Why.** Ferrite generates the quick-play arguments exactly as Mojang's own version document and the
+wiki describe them - `--quickPlayPath`, then `--quickPlaySingleplayer <world folder>` or
+`--quickPlayMultiplayer <address>` - and that is verified against both sources and against a live
+command. What could not be established here is the client's half: in seven launches the game started,
+reached the renderer, and sat on the title screen, without creating the quick-play log it was given or
+touching the world. Both an absolute and a relative `--quickPlayPath`, with and without a pre-existing
+log file, a version-matched world, and a real server address were tried. The client's own classes
+contain the arguments, so it parses them; why it then does nothing is not something this environment
+can determine, and no amount of further guessing in this repository would be honest evidence.
+
+**Steps.**
+
+1. Start Ferrite and open an instance that has at least one saved world.
+2. Open its Worlds tab and press **Play this world** on that world.
+3. Watch the game: it should skip the title screen and open that world.
+4. Optionally, for a server: set the instance's default server and press Play on the card.
+
+**What to hand back.** A sentence: which of those two happened, and if the game stayed on the title
+screen, the instance's `minecraft/logs/latest.log`.
+
+**Blocked until then.** The in-game half of FEATURE_PARITY row H11. The launcher's half - the argument
+list, the single-argument world name, and the two defects that were found and fixed in it - is
+verified and recorded in `docs/VERIFICATION.md` V032.

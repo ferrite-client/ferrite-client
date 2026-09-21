@@ -204,8 +204,6 @@ public sealed class LaunchCommandBuilder
     {
         var instance = request.Instance;
         var document = request.Document;
-        var quickPlayDirectory = Path.Combine(request.GameDirectory, "quickPlay");
-
         var placeholders = new Dictionary<string, string>(StringComparer.Ordinal)
         {
             ["auth_player_name"] = request.Account.PlayerName,
@@ -229,7 +227,10 @@ public sealed class LaunchCommandBuilder
             ["auth_xuid"] = request.Account.Xuid ?? string.Empty,
             ["resolution_width"] = instance.WindowWidth?.ToString() ?? string.Empty,
             ["resolution_height"] = instance.WindowHeight?.ToString() ?? string.Empty,
-            ["quickPlayPath"] = Path.Combine(quickPlayDirectory, "quickPlayLog.json"),
+            // An absolute path inside the instance's game directory. The wiki describes this argument
+            // as relative to the instance's files; both forms were tried against the client and
+            // behaved identically, so the unambiguous one is used here.
+            ["quickPlayPath"] = Path.Combine(request.GameDirectory, "quickPlay", "quickPlayLog.json"),
             ["quickPlaySingleplayer"] = instance.LastWorld ?? string.Empty,
             ["quickPlayMultiplayer"] = instance.LastServerAddress is { Length: > 0 } address
                 ? FormatServer(address, instance.LastServerPort)

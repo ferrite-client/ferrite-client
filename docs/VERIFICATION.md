@@ -2074,6 +2074,20 @@ The live command produced for that same version contains exactly those three, in
 world name as one argument. So the launcher's half is specification-correct; the client's half is the
 part that did not happen, and the cause is outside what this repository can determine.
 
+### V032.4 What was tried, in full
+
+| Configuration | Result |
+| --- | --- |
+| singleplayer, absolute `--quickPlayPath`, 26.3 client, world from 1.20.4 | title screen, no quick-play file |
+| singleplayer, absolute path, 1.20.4 client with its own 1.20.4 world | title screen, world untouched |
+| singleplayer, with the quick-play log pre-created as `{}` | title screen, file left as it was |
+| singleplayer, relative `--quickPlayPath` (`quickPlay\quickPlayLog.json`), no pre-existing file | title screen, no file created |
+| multiplayer against `mc.hypixel.net:25565` (reachable, pinged in V006.3) | title screen, no connection attempt in the log |
+
+The wiki also documents the arguments and states that `--quickPlayPath` is relative to the instance's
+files; both forms behaved identically, so the launcher keeps the absolute path, which is unambiguous.
+The exact user action that would settle this is written up as `HUMAN_ACTION_REQUIRED.md` H6.
+
 ---
 
 ## V033 - Switching an instance's mod loader version (2026-09-21)
