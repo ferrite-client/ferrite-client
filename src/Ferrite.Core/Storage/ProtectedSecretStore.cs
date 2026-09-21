@@ -17,6 +17,7 @@ public sealed class ProtectedSecretStore
     private readonly string _filePath;
     private readonly ILogger _logger;
     private Dictionary<string, string> _entries = new(StringComparer.Ordinal);
+    private bool _loaded;
 
     public ProtectedSecretStore(string filePath, ILogger logger)
     {
@@ -27,8 +28,18 @@ public sealed class ProtectedSecretStore
     /// <summary>True when the platform has no OS-backed protection and secrets are weaker.</summary>
     public bool IsDegraded => !OperatingSystem.IsWindows();
 
+    /// <summary>
+    /// Reads the store once per process. Callers share one instance, so a second load would discard
+    /// entries written since startup.
+    /// </summary>
     public void Load()
     {
+        if (_loaded)
+        {
+            return;
+        }
+
+        _loaded = true;
         if (!File.Exists(_filePath))
         {
             _entries = new Dictionary<string, string>(StringComparer.Ordinal);

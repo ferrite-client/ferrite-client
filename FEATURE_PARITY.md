@@ -27,7 +27,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | A05 | Crash-safe settings persistence | Atomic JSON write, schema version, migration, backup on damage | IMPLEMENTED | tests |
 | A06 | Storage layout separation | config / data / store / instances / cache / logs / tmp / backups | VERIFIED | V001 |
 | A07 | Nullable-clean, warning-free build | `TreatWarningsAsErrors`, analyzer-clean | VERIFIED | V001 |
-| A08 | Automated test suite | xUnit project `Ferrite.Core.Tests` | VERIFIED | 85 tests |
+| A08 | Automated test suite | xUnit projects `Ferrite.Core.Tests` and `Ferrite.App.Tests` | VERIFIED | 143 tests (2026-09-21) |
 | A09 | Windows packaging | Framework-dependent + self-contained publish profiles | NOT STARTED | - |
 | A10 | Clean-checkout build script | `scripts/build.ps1`, `test.ps1`, `package.ps1` | VERIFIED | scripts/build.ps1, test.ps1, verify-live.ps1 |
 
@@ -37,7 +37,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | --- | --- | --- | --- | --- |
 | B01 | Create vanilla instance | Instance store creates the directory skeleton and metadata | VERIFIED | V001 |
 | B02 | Create loader instance | Loader selection persisted on the instance | IMPLEMENTED | V002 |
-| B03 | Create modpack instance | From `.mrpack`, CurseForge zip, or remote version | VERIFIED | V005.1 |
+| B03 | Create modpack instance | From `.mrpack`, CurseForge zip, or a browsed pack project | VERIFIED | V005.1 and V007.2 (`.mrpack`); CurseForge zip path IMPLEMENTED, live install BLOCKED EXTERNAL (K05) |
 | B04 | Clone instance | Copy with isolation | VERIFIED | InstanceManagerTests |
 | B05 | Rename instance | Rename metadata and directory safely | VERIFIED | InstanceManagerTests |
 | B06 | Delete instance | Moves the instance directory into backups | VERIFIED | moves to backups, tested |
@@ -188,17 +188,17 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | J07 | Install into instance | Correct subfolder per project type | VERIFIED | V003.2 |
 | J08 | Update installed content | Match installed files to versions | NOT STARTED | - |
 | J09 | Compatibility guarantee | Never install an incompatible version | VERIFIED | V003.1, V003.2 |
-| J10 | Modpack browsing | Search and install Modrinth modpacks | NOT STARTED | modpack install path not implemented |
+| J10 | Modpack browsing | Modpack projects install as a new instance through the modpack installers | IMPLEMENTED | browser dispatch to MrpackInstaller / CurseForgePackInstaller; live install of a pack project not yet run from the UI |
 | J11 | Offline/cached metadata | Cached results with a clear offline state | NOT STARTED | - |
 
 ## K. CurseForge integration
 
 | ID | Capability | Our implementation | Status | Evidence |
 | --- | --- | --- | --- | --- |
-| K01 | API client | Search, project, files, dependency resolution | NOT STARTED | - |
-| K02 | API key configuration | Secure per-user key storage | NOT STARTED | - |
-| K03 | Modpack install | `manifest.json` + `overrides/` installer | NOT STARTED | - |
-| K04 | Retail-file restriction handling | Report files that cannot be downloaded | NOT STARTED | - |
+| K01 | API client | Search, project, files, bulk file lookup, dependency resolution | IMPLEMENTED | `CurseForgeClient`, `CurseForgeIds`, `CurseForgeClientTests` |
+| K02 | API key configuration | Key in the OS-protected secret store, entered in Settings | IMPLEMENTED | `ProviderCredentialStore`, `ProviderCredentialStoreTests`, SettingsView |
+| K03 | Modpack install | `manifest.json` + overrides installer with API file resolution | IMPLEMENTED | `CurseForgePackInstaller`, `CurseForgePackTests` |
+| K04 | Retail-file restriction handling | Files without a download URL are reported, never silently skipped | IMPLEMENTED | `CurseForgePackInstaller.PlanFiles` + test |
 | K05 | Live CurseForge calls | Requires a user-issued API key | BLOCKED EXTERNAL | `HUMAN_ACTION_REQUIRED.md` H2 |
 
 ## L. Modpacks
@@ -206,7 +206,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | ID | Capability | Our implementation | Status | Evidence |
 | --- | --- | --- | --- | --- |
 | L01 | Install `.mrpack` | Index + downloads + overrides, checksum verified | VERIFIED | V005.1, V005.2 |
-| L02 | Install CurseForge zip | manifest.json + overrides + file resolution | NOT STARTED | - |
+| L02 | Install CurseForge zip | manifest.json + overrides + file resolution | IMPLEMENTED | `CurseForgePackInstaller`; archive kind auto-detected on import. Live install BLOCKED EXTERNAL (K05) |
 | L03 | Export `.mrpack` | Pack index with hashes and overrides | VERIFIED | V005.3 |
 | L04 | Modpack identity | Project, version, provider in instance metadata | IMPLEMENTED | model |
 | L05 | Update modpack | Apply a new version, preserve user content | IMPLEMENTED | re-install over an existing instance backs up first |
@@ -273,6 +273,12 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 ## Summary
 
 | Status | Count |
+| --- | --- |
+| NOT STARTED | 13 |
+| IN PROGRESS | 0 |
+| IMPLEMENTED | 63 |
+| VERIFIED | 91 |
+| BLOCKED EXTERNAL | 5 |
 | --- | --- |
 | NOT STARTED | 19 |
 | IN PROGRESS | 0 |

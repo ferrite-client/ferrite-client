@@ -207,15 +207,52 @@ Sources: https://api.modrinth.com/v2/... fetched live 2026-09-20.
   `SMxNOGZ6` ships `sodium-fabric-0.8.13+mc1.21.1.jar`, size 1,574,609, SHA-1
   `003c114c85ca88ef3362e018deb6aca0c682d6a1` plus SHA-512.
 
-### CurseForge — **LIMIT**
+### CurseForge — **IMPLEMENTED (live calls BLOCKED EXTERNAL)**
 
-- The official API requires a key issued through the CurseForge developer console, and its
-  terms restrict file redistribution. Ferrite implements the full client (search, project,
-  files, dependency resolution, modpack install) but live calls require a user-supplied API
-  key; without one the integration reports a clear configuration state.
-- CurseForge modpacks are ZIP archives with `manifest.json` plus `overrides/`; the manifest
-  lists `files[]` with `projectID`, `fileID`, and `required` flags that only the API can
-  resolve.
+Source: the published CurseForge "Eternal" API (v1) documentation. The service requires an
+`x-api-key` header on every request; keys are issued through the CurseForge developer console
+and their terms restrict redistribution of files whose authors disabled third-party
+distribution.
+
+Endpoints Ferrite uses (`https://api.curseforge.com/v1`):
+
+- `GET /mods/search` — parameters `gameId` (Minecraft is `432`), `searchFilter`, `index`,
+  `pageSize` (max 50), `classId`, `gameVersion`, `modLoaderType`, `sortField`, `sortOrder`.
+  Response carries `data[]` plus `pagination.totalCount`.
+- `GET /mods/{modId}` — one project. There is no slug lookup, so a slug is resolved through an
+  exact-term search first.
+- `GET /mods/{modId}/files` — files of a project, filtered by `gameVersion` and
+  `modLoaderType`.
+- `GET /mods/{modId}/files/{fileId}` — one file, used when a specific version is pinned.
+- `POST /mods/files` with `{"fileIds":[...]}` — bulk file metadata. This is what makes a
+  modpack install practical: a manifest lists dozens of file ids and one request resolves them.
+- `GET /mods/{modId}/files/{fileId}/download-url` — the file's URL, or `null` when the author
+  disallowed third-party distribution. Ferrite treats that as a reported warning, never as a
+  silent skip.
+
+Numeric identifiers (`CurseForgeIds`):
+
+- `classId`: mod `6`, modpack `4471`, resource pack `12`, shader `6552`, datapack `6945`.
+- `modLoaderType`: forge `1`, fabric `4`, quilt `5`, neoforge `6`.
+- `releaseType`: release `1`, beta `2`, alpha `3`.
+- dependency `relationType`: embedded `1`, optional `2`, required `3`, tool `4`,
+  incompatible `5`.
+
+A file's `gameVersions` array mixes game versions and loader names (for example
+`["1.21.1", "NeoForge", "Client"]`), so Ferrite splits it into game versions and loaders before
+compatibility matching.
+
+**CurseForge modpack format.** A ZIP whose root contains `manifest.json` plus an overrides
+folder (usually `overrides`, named by the manifest's `overrides` field). The manifest declares
+`minecraft.version`, `minecraft.modLoaders[]` (`{"id":"neoforge-21.1.72","primary":true}`),
+`files[]` (`projectID`, `fileID`, `required`), `name`, `version`, and `manifestVersion`. The
+loader id is `<loader>-<version>`. Pack files land in `mods/`; everything else ships inside
+the overrides tree.
+
+**Limits.** Without a key, every call fails by design and the integration reports a
+configuration state instead of pretending to work. A file with no download URL cannot be
+installed at all: only the official launcher may fetch it. Both are recorded in
+`docs/HUMAN_ACTION_REQUIRED.md` (H2) and `FEATURE_PARITY.md` (K05).
 
 ### Modrinth modpack format (.mrpack) — **VERIFIED**
 

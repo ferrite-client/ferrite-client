@@ -42,13 +42,18 @@ internal sealed partial class TestHttpServer
         var requestLine = lines.Length > 0 ? lines[0] : string.Empty;
         var parts = requestLine.Split(' ');
         var method = parts.Length > 0 ? parts[0] : "GET";
-        var path = parts.Length > 1 ? parts[1] : "/";
+        var target = parts.Length > 1 ? parts[1] : "/";
+        // Routing matches on the path alone; the query string is exposed separately so a handler can
+        // assert on it without having to register a route per query combination.
+        var separatorIndex = target.IndexOf('?');
+        var path = separatorIndex >= 0 ? target[..separatorIndex] : target;
+        var query = separatorIndex >= 0 ? target[(separatorIndex + 1)..] : string.Empty;
         var contentLength = headers.TryGetValue("content-length", out var lengthText)
             && int.TryParse(lengthText, out var parsed)
                 ? parsed
                 : 0;
 
-        return (new TestRequest(method, path, string.Empty, headers), contentLength);
+        return (new TestRequest(method, path, query, string.Empty, headers), contentLength);
     }
 
     private static async Task<string> ReadBodyAsync(Stream stream, int contentLength)

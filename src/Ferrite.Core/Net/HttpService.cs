@@ -235,7 +235,7 @@ public sealed class HttpService : IDisposable
             Content = new FormUrlEncodedContent(form),
         };
 
-        var bytes = await SendBufferedAsync(request, maxBytes, cancellationToken).ConfigureAwait(false);
+        var bytes = await SendBufferedWithRetryAsync(request, maxBytes, cancellationToken).ConfigureAwait(false);
         return ParseElement(bytes, url);
     }
 
@@ -251,7 +251,7 @@ public sealed class HttpService : IDisposable
             Content = new StringContent(jsonBody, Encoding.UTF8, "application/json"),
         };
 
-        var bytes = await SendBufferedAsync(request, maxBytes, cancellationToken).ConfigureAwait(false);
+        var bytes = await SendBufferedWithRetryAsync(request, maxBytes, cancellationToken).ConfigureAwait(false);
         return ParseElement(bytes, url);
     }
 
@@ -264,7 +264,7 @@ public sealed class HttpService : IDisposable
     {
         using var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-        var bytes = await SendBufferedAsync(request, maxBytes, cancellationToken).ConfigureAwait(false);
+        var bytes = await SendBufferedWithRetryAsync(request, maxBytes, cancellationToken).ConfigureAwait(false);
         return ParseElement(bytes, url);
     }
 
@@ -280,7 +280,11 @@ public sealed class HttpService : IDisposable
         return (int)response.StatusCode;
     }
 
-    private async Task<byte[]> SendBufferedAsync(
+    /// <summary>
+    /// Sends a request and returns the bounded response body, retrying transient failures. Callers use
+    /// this for requests that need their own headers, such as an API key.
+    /// </summary>
+    public async Task<byte[]> SendBufferedWithRetryAsync(
         HttpRequestMessage template,
         int maxBytes,
         CancellationToken cancellationToken)

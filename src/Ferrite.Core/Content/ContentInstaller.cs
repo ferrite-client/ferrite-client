@@ -16,16 +16,16 @@ public sealed class ContentInstaller
     private const int MaxDependencyDepth = 6;
     private const int MaxDependencyCount = 64;
 
-    private readonly ModrinthClient _modrinth;
+    private readonly IContentProvider _provider;
     private readonly DownloadEngine _downloads;
     private readonly ILogger<ContentInstaller> _logger;
 
     public ContentInstaller(
-        ModrinthClient modrinth,
+        IContentProvider provider,
         DownloadEngine downloads,
         ILogger<ContentInstaller> logger)
     {
-        _modrinth = modrinth;
+        _provider = provider;
         _downloads = downloads;
         _logger = logger;
     }
@@ -44,25 +44,28 @@ public sealed class ContentInstaller
         var optional = new List<ContentVersion>();
         var visited = new HashSet<string>(StringComparer.Ordinal);
 
-        var rootProject = await _modrinth
+        var rootProject = await _provider
             .GetProjectAsync(projectIdOrSlug, cancellationToken)
             .ConfigureAwait(false);
         if (rootProject is null)
         {
-            throw new ContentProviderException($"Project '{projectIdOrSlug}' was not found on Modrinth.");
+            throw new ContentProviderException(
+                $"Project '{projectIdOrSlug}' was not found on {_provider.Name}.");
         }
 
         ContentVersion? rootVersion;
         if (versionId is { Length: > 0 })
         {
-            rootVersion = await _modrinth.GetVersionAsync(versionId, cancellationToken).ConfigureAwait(false);
+            rootVersion = await _provider
+                .GetVersionAsync(rootProject.ProjectId, versionId, cancellationToken)
+                .ConfigureAwait(false);
         }
         else
         {
-            var candidates = await _modrinth
+            var candidates = await _provider
                 .GetVersionsAsync(rootProject.ProjectId, instance.MinecraftVersion, loader, cancellationToken)
                 .ConfigureAwait(false);
-            rootVersion = _modrinth.SelectBestVersion(candidates, instance.MinecraftVersion, loader);
+            rootVersion = _provider.SelectBestVersion(candidates, instance.MinecraftVersion, loader);
         }
 
         if (rootVersion is null)
@@ -85,9 +88,18 @@ public sealed class ContentInstaller
             }
 
             var file = version.PrimaryFile;
-            if (file is null || string.IsNullOrEmpty(file.Url))
+            if (file is null)
             {
                 warnings.Add($"{version.VersionNumber} has no downloadable file.");
+                continue;
+            }
+
+            if (string.IsNullOrEmpty(file.Url))
+            {
+                // CurseForge only returns a URL when the author allowed third-party distribution.
+                warnings.Add(
+                    $"{version.VersionNumber} cannot be downloaded automatically: "
+                    + "the author has not allowed third-party distribution.");
                 continue;
             }
 
@@ -225,10 +237,14 @@ public sealed class ContentInstaller
     {
         if (!string.IsNullOrEmpty(dependency.VersionId))
         {
-            var pinned = await _modrinth.GetVersionAsync(dependency.VersionId, cancellationToken).ConfigureAwait(false);
+            var pinned = await _provider
+                .GetVersionAsync(dependency.ProjectId ?? string.Empty, dependency.VersionId, cancellationToken)
+                .ConfigureAwait(false);
             if (pinned is not null)
             {
-                return ModrinthClient.IsCompatible(pinned, instance.MinecraftVersion, loader) ? pinned : null;
+                return ContentCompatibility.IsCompatible(pinned, instance.MinecraftVersion, loader)
+                    ? pinned
+                    : null;
             }
         }
 
@@ -237,9 +253,9 @@ public sealed class ContentInstaller
             return null;
         }
 
-        var versions = await _modrinth
+        var versions = await _provider
             .GetVersionsAsync(dependency.ProjectId, instance.MinecraftVersion, loader, cancellationToken)
             .ConfigureAwait(false);
-        return _modrinth.SelectBestVersion(versions, instance.MinecraftVersion, loader);
+        return _provider.SelectBestVersion(versions, instance.MinecraftVersion, loader);
     }
 }

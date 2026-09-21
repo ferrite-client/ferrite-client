@@ -21,22 +21,39 @@ internal static partial class Scenarios
             return 2;
         }
 
-        var index = services.Modpacks.ReadIndex(archivePath);
-        Console.WriteLine($"Pack: {index.Name} {index.VersionId} (format {index.FormatVersion})");
-        Console.WriteLine($"Dependencies: {string.Join(", ", index.Dependencies.Select(pair => pair.Key + "=" + pair.Value))}");
-        Console.WriteLine($"Declared files: {index.Files.Count}");
+        var request = new ModpackInstallRequest
+        {
+            ArchivePath = archivePath,
+            SourceUrl = source.StartsWith("http", StringComparison.OrdinalIgnoreCase) ? source : null,
+            BackupExisting = true,
+        };
+        var progress = new Progress<InstallProgress>(ReportProgress);
 
-        var result = await services.Modpacks
-            .InstallAsync(
-                new ModpackInstallRequest
-                {
-                    ArchivePath = archivePath,
-                    SourceUrl = source.StartsWith("http", StringComparison.OrdinalIgnoreCase) ? source : null,
-                    BackupExisting = true,
-                },
-                new Progress<InstallProgress>(ReportProgress),
-                cancellationToken)
-            .ConfigureAwait(false);
+        var kind = ModpackArchives.DetectKind(archivePath);
+        ModpackInstallResult result;
+        if (kind == ModpackArchiveKind.CurseForge)
+        {
+            var manifest = CurseForgePackInstaller.ReadManifest(archivePath);
+            var (loader, loaderVersion) = CurseForgePackInstaller.ResolveLoader(manifest);
+            Console.WriteLine($"Pack: {manifest.Name} {manifest.Version} (CurseForge manifest)");
+            Console.WriteLine($"Minecraft: {manifest.Minecraft?.Version}, loader: {loader} {loaderVersion ?? "-"}");
+            Console.WriteLine($"Declared files: {manifest.Files.Count}");
+
+            result = await services.CurseForgePacks
+                .InstallAsync(request, progress, cancellationToken)
+                .ConfigureAwait(false);
+        }
+        else
+        {
+            var index = services.Modpacks.ReadIndex(archivePath);
+            Console.WriteLine($"Pack: {index.Name} {index.VersionId} (format {index.FormatVersion})");
+            Console.WriteLine($"Dependencies: {string.Join(", ", index.Dependencies.Select(pair => pair.Key + "=" + pair.Value))}");
+            Console.WriteLine($"Declared files: {index.Files.Count}");
+
+            result = await services.Modpacks
+                .InstallAsync(request, progress, cancellationToken)
+                .ConfigureAwait(false);
+        }
 
         Console.WriteLine();
         Console.WriteLine($"Instance: {result.Instance.Name} ({result.Instance.Id})");

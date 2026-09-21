@@ -17,6 +17,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     {
         _services = services;
         _shell = shell;
+        RefreshCurseForgeKeyStatus();
     }
 
     public IReadOnlyList<ThemeVariant> Themes { get; } =
@@ -46,6 +47,13 @@ public sealed partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private bool _showSnapshots;
 
+    /// <summary>A key the user is entering. The stored key is never read back into the UI.</summary>
+    [ObservableProperty]
+    private string? _newCurseForgeApiKey;
+
+    [ObservableProperty]
+    private string _curseForgeKeyStatus = string.Empty;
+
     [ObservableProperty]
     private string _dataRoot = string.Empty;
 
@@ -68,7 +76,22 @@ public sealed partial class SettingsViewModel : ObservableObject
         MicrosoftClientId = settings.MicrosoftClientId;
         ShowSnapshots = settings.ShowSnapshotsInVersionList;
         DataRoot = _services.Paths.Root;
+        NewCurseForgeApiKey = null;
+        RefreshCurseForgeKeyStatus();
         await RefreshCacheSizeAsync().ConfigureAwait(true);
+    }
+
+    private void RefreshCurseForgeKeyStatus()
+    {
+        if (!_services.Credentials.HasCurseForgeApiKey)
+        {
+            CurseForgeKeyStatus = "No key stored. CurseForge browsing and modpack installs stay disabled.";
+            return;
+        }
+
+        CurseForgeKeyStatus = _services.Credentials.IsDegraded
+            ? "Key stored with file permissions only (this platform has no OS-backed protection)."
+            : "Key stored and protected by the operating system.";
     }
 
     [RelayCommand]
@@ -83,8 +106,27 @@ public sealed partial class SettingsViewModel : ObservableObject
         settings.ShowSnapshotsInVersionList = ShowSnapshots;
 
         await _services.Settings.SaveAsync(CancellationToken.None).ConfigureAwait(true);
+
+        if (!string.IsNullOrWhiteSpace(NewCurseForgeApiKey))
+        {
+            _services.Credentials.CurseForgeApiKey = NewCurseForgeApiKey;
+            _services.Credentials.Save();
+            NewCurseForgeApiKey = null;
+            RefreshCurseForgeKeyStatus();
+        }
+
         StatusNote = "Settings saved";
         _shell.ReportStatus(StatusNote);
+    }
+
+    [RelayCommand]
+    private void ClearCurseForgeKey()
+    {
+        _services.Credentials.CurseForgeApiKey = null;
+        _services.Credentials.Save();
+        NewCurseForgeApiKey = null;
+        RefreshCurseForgeKeyStatus();
+        StatusNote = "CurseForge API key removed";
     }
 
     [RelayCommand]

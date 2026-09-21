@@ -63,6 +63,19 @@ internal sealed class VerifyServices : IDisposable
             Modrinth,
             Downloads,
             LoggerFactory.CreateLogger<ContentInstaller>());
+        Secrets = new ProtectedSecretStore(
+            Paths.SecretsFile,
+            LoggerFactory.CreateLogger<ProtectedSecretStore>());
+        Secrets.Load();
+        Credentials = new ProviderCredentialStore(Secrets);
+        CurseForge = new CurseForgeClient(
+            Http,
+            LoggerFactory.CreateLogger<CurseForgeClient>(),
+            () => Credentials.CurseForgeApiKey);
+        CurseForgeContent = new ContentInstaller(
+            CurseForge,
+            Downloads,
+            LoggerFactory.CreateLogger<ContentInstaller>());
         Mods = new InstanceContentManager(new ModScanner(LoggerFactory.CreateLogger<ModScanner>()));
         Modpacks = new MrpackInstaller(
             Downloads,
@@ -74,6 +87,16 @@ internal sealed class VerifyServices : IDisposable
             Paths,
             LoggerFactory.CreateLogger<MrpackInstaller>());
         ModpackExporter = new ModpackExporter(Paths, LoggerFactory.CreateLogger<ModpackExporter>());
+        CurseForgePacks = new CurseForgePackInstaller(
+            CurseForge,
+            Downloads,
+            Instances,
+            Fabric,
+            Forge,
+            Installer,
+            Java,
+            Paths,
+            LoggerFactory.CreateLogger<CurseForgePackInstaller>());
         Worlds = new WorldService(LoggerFactory.CreateLogger<WorldService>());
         WorldsArchive = new WorldArchive(Paths.BackupsDirectory, LoggerFactory.CreateLogger<WorldArchive>());
         Servers = new ServerListService(LoggerFactory.CreateLogger<ServerListService>());
@@ -114,11 +137,21 @@ internal sealed class VerifyServices : IDisposable
 
     public ContentInstaller Content { get; }
 
+    public ProtectedSecretStore Secrets { get; }
+
+    public ProviderCredentialStore Credentials { get; }
+
+    public CurseForgeClient CurseForge { get; }
+
+    public ContentInstaller CurseForgeContent { get; }
+
     public InstanceContentManager Mods { get; }
 
     public MrpackInstaller Modpacks { get; }
 
     public ModpackExporter ModpackExporter { get; }
+
+    public CurseForgePackInstaller CurseForgePacks { get; }
 
     public WorldService Worlds { get; }
 

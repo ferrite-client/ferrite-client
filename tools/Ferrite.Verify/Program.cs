@@ -41,6 +41,7 @@ internal static class Program
                     GetOption(args, "--instance"),
                     cancellation.Token),
                 "modrinth" => await Scenarios.ModrinthSearchAsync(services, versionId, cancellation.Token),
+                "curseforge" => await Scenarios.CurseForgeAsync(services, versionId, cancellation.Token),
                 "content" => await Scenarios.InstallContentAsync(
                     services,
                     versionId,

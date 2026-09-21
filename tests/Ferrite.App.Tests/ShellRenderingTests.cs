@@ -146,6 +146,36 @@ public sealed class ShellRenderingTests : IDisposable
         Save(frame!, "shell-minimum");
     }
 
+    /// <summary>
+    /// Switching the browser to a provider without a key must explain the state instead of showing
+    /// an empty result list or an error dialog.
+    /// </summary>
+    [AvaloniaFact]
+    public void Browse_page_explains_an_unconfigured_provider()
+    {
+        var shell = new MainWindowViewModel(_services);
+        var viewModel = new BrowseViewModel(_services, shell);
+        var window = new Window
+        {
+            Content = new BrowseView { DataContext = viewModel },
+            Width = 1200,
+            Height = 800,
+        };
+        window.Show();
+
+        viewModel.SelectedProvider = viewModel.Providers.Single(
+            provider => provider.Name == "curseforge");
+
+        var frame = window.CaptureRenderedFrame();
+        Assert.NotNull(frame);
+
+        var texts = Texts(window);
+        Assert.Contains(texts, text => text.Contains("CurseForge needs an API key", StringComparison.Ordinal));
+        Assert.Contains(texts, text => text.Contains("Search CurseForge", StringComparison.Ordinal));
+
+        Save(frame!, "browse-curseforge");
+    }
+
     private MainWindow ShowShell(out MainWindowViewModel viewModel)
     {
         viewModel = new MainWindowViewModel(_services);

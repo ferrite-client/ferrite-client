@@ -46,6 +46,22 @@
 
       <Border Height="1" Background="{DynamicResource FerriteBorder}" />
 
+      <TextBlock Classes="h2" Text="Content providers" />
+      <StackPanel Spacing="4">
+        <TextBlock Classes="label" Text="CURSEFORGE API KEY" />
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+          <TextBox Grid.Column="0" PasswordChar="*" Text="{Binding NewCurseForgeApiKey}"
+                   PlaceholderText="Paste a key to store or replace the current one" />
+          <Button Grid.Column="1" Classes="danger" Content="Remove key"
+                  Command="{Binding ClearCurseForgeKeyCommand}" />
+        </Grid>
+        <TextBlock Classes="faint" TextWrapping="Wrap" Text="{Binding CurseForgeKeyStatus}" />
+        <TextBlock Classes="faint" TextWrapping="Wrap"
+                   Text="CurseForge browsing, mod installation, and modpack imports need a key issued to you by CurseForge. The key is stored outside the settings file. See docs/HUMAN_ACTION_REQUIRED.md." />
+      </StackPanel>
+
+      <Border Height="1" Background="{DynamicResource FerriteBorder}" />
+
       <TextBlock Classes="h2" Text="Storage" />
       <StackPanel Spacing="6">
         <TextBlock Classes="label" Text="DATA ROOT" />

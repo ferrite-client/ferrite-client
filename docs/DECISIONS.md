@@ -142,3 +142,39 @@ repeated items and framed panels, never nested.
 **Why.** The brief requires an original visual identity and forbids copied assets. The palette is
 deliberately two-accent rather than single-hue, and the navigation list keeps the shell reading as
 an application rather than a settings form. Both themes were rendered and inspected (V004).
+
+## D015 - One provider contract instead of per-provider installers
+
+**Decision.** `IContentProvider` covers search, project lookup, versions, single-version lookup,
+and version selection. `ContentInstaller` depends on that contract, not on `ModrinthClient`, and
+`AppServices.InstallerFor` hands the browser the matching installer instance.
+
+**Rejected.** Keeping a Modrinth-shaped installer and adding a parallel CurseForge one. That
+would have duplicated dependency resolution, path safety, hash verification, and warning
+handling — the parts most likely to rot independently.
+
+**Why.** CurseForge and Modrinth differ in id shape and in the retail-file restriction, not in
+what installing content means. Version selection is identical, so it lives once in
+`ContentCompatibility`, which also normalises loader spellings (`NeoForge` vs `neoforge`).
+
+## D016 - Provider keys live in the secret store, never in settings
+
+**Decision.** The CurseForge API key is stored through `ProtectedSecretStore` (DPAPI
+current-user on Windows) under `config/accounts.bin`, wrapped by `ProviderCredentialStore`.
+`LauncherSettings` never contains it, and the UI never reads a stored key back into a field.
+
+**Why.** Settings are a plaintext JSON document that users copy between machines and paste into
+bug reports. A key that grants API access does not belong there. The client takes a
+`Func<string?>` accessor, so a newly entered key takes effect without rebuilding the client
+graph.
+
+## D017 - CurseForge modpack installs resolve files in one bulk request
+
+**Decision.** A `manifest.json` pack resolves every declared `fileID` through
+`POST /mods/files` rather than one request per file, and files without a download URL are
+reported as warnings.
+
+**Why.** Packs declare dozens to hundreds of files; per-file lookups would be slow and would
+multiply rate-limit exposure. The retail restriction is a legitimate limitation of the
+distribution terms, so it is surfaced to the user rather than hidden behind a partial install
+that silently omits mods.

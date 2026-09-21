@@ -4,7 +4,6 @@ using Ferrite.Core.Java;
 using Ferrite.Core.Loaders;
 using Ferrite.Core.Minecraft;
 using Ferrite.Core.Platform;
-using Ferrite.Core.Rules;
 using Ferrite.Core.Storage;
 using Ferrite.Core.Util;
 using Microsoft.Extensions.Logging;
@@ -22,11 +21,7 @@ public sealed partial class MrpackInstaller
 
     private readonly DownloadEngine _downloads;
     private readonly InstanceStore _instances;
-    private readonly FabricLoaderService _fabric;
-    private readonly ForgeLoaderService _forge;
-    private readonly MinecraftInstaller _installer;
-    private readonly JavaDetector _java;
-    private readonly AppPaths _paths;
+    private readonly ModpackInstallSupport _support;
     private readonly ILogger<MrpackInstaller> _logger;
 
     public MrpackInstaller(
@@ -41,11 +36,7 @@ public sealed partial class MrpackInstaller
     {
         _downloads = downloads;
         _instances = instances;
-        _fabric = fabric;
-        _forge = forge;
-        _installer = installer;
-        _java = java;
-        _paths = paths;
+        _support = new ModpackInstallSupport(instances, fabric, forge, installer, java, paths, logger);
         _logger = logger;
     }
 
@@ -78,17 +69,18 @@ public sealed partial class MrpackInstaller
             : new LoaderVersionInfo(loader, loaderVersion, minecraftVersion, true, null).VersionId;
 
         var warnings = new List<string>();
-        var instance = await ResolveInstanceAsync(
-                request, index, minecraftVersion, loader, loaderVersion, cancellationToken)
+        var instance = await _support
+            .ResolveInstanceAsync(
+                request,
+                index.Name ?? "Modpack",
+                minecraftVersion,
+                loader,
+                loaderVersion,
+                cancellationToken)
             .ConfigureAwait(false);
-        var gameDirectory = _paths.InstanceGameDirectory(instance.Id);
+        var gameDirectory = _support.GameDirectory(instance);
 
-        string? backupPath = null;
-        if (request.BackupExisting && HasUserContent(gameDirectory))
-        {
-            backupPath = BackupGameDirectory(instance, gameDirectory);
-            warnings.Add($"Existing instance content was backed up to {backupPath}");
-        }
+        var backupPath = _support.BackupIfNeeded(request, instance, warnings);
 
         _logger.LogInformation(
             "Installing modpack {Name} {Version} ({Loader} {LoaderVersion}, Minecraft {Minecraft})",
@@ -98,18 +90,24 @@ public sealed partial class MrpackInstaller
             loaderVersion,
             minecraftVersion);
 
-        await InstallLoaderAsync(loader, minecraftVersion, loaderVersion, progress, cancellationToken)
+        await _support
+            .InstallLoaderAsync(loader, minecraftVersion, loaderVersion, progress, cancellationToken)
             .ConfigureAwait(false);
 
-        await _installer
-            .InstallAsync(instance.Id, versionId, RuleContext.ForHost(), progress, cancellationToken)
+        await _support
+            .InstallMinecraftAsync(instance.Id, versionId, progress, cancellationToken)
             .ConfigureAwait(false);
 
         var (downloaded, skipped) = await DownloadPackFilesAsync(
                 index, gameDirectory, warnings, progress, cancellationToken)
             .ConfigureAwait(false);
 
-        var overrideFiles = await ExtractOverridesAsync(request.ArchivePath, gameDirectory, cancellationToken)
+        var overrideFiles = await ModpackInstallSupport
+            .ExtractOverridesAsync(
+                request.ArchivePath,
+                gameDirectory,
+                ["overrides", "client-overrides"],
+                cancellationToken)
             .ConfigureAwait(false);
 
         instance.Modpack = new ModpackIdentity

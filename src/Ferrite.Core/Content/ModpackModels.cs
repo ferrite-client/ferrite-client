@@ -1,6 +1,53 @@
 using Ferrite.Core.Storage;
+using Ferrite.Core.Util;
 
 namespace Ferrite.Core.Content;
+
+/// <summary>Which modpack format an archive uses.</summary>
+public enum ModpackArchiveKind
+{
+    Unknown = 0,
+    Modrinth = 1,
+    CurseForge = 2,
+}
+
+public static class ModpackArchives
+{
+    public const string ModrinthIndexEntry = "modrinth.index.json";
+    public const string CurseForgeManifestEntry = "manifest.json";
+
+    /// <summary>
+    /// Identifies a pack archive by its root entry, so an import can pick the right installer
+    /// without the user choosing a format.
+    /// </summary>
+    public static ModpackArchiveKind DetectKind(string archivePath)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(archivePath);
+        if (!File.Exists(archivePath))
+        {
+            return ModpackArchiveKind.Unknown;
+        }
+
+        try
+        {
+            if (ArchiveExtractor.ContainsEntry(archivePath, ModrinthIndexEntry))
+            {
+                return ModpackArchiveKind.Modrinth;
+            }
+
+            if (ArchiveExtractor.ContainsEntry(archivePath, CurseForgeManifestEntry))
+            {
+                return ModpackArchiveKind.CurseForge;
+            }
+        }
+        catch (InvalidDataException)
+        {
+            return ModpackArchiveKind.Unknown;
+        }
+
+        return ModpackArchiveKind.Unknown;
+    }
+}
 
 public sealed record ModpackInstallRequest
 {

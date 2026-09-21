@@ -12,8 +12,9 @@ public sealed partial class LibraryViewModel
     private string? _modpackStatus;
 
     /// <summary>
-    /// Installs a Modrinth modpack from a local archive. Called by the view once the user has picked
-    /// a file, so the view model never touches platform storage APIs.
+    /// Installs a modpack from a local archive, choosing the Modrinth or CurseForge installer from
+    /// the archive's root entry. Called by the view once the user has picked a file, so the view
+    /// model never touches platform storage APIs.
     /// </summary>
     public async Task ImportModpackAsync(string archivePath)
     {
@@ -26,19 +27,26 @@ public sealed partial class LibraryViewModel
         IsBusy = true;
         try
         {
-            var index = _services.Modpacks.ReadIndex(archivePath);
-            ModpackStatus = $"Installing {index.Name} {index.VersionId}...";
-            _shell.BeginActivity($"Installing {index.Name}...");
+            var request = new ModpackInstallRequest { ArchivePath = archivePath };
+            var progress = new Progress<InstallProgress>(_shell.ReportActivity);
 
-            var result = await _services.Modpacks
-                .InstallAsync(
-                    new ModpackInstallRequest { ArchivePath = archivePath },
-                    new Progress<InstallProgress>(_shell.ReportActivity),
-                    CancellationToken.None)
-                .ConfigureAwait(true);
+            var result = ModpackArchives.DetectKind(archivePath) switch
+            {
+                ModpackArchiveKind.Modrinth => await InstallModrinthPackAsync(archivePath, request, progress)
+                    .ConfigureAwait(true),
+                ModpackArchiveKind.CurseForge => await InstallCurseForgePackAsync(archivePath, request, progress)
+                    .ConfigureAwait(true),
+                _ => throw new ContentProviderException(
+                    "That archive is not a modpack: it has neither modrinth.index.json nor manifest.json."),
+            };
 
             ModpackStatus =
                 $"{result.Instance.Name}: {result.FilesDownloaded} file(s), {result.OverrideFiles} override(s)";
+            if (result.Warnings.Count > 0)
+            {
+                ModpackStatus += $" · {result.Warnings.Count} warning(s)";
+            }
+
             _shell.ReportStatus(ModpackStatus);
             await RefreshAsync().ConfigureAwait(true);
         }
@@ -52,5 +60,29 @@ public sealed partial class LibraryViewModel
             IsBusy = false;
             _shell.EndActivity();
         }
+    }
+
+    private async Task<ModpackInstallResult> InstallModrinthPackAsync(
+        string archivePath,
+        ModpackInstallRequest request,
+        IProgress<InstallProgress> progress)
+    {
+        var index = _services.Modpacks.ReadIndex(archivePath);
+        _shell.BeginActivity($"Installing {index.Name}...");
+        return await _services.Modpacks
+            .InstallAsync(request, progress, CancellationToken.None)
+            .ConfigureAwait(true);
+    }
+
+    private async Task<ModpackInstallResult> InstallCurseForgePackAsync(
+        string archivePath,
+        ModpackInstallRequest request,
+        IProgress<InstallProgress> progress)
+    {
+        var manifest = CurseForgePackInstaller.ReadManifest(archivePath);
+        _shell.BeginActivity($"Installing {manifest.Name}...");
+        return await _services.CurseForgePacks
+            .InstallAsync(request, progress, CancellationToken.None)
+            .ConfigureAwait(true);
     }
 }

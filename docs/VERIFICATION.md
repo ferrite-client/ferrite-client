@@ -387,3 +387,100 @@ world and server-list round trips failed with
 `NbtException: The document ended after 6 byte(s) while 1792 more were needed` — a byte-swapped
 string length. The writer now emits every multi-byte value big-endian explicitly. This mattered:
 without the fix, `servers.dat` written by the launcher would have been unreadable by the game.
+
+---
+
+## V007 - CurseForge integration and shared modpack install path (2026-09-21)
+
+Environment: Windows 11 x64, .NET 10.0.5, `Ferrite.Verify` run against a scratch data root whose
+`data/store` is a junction onto the real content store, so nothing in the user's library was
+modified and no large artefacts were re-downloaded.
+
+### V007.1 Automated tests
+
+Command: `pwsh -File scripts/test.ps1`
+
+```
+   Ferrite.Core.Tests  Total: 137, Errors: 0, Failed: 0, Skipped: 0, Not Run: 0, Time: 25.2s
+   Ferrite.App.Tests   Total: 5,   Errors: 0, Failed: 0, Skipped: 0, Not Run: 0, Time: 1.3s
+All test projects passed.
+```
+
+New coverage: `CurseForgeClientTests` (request shape with `gameId`/`classId`/`modLoaderType`,
+response mapping, hashes and dependencies, missing-key configuration error, retail-file
+`download-url: null`, id mappings), `CurseForgePackTests` (manifest parsing, loader resolution
+for NeoForge/Forge/Fabric/Quilt, file planning into `mods/`, retail-file warning, path-escape
+rejection, archive-kind detection, loader-token normalisation, release preference), and
+`ProviderCredentialStoreTests` (round trip, clearing, no plaintext on disk, load idempotence).
+
+### V007.2 `.mrpack` path re-verified after the shared-install refactor
+
+`MrpackInstaller` lost its own instance/loader/backup helpers to `ModpackInstallSupport`, so
+V005.1 was re-run end to end against the same pack:
+
+Command: `Ferrite.Verify modpack https://cdn.modrinth.com/data/1KVo5zza/versions/N276l2ON/Fabulously.Optimized-v6.5.0.mrpack`
+
+```
+Pack: Fabulously Optimized 6.5.0 (format 1)
+Dependencies: fabric-loader=0.19.3, minecraft=1.21.1
+Declared files: 50
+[info] MrpackInstaller: Installing modpack Fabulously Optimized 6.5.0 (Fabric 0.19.3, Minecraft 1.21.1)
+Instance: Fabulously Optimized (fbd15019-7e65-4de1-b7fc-c2be2f2e2f7e)
+  launch version: fabric-loader-0.19.3-1.21.1
+  files:          50 downloaded, 0 skipped
+  overrides:      63
+  mod inventory:  48 mod(s)
+```
+
+Identical to V005.1, which is the evidence that the refactor preserved behaviour: 50
+hash-verified files, 63 overrides, 48 mods read back from disk.
+
+### V007.3 Modrinth search after the provider abstraction
+
+Command: `Ferrite.Verify modrinth sodium`
+
+```
+Total hits: 351
+  [Mod] Sodium (sodium) - 228,694,255 downloads
+  [Mod] Sodium Extra (sodium-extra) - 96,965,977 downloads
+  ...
+```
+
+The live Modrinth path still works with `ContentInstaller` now depending on `IContentProvider`
+rather than `ModrinthClient` directly.
+
+### V007.4 CurseForge blocked state is reported, not faked
+
+Command: `Ferrite.Verify curseforge jei`
+
+```
+CurseForge: no API key configured.
+  CurseForge needs an API key. Add one in Settings; see docs/HUMAN_ACTION_REQUIRED.md.
+  secret store: <root>\config\accounts.bin
+  live calls are BLOCKED EXTERNAL; see docs/HUMAN_ACTION_REQUIRED.md (H2).
+```
+
+No request is attempted without a key, so the harness reports the configuration state instead of
+producing an error that could be mistaken for a broken integration. Live CurseForge calls remain
+BLOCKED EXTERNAL until a key is supplied; the client, key storage, modpack installer, and
+retail-file handling are covered by the tests in V007.1.
+
+### V007.5 Interface: provider switch and key entry rendered
+
+Command: `FERRITE_UI_SHOTS=<dir> dotnet run --project tests/Ferrite.App.Tests`
+
+The real views were rendered headlessly and inspected as images:
+
+- `browse-curseforge.png` — the browser switched to CurseForge shows `Search CurseForge` as the
+  placeholder, keeps the Modrinth-style filter row, and explains the state in one line
+  ("CurseForge needs an API key. Add one in Settings; ...") instead of an empty list or a dialog.
+  The first render of this screen clipped that sentence at the right edge; the status text was
+  moved out of the filter row onto its own wrapped line, and the duplicated status/provider line
+  was collapsed to one. Both were fixed and re-rendered.
+- `page-settings.png` — Settings gained a *Content providers* section: a masked key field, a
+  *Remove key* action, a live status line ("No key stored. CurseForge browsing and modpack
+  installs stay disabled." on a fresh profile), and an explanation that the key is stored outside
+  the settings file.
+
+The render pass also asserts the page text, so a regression that hides the explanation fails the
+test rather than only looking wrong.

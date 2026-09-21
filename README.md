@@ -19,7 +19,15 @@ What has been exercised end to end against live services (evidence in `docs/VERI
   running the official installer processor chain.
 - Installing a real mod from Modrinth with loader-aware version selection, reading its metadata
   from the mod file, and disabling/re-enabling it without touching its bytes.
+- Installing a real Modrinth modpack (Fabulously Optimized 6.5.0) into its own instance,
+  launching it with 48 mods mounted by Fabric, exporting it, and re-importing the export.
+- Reading worlds and `servers.dat` from a real Minecraft installation and backing a world up.
+- Pinging production Minecraft servers for version, player counts, latency, and MOTD.
 - Java discovery across PATH, vendor installs, and the Minecraft launcher's own runtimes.
+
+Content browsing covers Modrinth and CurseForge through one browser. CurseForge needs a
+user-issued API key; until one is stored, that provider reports a configuration state rather
+than failing, and its live calls stay BLOCKED EXTERNAL in `FEATURE_PARITY.md`.
 
 ## Requirements
 
@@ -56,7 +64,9 @@ The data root can be relocated from Settings.
 
 - **Microsoft sign-in** requires an Azure public-client application ID. Ferrite does not bundle
   one. See `docs/HUMAN_ACTION_REQUIRED.md`.
-- **CurseForge** requires a user-issued API key. See `docs/HUMAN_ACTION_REQUIRED.md`.
+- **CurseForge** requires a user-issued API key, entered under Settings -> Content providers.
+  It is written to the OS-protected secret store (`config/accounts.bin`), not to
+  `settings.json`. See `docs/HUMAN_ACTION_REQUIRED.md` (H2).
 
 Neither secret is ever committed to this repository.
 

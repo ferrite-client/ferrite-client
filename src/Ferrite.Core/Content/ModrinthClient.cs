@@ -8,7 +8,7 @@ namespace Ferrite.Core.Content;
 /// Modrinth API v2 client. Endpoint shapes were read from the live service; see
 /// <c>docs/RESEARCH.md</c> section 5.
 /// </summary>
-public sealed class ModrinthClient
+public sealed class ModrinthClient : IContentProvider
 {
     public const string ProviderName = "modrinth";
     public const string ApiBase = "https://api.modrinth.com/v2";
@@ -25,6 +25,12 @@ public sealed class ModrinthClient
         _logger = logger;
         _apiBase = apiBase.TrimEnd('/');
     }
+
+    public string Name => ProviderName;
+
+    public bool IsConfigured => true;
+
+    public string? UnavailableReason => null;
 
     public async Task<ContentSearchResult> SearchAsync(
         ContentSearchQuery query,
@@ -147,6 +153,12 @@ public sealed class ModrinthClient
         return json is null ? null : ReadVersion(json.Value);
     }
 
+    /// <summary>Modrinth version ids are globally unique, so the project id is not needed.</summary>
+    Task<ContentVersion?> IContentProvider.GetVersionAsync(
+        string projectId,
+        string versionId,
+        CancellationToken cancellationToken) => GetVersionAsync(versionId, cancellationToken);
+
     public async Task<IReadOnlyList<ContentVersion>> GetVersionsByIdsAsync(
         IReadOnlyList<string> versionIds,
         CancellationToken cancellationToken)
@@ -191,47 +203,17 @@ public sealed class ModrinthClient
         IReadOnlyList<ContentVersion> versions,
         string? gameVersion,
         string? loader,
-        bool preferRelease = true)
-    {
-        var compatible = versions.Where(version => IsCompatible(version, gameVersion, loader)).ToList();
-        if (compatible.Count == 0)
-        {
-            return null;
-        }
+        bool preferRelease = true) =>
+        ContentCompatibility.SelectBestVersion(versions, gameVersion, loader, preferRelease);
 
-        if (preferRelease)
-        {
-            var releases = compatible.Where(version => version.IsRelease).ToList();
-            if (releases.Count > 0)
-            {
-                compatible = releases;
-            }
-        }
-
-        return compatible
-            .OrderByDescending(version => version.PublishedAt ?? DateTimeOffset.MinValue)
-            .First();
-    }
+    ContentVersion? IContentProvider.SelectBestVersion(
+        IReadOnlyList<ContentVersion> versions,
+        string? gameVersion,
+        string? loader) => SelectBestVersion(versions, gameVersion, loader);
 
     /// <summary>Never returns true for a version that does not match the instance's game/loader.</summary>
-    public static bool IsCompatible(ContentVersion version, string? gameVersion, string? loader)
-    {
-        if (!string.IsNullOrEmpty(gameVersion)
-            && version.GameVersions.Count > 0
-            && !version.GameVersions.Contains(gameVersion, StringComparer.OrdinalIgnoreCase))
-        {
-            return false;
-        }
-
-        if (!string.IsNullOrEmpty(loader)
-            && version.Loaders.Count > 0
-            && !version.Loaders.Contains(loader, StringComparer.OrdinalIgnoreCase))
-        {
-            return false;
-        }
-
-        return true;
-    }
+    public static bool IsCompatible(ContentVersion version, string? gameVersion, string? loader) =>
+        ContentCompatibility.IsCompatible(version, gameVersion, loader);
 
     private ContentSummary ReadSummary(JsonElement element)
     {

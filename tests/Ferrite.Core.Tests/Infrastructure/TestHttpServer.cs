@@ -7,6 +7,7 @@ namespace Ferrite.Core.Tests.Infrastructure;
 internal sealed record TestRequest(
     string Method,
     string Path,
+    string Query,
     string Body,
     IReadOnlyDictionary<string, string> Headers);
 

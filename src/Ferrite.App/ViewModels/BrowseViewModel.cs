@@ -9,7 +9,7 @@ using Ferrite.Core.Storage;
 
 namespace Ferrite.App.ViewModels;
 
-/// <summary>Modrinth browser: search, versions, and installation into an instance.</summary>
+/// <summary>Content browser: search a provider, pick a version, and install into an instance.</summary>
 public sealed partial class BrowseViewModel : ObservableObject
 {
     private readonly AppServices _services;
@@ -19,11 +19,19 @@ public sealed partial class BrowseViewModel : ObservableObject
     {
         _services = services;
         _shell = shell;
+        Providers = services.ContentProviders
+            .Select(provider => new ProviderOption(provider.Name, ContentProviderNames.DisplayNameFor(provider.Name)))
+            .ToList();
         ProjectTypes = ["mod", "modpack", "resourcepack", "shader"];
         SortOptions = ["relevance", "downloads", "follows", "newest", "updated"];
+        // Assigned to the field so construction does not kick off a search before instances load.
+        _selectedProvider = Providers.FirstOrDefault();
         SelectedProjectType = "mod";
         SelectedSort = "relevance";
     }
+
+    /// <summary>A provider the user can browse, labelled for display.</summary>
+    public sealed record ProviderOption(string Name, string DisplayName);
 
     public ObservableCollection<ContentSummary> Results { get; } = [];
 
@@ -34,6 +42,11 @@ public sealed partial class BrowseViewModel : ObservableObject
     public IReadOnlyList<string> ProjectTypes { get; }
 
     public IReadOnlyList<string> SortOptions { get; }
+
+    public IReadOnlyList<ProviderOption> Providers { get; }
+
+    [ObservableProperty]
+    private ProviderOption? _selectedProvider;
 
     [ObservableProperty]
     private string _searchText = string.Empty;
@@ -71,11 +84,34 @@ public sealed partial class BrowseViewModel : ObservableObject
     [ObservableProperty]
     private string? _resultSummary;
 
+    public IContentProvider ActiveProvider => _services.ContentProviders
+        .FirstOrDefault(provider => provider.Name == (SelectedProvider?.Name ?? string.Empty))
+        ?? _services.ContentProviders[0];
+
+    /// <summary>Set when the active provider cannot be queried, such as a missing API key.</summary>
+    public string? ProviderNote => ActiveProvider.UnavailableReason;
+
+    public string SearchPlaceholder => $"Search {SelectedProvider?.DisplayName ?? "content"}";
+
     public bool HasResults => Results.Count > 0;
 
     public bool HasSelection => SelectedResult is not null;
 
     public bool CanInstall => TargetInstance is not null && SelectedVersion is not null;
+
+    partial void OnSelectedProviderChanged(ProviderOption? value)
+    {
+        OnPropertyChanged(nameof(ProviderNote));
+        OnPropertyChanged(nameof(SearchPlaceholder));
+        Results.Clear();
+        Versions.Clear();
+        SelectedResult = null;
+        SelectedVersion = null;
+        ResultSummary = null;
+        StatusNote = null;
+        OnPropertyChanged(nameof(HasResults));
+        _ = SearchAsync();
+    }
 
     partial void OnSelectedResultChanged(ContentSummary? value)
     {
@@ -123,12 +159,21 @@ public sealed partial class BrowseViewModel : ObservableObject
     [RelayCommand]
     private async Task SearchAsync()
     {
+        var provider = ActiveProvider;
+        if (!provider.IsConfigured)
+        {
+            // ProviderNote already carries the explanation; a duplicate status line would only
+            // repeat it.
+            StatusNote = null;
+            return;
+        }
+
         IsBusy = true;
         try
         {
             StatusNote = null;
             var type = SelectedProjectType is { } text ? ContentProjectTypes.Parse(text) : (ContentProjectType?)null;
-            var result = await _services.Modrinth
+            var result = await provider
                 .SearchAsync(
                     new ContentSearchQuery(
                         SearchText ?? string.Empty,
@@ -173,7 +218,8 @@ public sealed partial class BrowseViewModel : ObservableObject
         {
             var loader = string.IsNullOrWhiteSpace(LoaderFilter) ? null : LoaderFilter;
             var gameVersion = string.IsNullOrWhiteSpace(GameVersionFilter) ? null : GameVersionFilter;
-            var versions = await _services.Modrinth
+            var provider = ActiveProvider;
+            var versions = await provider
                 .GetVersionsAsync(project.ProjectId, gameVersion, loader, CancellationToken.None)
                 .ConfigureAwait(true);
 
@@ -182,7 +228,7 @@ public sealed partial class BrowseViewModel : ObservableObject
                 Versions.Add(version);
             }
 
-            SelectedVersion = _services.Modrinth.SelectBestVersion(versions, gameVersion, loader);
+            SelectedVersion = provider.SelectBestVersion(versions, gameVersion, loader);
             if (SelectedVersion is null && versions.Count > 0)
             {
                 StatusNote = $"No {project.Title} version matches this instance's game version or loader.";

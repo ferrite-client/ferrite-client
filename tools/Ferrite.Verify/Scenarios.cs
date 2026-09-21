@@ -353,6 +353,62 @@ internal static partial class Scenarios
     }
 
     /// <summary>
+    /// Exercises the CurseForge client. Every call needs a key the user obtains from CurseForge, so
+    /// without one this reports the blocked state rather than pretending to succeed.
+    /// </summary>
+    public static async Task<int> CurseForgeAsync(
+        VerifyServices services,
+        string query,
+        CancellationToken cancellationToken)
+    {
+        if (!services.CurseForge.IsConfigured)
+        {
+            Console.WriteLine("CurseForge: no API key configured.");
+            Console.WriteLine($"  {services.CurseForge.UnavailableReason}");
+            Console.WriteLine($"  secret store: {services.Paths.SecretsFile}");
+            Console.WriteLine("  live calls are BLOCKED EXTERNAL; see docs/HUMAN_ACTION_REQUIRED.md (H2).");
+            return 0;
+        }
+
+        var search = await services.CurseForge
+            .SearchAsync(new ContentSearchQuery(query, Limit: 5), cancellationToken)
+            .ConfigureAwait(false);
+        Console.WriteLine($"Total hits: {search.TotalHits}");
+        foreach (var hit in search.Hits)
+        {
+            Console.WriteLine(
+                $"  [{hit.ProjectType}] {hit.Title} ({hit.Slug}) - {hit.Downloads:N0} downloads");
+        }
+
+        var first = search.Hits.FirstOrDefault();
+        if (first is null)
+        {
+            Console.WriteLine("Search returned no hits to inspect further.");
+            return 3;
+        }
+
+        var project = await services.CurseForge
+            .GetProjectAsync(first.ProjectId, cancellationToken)
+            .ConfigureAwait(false);
+        Console.WriteLine($"Project {first.ProjectId}: {project?.Title ?? "(not found)"}");
+
+        var versions = await services.CurseForge
+            .GetVersionsAsync(first.ProjectId, gameVersion: null, loader: null, cancellationToken)
+            .ConfigureAwait(false);
+        Console.WriteLine($"Files: {versions.Count}");
+        foreach (var version in versions.Take(5))
+        {
+            var file = version.PrimaryFile;
+            var distribution = file is null || string.IsNullOrEmpty(file.Url)
+                ? "no download url (third-party distribution disabled)"
+                : "download url present";
+            Console.WriteLine($"  {version.VersionNumber} [{version.VersionType}] {distribution}");
+        }
+
+        return 0;
+    }
+
+    /// <summary>
     /// Searches Modrinth, resolves dependencies, installs into an instance, and re-reads the
     /// installed mod metadata from disk.
     /// </summary>

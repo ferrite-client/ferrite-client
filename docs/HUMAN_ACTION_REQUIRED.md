@@ -48,11 +48,21 @@ implements the complete client, but cannot legitimately call the service without
 2. Create an API key and accept the terms.
 3. Copy the key.
 
-**What to hand back.** The key, entered in Ferrite under Settings -> Content -> CurseForge API
-key (stored with OS-backed protection, never committed).
+**What to hand back.** The key, entered in Ferrite under Settings -> Content providers ->
+CurseForge API key. It is stored in the OS-protected secret store (`config/accounts.bin`,
+DPAPI current-user on Windows), never in the settings document and never in the repository.
+
+**Already implemented.** The API client (search, project, file listing, bulk file resolution,
+download-URL lookup), version compatibility filtering, dependency resolution, the
+`manifest.json` modpack installer with overrides extraction, and secure key storage, all
+covered by automated tests against a scripted HTTP boundary. The verification harness reports
+the blocked state with `Ferrite.Verify curseforge <query>`.
 
 **Blocked until then.** Live CurseForge search, file resolution, and CurseForge modpack
-downloads. Recorded as FEATURE_PARITY row K05.
+downloads. Recorded as FEATURE_PARITY row K05. After the key is stored, verify with
+`scripts/verify-live.ps1 curseforge jei` (expect real search hits) and
+`scripts/verify-live.ps1 modpack <path-to-a-curseforge-pack.zip>` (expect files downloaded into
+the new instance's `mods/` folder).
 
 ---
 

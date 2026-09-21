@@ -27,6 +27,7 @@ public sealed class AppServices : IDisposable
         Paths.EnsureCreated();
 
         var secrets = new ProtectedSecretStore(paths.SecretsFile, loggerFactory.CreateLogger<ProtectedSecretStore>());
+        secrets.Load();
         Settings = new SettingsStore(paths, loggerFactory.CreateLogger<SettingsStore>());
         Http = new HttpService(new HttpServiceOptions(), loggerFactory.CreateLogger<HttpService>());
         Downloads = new DownloadEngine(Http, new DownloadEngineOptions(), loggerFactory.CreateLogger<DownloadEngine>());
@@ -70,6 +71,16 @@ public sealed class AppServices : IDisposable
             loggerFactory);
         Modrinth = new ModrinthClient(Http, loggerFactory.CreateLogger<ModrinthClient>());
         Content = new ContentInstaller(Modrinth, Downloads, loggerFactory.CreateLogger<ContentInstaller>());
+        Credentials = new ProviderCredentialStore(secrets);
+        CurseForge = new CurseForgeClient(
+            Http,
+            loggerFactory.CreateLogger<CurseForgeClient>(),
+            () => Credentials.CurseForgeApiKey);
+        CurseForgeContent = new ContentInstaller(
+            CurseForge,
+            Downloads,
+            loggerFactory.CreateLogger<ContentInstaller>());
+        ContentProviders = [Modrinth, CurseForge];
         Mods = new InstanceContentManager(new ModScanner(loggerFactory.CreateLogger<ModScanner>()));
         Modpacks = new MrpackInstaller(
             Downloads,
@@ -81,6 +92,16 @@ public sealed class AppServices : IDisposable
             paths,
             loggerFactory.CreateLogger<MrpackInstaller>());
         ModpackExporter = new ModpackExporter(paths, loggerFactory.CreateLogger<ModpackExporter>());
+        CurseForgePacks = new CurseForgePackInstaller(
+            CurseForge,
+            Downloads,
+            Instances,
+            Fabric,
+            Forge,
+            Installer,
+            Java,
+            paths,
+            loggerFactory.CreateLogger<CurseForgePackInstaller>());
         Worlds = new WorldService(loggerFactory.CreateLogger<WorldService>());
         WorldsArchive = new WorldArchive(paths.BackupsDirectory, loggerFactory.CreateLogger<WorldArchive>());
         Servers = new ServerListService(loggerFactory.CreateLogger<ServerListService>());
@@ -127,11 +148,26 @@ public sealed class AppServices : IDisposable
 
     public ContentInstaller Content { get; }
 
+    public ProviderCredentialStore Credentials { get; }
+
+    public CurseForgeClient CurseForge { get; }
+
+    public ContentInstaller CurseForgeContent { get; }
+
+    /// <summary>Providers the browser can switch between, in display order.</summary>
+    public IReadOnlyList<IContentProvider> ContentProviders { get; }
+
+    /// <summary>The installer that places files from <paramref name="provider"/> into an instance.</summary>
+    public ContentInstaller InstallerFor(IContentProvider provider) =>
+        ReferenceEquals(provider, CurseForge) ? CurseForgeContent : Content;
+
     public InstanceContentManager Mods { get; }
 
     public MrpackInstaller Modpacks { get; }
 
     public ModpackExporter ModpackExporter { get; }
+
+    public CurseForgePackInstaller CurseForgePacks { get; }
 
     public WorldService Worlds { get; }
 

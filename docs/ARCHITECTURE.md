@@ -67,7 +67,7 @@ extraction path is checked for containment inside the intended destination.
   config/
     settings.json                  launcher settings (schema-versioned)
     accounts.json                  account records (tokens encrypted per record)
-    accounts.bin                   DPAPI-protected token blobs
+    accounts.bin                   DPAPI-protected token blobs and provider API keys
   data/
     instances/<id>/instance.json   instance metadata
     instances/<id>/.minecraft/     game directory (isolated)
@@ -132,9 +132,23 @@ extraction path is checked for containment inside the intended destination.
 
 ## 9. Market/content services
 
-- Providers implement a small internal contract (`IContentProvider`) covering search, project
-  lookup, versions, and download resolution, so Modrinth and CurseForge share the installer
-  and dependency resolver.
+- Providers implement `IContentProvider` (`Name`, `IsConfigured`, `UnavailableReason`,
+  `SearchAsync`, `GetProjectAsync`, `GetVersionsAsync`, `GetVersionAsync`,
+  `SelectBestVersion`). `ModrinthClient` and `CurseForgeClient` are the two implementations,
+  so the browser, `ContentInstaller`, and the dependency resolver are provider-agnostic.
+  `AppServices.InstallerFor(provider)` hands the browser the matching installer.
+- Compatibility rules live in one place (`ContentCompatibility`): a version whose game version
+  or loader does not match the instance is never selected, and provider token spellings
+  (`NeoForge` vs `neoforge`) normalise before comparison.
+- `CurseForgeClient` keeps its key behind a `Func<string?>` accessor reading
+  `ProviderCredentialStore`, so a key entered in Settings takes effect without rebuilding the
+  client. CurseForge addresses files per project, so `GetVersionAsync` takes the project id and
+  `GetFilesAsync` resolves many file ids in one bulk request.
+- Modpack installers: `MrpackInstaller` (`.mrpack`) and `CurseForgePackInstaller`
+  (`manifest.json` + overrides). Both delegate instance resolution, loader installation, and
+  the pre-install backup to `ModpackInstallSupport`, so the two formats cannot drift apart.
+  `ModpackArchives.DetectKind` picks the installer from the archive's root entry, which is what
+  the library import button and the browser's modpack install path use.
 - The dependency resolver performs a breadth-first walk with a visited set, separating
   required from optional dependencies, and never installs a version whose loader or game
   version does not match the instance.

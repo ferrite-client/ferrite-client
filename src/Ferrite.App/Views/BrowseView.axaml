@@ -8,20 +8,34 @@
 
     <StackPanel Grid.Row="0" Spacing="10" Margin="0,0,0,16">
       <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
-        <TextBox Grid.Column="0" PlaceholderText="Search Modrinth"
+        <TextBox Grid.Column="0" PlaceholderText="{Binding SearchPlaceholder}"
                  Text="{Binding SearchText}" />
         <Button Grid.Column="1" Classes="primary" Content="Search" Command="{Binding SearchCommand}" />
         <Button Grid.Column="2" Content="Refresh instances" Command="{Binding RefreshInstancesCommand}" />
       </Grid>
 
-      <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto" ColumnSpacing="10">
-        <ComboBox Grid.Column="0" ItemsSource="{Binding ProjectTypes}" SelectedItem="{Binding SelectedProjectType}" Width="150" />
-        <ComboBox Grid.Column="1" ItemsSource="{Binding SortOptions}" SelectedItem="{Binding SelectedSort}" Width="150" />
-        <TextBox Grid.Column="2" PlaceholderText="Minecraft version" Text="{Binding GameVersionFilter}" Width="150" />
-        <TextBox Grid.Column="3" PlaceholderText="Loader" Text="{Binding LoaderFilter}" Width="120" />
-        <TextBlock Grid.Column="4" Classes="faint" VerticalAlignment="Center" Text="{Binding ResultSummary}" />
-        <TextBlock Grid.Column="5" Classes="faint" VerticalAlignment="Center" Text="{Binding StatusNote}" />
+      <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,*" ColumnSpacing="10">
+        <ComboBox Grid.Column="0" ItemsSource="{Binding Providers}" SelectedItem="{Binding SelectedProvider}"
+                  Width="150">
+          <ComboBox.ItemTemplate>
+            <DataTemplate>
+              <TextBlock Text="{Binding DisplayName}" />
+            </DataTemplate>
+          </ComboBox.ItemTemplate>
+        </ComboBox>
+        <ComboBox Grid.Column="1" ItemsSource="{Binding ProjectTypes}" SelectedItem="{Binding SelectedProjectType}" Width="150" />
+        <ComboBox Grid.Column="2" ItemsSource="{Binding SortOptions}" SelectedItem="{Binding SelectedSort}" Width="150" />
+        <TextBox Grid.Column="3" PlaceholderText="Minecraft version" Text="{Binding GameVersionFilter}" Width="150" />
+        <TextBox Grid.Column="4" PlaceholderText="Loader" Text="{Binding LoaderFilter}" Width="120" />
+        <TextBlock Grid.Column="5" Classes="faint" VerticalAlignment="Center" Text="{Binding ResultSummary}" />
       </Grid>
+
+      <StackPanel Spacing="2">
+        <TextBlock Classes="muted" TextWrapping="Wrap" Text="{Binding StatusNote}"
+                   IsVisible="{Binding StatusNote, Converter={x:Static ObjectConverters.IsNotNull}}" />
+        <TextBlock Classes="faint" TextWrapping="Wrap" Text="{Binding ProviderNote}"
+                   IsVisible="{Binding ProviderNote, Converter={x:Static ObjectConverters.IsNotNull}}" />
+      </StackPanel>
     </StackPanel>
 
     <Grid Grid.Row="1" ColumnDefinitions="2*,3*" ColumnSpacing="16">
@@ -45,7 +59,7 @@
           </ListBox>
           <TextBlock Classes="muted" Margin="12" VerticalAlignment="Top"
                      IsVisible="{Binding !HasResults}"
-                     Text="Search Modrinth for mods, modpacks, resource packs, and shaders. Results are filtered to the selected instance's Minecraft version and loader." />
+                     Text="Search a provider for mods, modpacks, resource packs, and shaders. Results are filtered to the selected instance's Minecraft version and loader." />
         </Grid>
       </Border>
 
