@@ -347,3 +347,26 @@ a preference that is no longer installed and an empty catalogue.
 **Boundary.** Paths a user adds are probed by executing them, like every other candidate: the probe
 is the only gate. An executable that answers like a Java runtime but is not one would still run, and
 that is the same trust a user extends by choosing it by hand.
+
+## D029 - The assistant is rules over evidence, not a model
+
+**Decision.** The instance assistant (`InstanceAdvisor`, `AdvisorText`) is a deterministic rule set
+over the instance's own evidence - crash reports and their frame-mod attribution, the log tail, the
+declared mod dependencies, the managed-file check, Java availability, and the last preflight result.
+It never calls an external service, and the rendered report says which evidence it read.
+
+**Rejected.** Integrating a hosted language model. XMCL's equivalent feature is "Built-in AI Agent",
+which names a model.
+
+**Why.** A model needs an endpoint and a credential - the same class of external dependency as the
+Microsoft client id (H1) and the CurseForge key (H2) - and the product brief forbids presenting a
+capability that has not actually been implemented. Embedding a shared key would also ship a secret
+in the binary. A rule set over evidence the instance already holds is honest, testable,
+reproducible, offline, and free, and it produces the same actionable explanation for the same
+failure every time. Every conclusion carries the line or the frame that produced it, so the user can
+check it rather than trust it.
+
+**Boundary.** The advisor explains Minecraft-level failures and mod metadata. It does not read an
+arbitrary file tree or the game's in-memory state, and it does not claim a diagnosis - the wording
+states that a stack frame is evidence that code ran, not proof of cause. A model-backed variant would
+be an additive feature gated on a user-supplied endpoint, not a replacement for this one.

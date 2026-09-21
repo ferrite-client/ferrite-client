@@ -569,6 +569,23 @@
         </Grid>
       </TabItem>
 
+      <TabItem Header="{DynamicResource L.Instance.TabAssistant}">
+        <Grid RowDefinitions="Auto,*" Margin="0,16,0,0" RowSpacing="12">
+          <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
+            <Button Classes="primary" Content="{DynamicResource L.Instance.RunAssistant}"
+                    Command="{Binding AskAssistantCommand}"
+                    IsEnabled="{Binding !IsAdvising}" />
+            <TextBlock Classes="muted" VerticalAlignment="Center"
+                       Text="{DynamicResource L.Instance.AssistantHint}" />
+          </StackPanel>
+          <Border Grid.Row="1" Classes="card">
+            <ScrollViewer>
+              <SelectableTextBlock Classes="mono" Text="{Binding AdvisorText}" />
+            </ScrollViewer>
+          </Border>
+        </Grid>
+      </TabItem>
+
     </TabControl>
 
     <TextBlock Grid.Row="2" Classes="muted" Margin="0,12,0,0" Text="{Binding StatusNote}" />

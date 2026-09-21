@@ -286,6 +286,13 @@ internal static class StringsEn
             ["L.Instance.ModGroupNeedsBoth"] = "A group needs both a name and a rule.",
             ["L.Instance.ModGroupSaved"] = "Group {0} saved",
             ["L.Instance.ModGroupRemoved"] = "Group {0} removed",
+            ["L.Instance.TabAssistant"] = "Assistant",
+            ["L.Instance.RunAssistant"] = "Check this instance",
+            ["L.Instance.AssistantHint"] =
+                "Reads this instance's own logs, crash reports, mods, and files.",
+            ["L.Instance.AssistantRunning"] = "Checking the instance...",
+            ["L.Instance.AssistantFoundProblems"] = "The assistant found something to act on.",
+            ["L.Instance.AssistantClean"] = "The assistant found nothing to act on.",
             ["L.Instance.SortName"] = "Sort by name",
             ["L.Instance.SortSize"] = "Sort by size",
             ["L.Instance.SortLoader"] = "Sort by loader",

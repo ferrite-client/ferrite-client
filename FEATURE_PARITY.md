@@ -249,7 +249,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | N06 | Operation log | Recent operations with outcome and duration, persisted and bounded | VERIFIED | V008.4; `DiagnosticsTests` |
 | N07 | Save preview and chunk tools | Read a world visually and select, copy, or delete chunks | NOT STARTED | XMCL feature catalogue 15 |
 | N08 | Blueprint preview | Preview a structure in 3D with compatibility and materials | NOT STARTED | XMCL feature catalogue 16 |
-| N09 | Built-in assistant | Explain a failed launch from the instance's own evidence | NOT STARTED | XMCL feature catalogue 22 |
+| N09 | Built-in assistant | A rule-based advisor over the instance's own evidence: crash frames, log signatures, missing dependencies, missing files, and Java | VERIFIED | V037; deterministic by design (D029) - a model-backed agent would need an external endpoint |
 
 ## O. Launcher settings, storage, and updates
 
@@ -287,8 +287,8 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 
 | Status | Count |
 | --- | --- |
-| NOT STARTED | 10 |
+| NOT STARTED | 9 |
 | IN PROGRESS | 0 |
 | IMPLEMENTED | 0 |
-| VERIFIED | 157 |
+| VERIFIED | 158 |
 | BLOCKED EXTERNAL | 18 |

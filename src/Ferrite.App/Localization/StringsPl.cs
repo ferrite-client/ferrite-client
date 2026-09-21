@@ -289,6 +289,13 @@ internal static class StringsPl
             ["L.Instance.ModGroupNeedsBoth"] = "Grupa wymaga zarówno nazwy, jak i reguły.",
             ["L.Instance.ModGroupSaved"] = "Zapisano grupę {0}",
             ["L.Instance.ModGroupRemoved"] = "Usunięto grupę {0}",
+            ["L.Instance.TabAssistant"] = "Asystent",
+            ["L.Instance.RunAssistant"] = "Sprawdź tę instancję",
+            ["L.Instance.AssistantHint"] =
+                "Czyta logi, raporty awarii, mody i pliki tej instancji.",
+            ["L.Instance.AssistantRunning"] = "Sprawdzanie instancji...",
+            ["L.Instance.AssistantFoundProblems"] = "Asystent znalazł coś do działania.",
+            ["L.Instance.AssistantClean"] = "Asystent nie znalazł nic do działania.",
             ["L.Instance.SortName"] = "Sortuj według nazwy",
             ["L.Instance.SortSize"] = "Sortuj według rozmiaru",
             ["L.Instance.SortLoader"] = "Sortuj według loadera",

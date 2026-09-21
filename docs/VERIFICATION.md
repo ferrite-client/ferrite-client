@@ -2263,3 +2263,50 @@ Every new label exists in English and Polish; the localisation tests pass.
 
 **Limitations, stated precisely.** The palette matches on substrings of command and instance titles;
 it does not search mods, versions, or settings, and it does not rank results by recency.
+
+## V037 - Instance assistant (2026-09-21)
+
+Commands: `InstanceAdvisorTests` (Core), `InstanceAssistantTests` (App), and the whole suite
+(`344` Core tests, `77` App tests, all passing). The scope decision is recorded as `DECISIONS.md`
+D029.
+
+XMCL's catalogue has a "Built-in AI Agent - let an agent inspect the instance virtual filesystem and
+explain an actionable fix". The first inventory did not list it. Ferrite now has an instance
+assistant that reads the instance's own evidence and explains what to do.
+
+### V037.1 Deterministic, not a model
+
+The agent names a model; a model needs a credential and a network service this environment cannot
+supply, and shipping a hidden one would be worse than shipping none. The closest legitimate
+alternative is a rule-based advisor over the same evidence an agent would read, and that is what is
+implemented: the crash reports (via the existing frame-mod attribution), the log tail, the declared
+mod dependencies, the managed-file check, Java availability, and the last preflight result. The
+rendering says so plainly and states that it never calls an external service, so the user is never
+misled about what produced the answer.
+
+### V037.2 The rules the tests pin
+
+The Core tests pin each rule: an absent Java runtime is blocking; a blocking preflight issue becomes
+a finding whose action names repair; a stack frame that references an installed mod is reported as
+evidence and the wording says a frame is not proof; a mod the crash report loaded but the instance no
+longer has is blocking; a required dependency that is not installed and is not provided by the loader
+is reported (while `fabric-api` and `fabricloader` are recognised as provided); the known log
+signatures (out of memory, duplicate mods, an incompatible mod set, a missing mandatory dependency, a
+failed mixin, a missing class or method) each become a finding carrying the log line as evidence;
+disabled mods are context rather than a problem; and findings are ordered worst first. A healthy
+input produces a single context finding rather than an empty list, so the panel is never blank.
+
+### V037.3 The interface
+
+The instance detail page gains an `Assistant` tab: one button that runs the check and a scrollable,
+selectable report. Pressing it refreshes the log, the crash reports, and the mod list first, so the
+answer describes the instance as it is now rather than as it was when the page opened. The App tests
+drive that whole path against a real crash report and a real mod archive - the assistant names
+Sodium from the failing frame - and confirm that pressing it on an instance with nothing installed
+reports the missing files and recommends repair instead of throwing.
+
+**Limitations, stated precisely.** The assistant reasons over Minecraft errors and mod metadata; it
+does not inspect an arbitrary file tree, it does not read the game's own in-memory state, and its
+conclusions are rules over evidence rather than a diagnosis. A model-backed variant would need an
+externally supplied endpoint and key, the same shape of dependency as the Microsoft client id and
+the CurseForge key.
