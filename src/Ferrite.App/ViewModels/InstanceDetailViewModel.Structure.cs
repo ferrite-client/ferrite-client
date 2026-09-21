@@ -11,6 +11,9 @@ using Ferrite.Core.Minecraft;
 
 namespace Ferrite.App.ViewModels;
 
+/// <summary>One structure file, with the label the picker shows instead of a full path.</summary>
+public sealed record StructureFileItem(string Path, string Label);
+
 /// <summary>
 /// The structure preview: read a structure file, show it in three dimensions, list what it is made of,
 /// and say whether the game this instance runs can load it.
@@ -33,9 +36,9 @@ public sealed partial class InstanceDetailViewModel
     private StructureCompatibility _structureCompatibility = StructureCompatibility.Unknown;
 
     [ObservableProperty]
-    private string? _selectedStructureFile;
+    private StructureFileItem? _selectedStructureFile;
 
-    public ObservableCollection<string> StructureFiles { get; } = [];
+    public ObservableCollection<StructureFileItem> StructureFiles { get; } = [];
 
     /// <summary>Structures the instance's own worlds ship, so the common case needs no file picker.</summary>
     public bool HasStructureFiles => StructureFiles.Count > 0;
@@ -77,7 +80,7 @@ public sealed partial class InstanceDetailViewModel
             StructureFiles.Clear();
             foreach (var path in found)
             {
-                StructureFiles.Add(path);
+                StructureFiles.Add(new StructureFileItem(path, ShortLabel(path)));
             }
 
             OnPropertyChanged(nameof(HasStructureFiles));
@@ -124,10 +127,30 @@ public sealed partial class InstanceDetailViewModel
     [RelayCommand]
     private async Task LoadSelectedStructureAsync()
     {
-        if (SelectedStructureFile is { Length: > 0 } path)
+        if (SelectedStructureFile is { Path.Length: > 0 } item)
         {
-            await LoadStructureAsync(path).ConfigureAwait(true);
+            await LoadStructureAsync(item.Path).ConfigureAwait(true);
         }
+    }
+
+    /// <summary>
+    /// The label a structure is listed under: its path below the structures folder, which is what tells
+    /// two of them apart, instead of an absolute path that would wrap in the picker.
+    /// </summary>
+    private static string ShortLabel(string path)
+    {
+        var marker = Path.Combine("generated", "minecraft", "structures");
+        var index = path.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+        if (index >= 0)
+        {
+            var relative = path[(index + marker.Length)..].TrimStart('\\', '/');
+            if (relative.Length > 0)
+            {
+                return relative.Replace('\\', '/');
+            }
+        }
+
+        return Path.GetFileName(path);
     }
 
     /// <summary>

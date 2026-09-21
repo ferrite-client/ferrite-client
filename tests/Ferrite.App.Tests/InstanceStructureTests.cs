@@ -154,8 +154,11 @@ public sealed class InstanceStructureTests : IDisposable
         await viewModel.RefreshStructuresAsync();
 
         Assert.True(viewModel.HasStructureFiles);
-        Assert.Equal(structurePath, Assert.Single(viewModel.StructureFiles));
-        Assert.Equal(structurePath, viewModel.SelectedStructureFile);
+        var listed = Assert.Single(viewModel.StructureFiles);
+        Assert.Equal(structurePath, listed.Path);
+        // The picker shows the path below the structures folder, not the absolute path.
+        Assert.Equal("hut.nbt", listed.Label);
+        Assert.Equal(structurePath, viewModel.SelectedStructureFile!.Path);
 
         Assert.True(await viewModel.LoadStructureAsync(structurePath));
 

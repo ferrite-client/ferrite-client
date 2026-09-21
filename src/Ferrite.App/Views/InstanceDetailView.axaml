@@ -610,8 +610,9 @@
               <ComboBox ItemsSource="{Binding StructureFiles}" SelectedItem="{Binding SelectedStructureFile}"
                         Width="360">
                 <ComboBox.ItemTemplate>
-                  <DataTemplate>
-                    <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis" />
+                  <DataTemplate DataType="vm:StructureFileItem">
+                    <TextBlock Text="{Binding Label}" TextTrimming="CharacterEllipsis"
+                               ToolTip.Tip="{Binding Path}" />
                   </DataTemplate>
                 </ComboBox.ItemTemplate>
               </ComboBox>
@@ -635,11 +636,11 @@
 
           <Grid Grid.Row="2" ColumnDefinitions="*,260" ColumnSpacing="12">
             <Border Grid.Column="0" Classes="card" Padding="8">
-              <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                <Image Source="{Binding StructureImage}" Stretch="None"
-                       AutomationProperties.Name="{DynamicResource L.Instance.StructureChoose}"
-                       IsVisible="{Binding HasStructureImage}" />
-              </ScrollViewer>
+              <Image Source="{Binding StructureImage}" Stretch="Uniform"
+                     RenderOptions.BitmapInterpolationMode="None"
+                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                     AutomationProperties.Name="{DynamicResource L.Instance.StructureChoose}"
+                     IsVisible="{Binding HasStructureImage}" />
             </Border>
             <Border Grid.Column="1" Classes="card">
               <StackPanel Spacing="6">
