@@ -253,7 +253,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | O08 | Update staging | Download, SHA-256 verify, unpack outside the install root, write a hand-off script | VERIFIED | V012.3, V012.4; `UpdateHandoffTests` |
 | O09 | Update feed | Requires externally hosted infrastructure | BLOCKED EXTERNAL | `HUMAN_ACTION_REQUIRED.md` H3 |
 | O10 | Localisation | English and Polish, switchable at runtime; every label, button, empty state, and launcher-composed message comes from the table | VERIFIED | V015. Message text produced by Core (provider errors, verification results) stays English; see `docs/ARCHITECTURE.md` section 16 |
-| O11 | Accessibility | Keyboard navigation, focus, labels, contrast | IMPLEMENTED | keyboard reachable controls, themed focus |
+| O11 | Accessibility | Contrast, control names, and visible focus, all checked mechanically | VERIFIED | V028 |
 
 ## P. Cross-cutting quality
 

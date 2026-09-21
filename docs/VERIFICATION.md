@@ -1824,3 +1824,56 @@ Ten cases, each one an input a launcher cannot trust:
 
 The archive-traversal and entry-limit behaviour is also pinned by `ArchiveExtractorTests`, and the
 CurseForge manifest validation by `CurseForgePackTests`. Verifies P03.
+
+---
+
+## V028 - Accessibility: contrast, names, and visible focus (2026-09-21)
+
+Command: `dotnet run --project tests/Ferrite.App.Tests -- -class Ferrite.App.Tests.AccessibilityTests`
+
+Three checks, each against the real artefacts rather than an intention: the palette file, the view
+files, and a rendered frame.
+
+### V028.1 Contrast
+
+The test parses `Styles/Palette.axaml`, computes WCAG relative luminance for every token, and asserts
+4.5:1 for each text tone on all three surfaces, in both themes, plus the accent button's own text
+against its fill.
+
+**Defects found and fixed.** Three tones failed AA, all of them the small 12px text the interface uses
+for secondary detail:
+
+| Token | Theme | Surface | Before | After |
+| --- | --- | --- | --- | --- |
+| `FerriteTextFaint` | Dark | raised card | 3.54:1 | 5.50:1 (`#6C7480` → `#8C95A2`) |
+| `FerriteTextFaint` | Light | sunken | 3.58:1 | 4.64:1 (`#82888F` → `#616870`) |
+| `FerriteSuccess` | Light | sunken | 4.05:1 | 4.87:1 (`#2F7D72` → `#2B6F66`) |
+| `FerriteWarning` | Light | sunken | 4.06:1 | 4.86:1 (`#8A6D1F` → `#7C611B`) |
+
+The dark theme's faint tone was the worst offender at 3.54:1, and every one of the faint values is
+used for text a user is meant to read (versions, sizes, hints), not for decoration.
+
+### V028.2 Names
+
+Every view is parsed and every `Button`, `TextBox`, `ComboBox`, `NumericUpDown`, and `CheckBox` must
+carry a name, a placeholder, a tooltip, button content, or a bound item source. The check found 12
+controls with none of those — the memory and window-size steppers, the JVM and game argument boxes,
+the per-item update checkbox, the rename and clone name fields, the download-concurrency stepper, and
+the client-id field — and each now has an `AutomationProperties.Name` taken from its own localised
+label. Two new label strings (`FieldWindowWidth`, `FieldWindowHeight`) and a `SelectItem` name were
+added in both languages for the controls that had no label of their own.
+
+### V028.3 Focus
+
+The window is rendered, a Tab key is sent through the headless input stack, and the frame after the
+keypress is compared byte-for-byte with the frame before it. The test fails if focusing a control
+changes nothing on screen, which is what an invisible focus state looks like.
+
+Buttons, tabs, and list items now draw an accent-coloured two-pixel border on `:focus-visible`, and
+text fields, combo boxes, and steppers draw the accent border on any focus, because a caret alone does
+not say where the next keystroke lands.
+
+**Limitations, stated precisely.** These are the desktop accessibility properties this environment can
+check mechanically. A screen-reader walkthrough, a full keyboard-only pass over every workflow, and OS
+text-scaling behaviour were not performed, so `O11` is verified for contrast, naming, and focus rather
+than for every assistive technology.

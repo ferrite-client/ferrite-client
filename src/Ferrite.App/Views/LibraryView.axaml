@@ -70,7 +70,7 @@
       <Border Classes="card" MaxWidth="440" VerticalAlignment="Center" HorizontalAlignment="Center">
         <StackPanel Spacing="12">
               <TextBlock Classes="h2" Text="{DynamicResource L.Library.RenameTitle}" />
-          <TextBox Text="{Binding RenameName}" />
+          <TextBox Text="{Binding RenameName}" AutomationProperties.Name="{DynamicResource L.Library.FieldName}" />
           <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
               <Button Content="{DynamicResource L.Common.Cancel}" Command="{Binding CancelRenameCommand}" />
               <Button Classes="primary" Content="{DynamicResource L.Library.Rename}" Command="{Binding ConfirmRenameCommand}" />
@@ -87,7 +87,7 @@
               <TextBlock Classes="h2" Text="{DynamicResource L.Library.CloneTitle}" />
           <TextBlock Classes="muted"
                      Text="{DynamicResource L.Library.CloneHint}" />
-          <TextBox Text="{Binding CloneName}" />
+          <TextBox Text="{Binding CloneName}" AutomationProperties.Name="{DynamicResource L.Library.FieldName}" />
           <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
               <Button Content="{DynamicResource L.Common.Cancel}" Command="{Binding CancelCloneCommand}" />
               <Button Classes="primary" Content="{DynamicResource L.Library.Clone}" Command="{Binding ConfirmCloneCommand}" />
@@ -105,7 +105,7 @@
 
           <StackPanel Spacing="4">
               <TextBlock Classes="label" Text="{DynamicResource L.Library.FieldName}" />
-            <TextBox Text="{Binding NewName}" />
+            <TextBox Text="{Binding NewName}" AutomationProperties.Name="{DynamicResource L.Library.FieldName}" />
           </StackPanel>
 
           <StackPanel Spacing="4">

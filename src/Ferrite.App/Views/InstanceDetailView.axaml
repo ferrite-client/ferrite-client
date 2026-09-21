@@ -57,18 +57,22 @@
             <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
               <StackPanel Grid.Column="0" Spacing="4">
               <TextBlock Classes="label" Text="{DynamicResource L.Instance.FieldMaxMemory}" />
-                <NumericUpDown Value="{Binding MemoryMb}" Minimum="0" Maximum="65536" Increment="512" />
+                <NumericUpDown Value="{Binding MemoryMb}" Minimum="0" Maximum="65536" Increment="512"
+                               AutomationProperties.Name="{DynamicResource L.Instance.FieldMaxMemory}" />
               </StackPanel>
               <StackPanel Grid.Column="1" Spacing="4">
               <TextBlock Classes="label" Text="{DynamicResource L.Instance.FieldMinMemory}" />
-                <NumericUpDown Value="{Binding MinMemoryMb}" Minimum="0" Maximum="65536" Increment="512" />
+                <NumericUpDown Value="{Binding MinMemoryMb}" Minimum="0" Maximum="65536" Increment="512"
+                               AutomationProperties.Name="{DynamicResource L.Instance.FieldMinMemory}" />
               </StackPanel>
               <StackPanel Grid.Column="2" Spacing="4">
               <TextBlock Classes="label" Text="{DynamicResource L.Instance.FieldWindowSize}" />
                 <Grid ColumnDefinitions="*,12,*" ColumnSpacing="0">
                   <NumericUpDown Grid.Column="0" Value="{Binding WindowWidth}" Minimum="0" Maximum="16384"
+                                 AutomationProperties.Name="{DynamicResource L.Instance.FieldWindowWidth}"
                                  Increment="10" />
                   <NumericUpDown Grid.Column="2" Value="{Binding WindowHeight}" Minimum="0" Maximum="16384"
+                                 AutomationProperties.Name="{DynamicResource L.Instance.FieldWindowHeight}"
                                  Increment="10" />
                 </Grid>
                 <TextBlock Classes="faint" Text="{DynamicResource L.Instance.WindowSizeHint}" />
@@ -90,12 +94,14 @@
 
             <StackPanel Spacing="4">
               <TextBlock Classes="label" Text="{DynamicResource L.Instance.FieldJvmArguments}" />
-              <TextBox Text="{Binding JvmArgumentsText}" AcceptsReturn="True" Height="88" Classes="mono" />
+              <TextBox Text="{Binding JvmArgumentsText}" AcceptsReturn="True" Height="88" Classes="mono"
+                       AutomationProperties.Name="{DynamicResource L.Instance.FieldJvmArguments}" />
             </StackPanel>
 
             <StackPanel Spacing="4">
               <TextBlock Classes="label" Text="{DynamicResource L.Instance.FieldGameArguments}" />
-              <TextBox Text="{Binding GameArgumentsText}" AcceptsReturn="True" Height="72" Classes="mono" />
+              <TextBox Text="{Binding GameArgumentsText}" AcceptsReturn="True" Height="72" Classes="mono"
+                       AutomationProperties.Name="{DynamicResource L.Instance.FieldGameArguments}" />
             </StackPanel>
 
             <TextBlock Classes="muted" Text="{Binding StatusNote}" />
@@ -212,7 +218,8 @@
                   <DataTemplate DataType="vm:ContentUpdateItemViewModel">
                     <Border Classes="card" Margin="0,0,0,8">
                       <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-                        <CheckBox Grid.Column="0" IsChecked="{Binding IsSelected}" VerticalAlignment="Center" />
+                        <CheckBox Grid.Column="0" IsChecked="{Binding IsSelected}" VerticalAlignment="Center"
+                                  AutomationProperties.Name="{DynamicResource L.Common.SelectItem}" />
                         <StackPanel Grid.Column="1" Spacing="2">
                           <TextBlock Classes="h2" Text="{Binding Name}" />
                           <TextBlock Classes="mono" Text="{Binding Detail}" />

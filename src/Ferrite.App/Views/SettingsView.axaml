@@ -33,7 +33,8 @@
       <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
         <StackPanel Grid.Column="0" Spacing="4">
           <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldConcurrentDownloads}" />
-          <NumericUpDown Value="{Binding MaxConcurrentDownloads}" Minimum="1" Maximum="64" Increment="1" />
+          <NumericUpDown Value="{Binding MaxConcurrentDownloads}" Minimum="1" Maximum="64" Increment="1"
+                         AutomationProperties.Name="{DynamicResource L.Settings.FieldConcurrentDownloads}" />
         </StackPanel>
         <StackPanel Grid.Column="1" Spacing="4">
           <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldProxy}" />
@@ -53,7 +54,7 @@
       <TextBlock Classes="h2" Text="{DynamicResource L.Settings.Accounts}" />
       <StackPanel Spacing="4">
         <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldClientId}" />
-        <TextBox Text="{Binding MicrosoftClientId}" />
+        <TextBox Text="{Binding MicrosoftClientId}" AutomationProperties.Name="{DynamicResource L.Settings.FieldClientId}" />
         <TextBlock Classes="faint"
                    Text="{DynamicResource L.Settings.ClientIdHint}" />
       </StackPanel>

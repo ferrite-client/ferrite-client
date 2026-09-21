@@ -15,7 +15,11 @@
       <SolidColorBrush x:Key="FerriteBorderStrong" Color="#3A414B" />
       <SolidColorBrush x:Key="FerriteText" Color="#E8EAED" />
       <SolidColorBrush x:Key="FerriteTextMuted" Color="#9AA2AD" />
-      <SolidColorBrush x:Key="FerriteTextFaint" Color="#6C7480" />
+      <!--
+        The faint tone is used at 12px, so it still has to clear WCAG AA (4.5:1) against both the
+        page surface and the raised card surface.
+      -->
+      <SolidColorBrush x:Key="FerriteTextFaint" Color="#8C95A2" />
       <SolidColorBrush x:Key="FerriteAccent" Color="#D08A3E" />
       <SolidColorBrush x:Key="FerriteAccentHover" Color="#E0A458" />
       <SolidColorBrush x:Key="FerriteAccentText" Color="#1A1409" />
@@ -32,13 +36,13 @@
       <SolidColorBrush x:Key="FerriteBorderStrong" Color="#BCBCB4" />
       <SolidColorBrush x:Key="FerriteText" Color="#1C1E22" />
       <SolidColorBrush x:Key="FerriteTextMuted" Color="#5A6068" />
-      <SolidColorBrush x:Key="FerriteTextFaint" Color="#82888F" />
+      <SolidColorBrush x:Key="FerriteTextFaint" Color="#616870" />
       <SolidColorBrush x:Key="FerriteAccent" Color="#A5621B" />
       <SolidColorBrush x:Key="FerriteAccentHover" Color="#8E5215" />
       <SolidColorBrush x:Key="FerriteAccentText" Color="#FFFFFF" />
-      <SolidColorBrush x:Key="FerriteSuccess" Color="#2F7D72" />
+      <SolidColorBrush x:Key="FerriteSuccess" Color="#2B6F66" />
       <SolidColorBrush x:Key="FerriteDanger" Color="#B03A2E" />
-      <SolidColorBrush x:Key="FerriteWarning" Color="#8A6D1F" />
+      <SolidColorBrush x:Key="FerriteWarning" Color="#7C611B" />
     </ResourceDictionary>
 
   </ResourceDictionary.ThemeDictionaries>

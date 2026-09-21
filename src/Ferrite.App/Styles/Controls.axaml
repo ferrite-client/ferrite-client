@@ -81,6 +81,43 @@
     <Setter Property="Opacity" Value="0.45" />
   </Style>
 
+  <!--
+    Keyboard focus has to be visible on every control the user can tab to. The border is drawn in the
+    accent colour and thickened rather than animated, so it is unmistakable at a glance and does not
+    move the layout.
+  -->
+  <Style Selector="Button:focus-visible">
+    <Setter Property="BorderBrush" Value="{DynamicResource FerriteAccent}" />
+    <Setter Property="BorderThickness" Value="2" />
+  </Style>
+
+  <Style Selector="TextBox:focus-visible, ComboBox:focus-visible, NumericUpDown:focus-visible">
+    <Setter Property="BorderBrush" Value="{DynamicResource FerriteAccent}" />
+    <Setter Property="BorderThickness" Value="2" />
+  </Style>
+
+  <!--
+    A field the user is typing into shows focus even when it was reached with the pointer, because the
+    caret alone is not enough to tell where the next keystroke will land.
+  -->
+  <Style Selector="TextBox:focus, ComboBox:focus, NumericUpDown:focus">
+    <Setter Property="BorderBrush" Value="{DynamicResource FerriteAccent}" />
+  </Style>
+
+  <Style Selector="CheckBox:focus-visible">
+    <Setter Property="Foreground" Value="{DynamicResource FerriteAccent}" />
+  </Style>
+
+  <Style Selector="TabItem:focus-visible">
+    <Setter Property="Foreground" Value="{DynamicResource FerriteAccent}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+
+  <Style Selector="ListBoxItem:focus-visible">
+    <Setter Property="BorderBrush" Value="{DynamicResource FerriteAccent}" />
+    <Setter Property="BorderThickness" Value="2" />
+  </Style>
+
   <Style Selector="TextBox, ComboBox">
     <Setter Property="Background" Value="{DynamicResource FerriteSurfaceSunken}" />
     <Setter Property="Foreground" Value="{DynamicResource FerriteText}" />
