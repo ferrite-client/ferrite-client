@@ -32,6 +32,12 @@ public sealed record InstanceLaunchResult
 
     public GameProcess? Process { get; init; }
 
+    /// <summary>
+    /// The command that was started, with credentials redacted, so a diagnostic log or a bug report
+    /// can show how the game was launched without carrying a token.
+    /// </summary>
+    public string? CommandPreview { get; init; }
+
     public VerificationReport? Verification { get; init; }
 
     public JavaCompatibilityResult? Compatibility { get; init; }

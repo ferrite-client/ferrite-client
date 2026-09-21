@@ -156,6 +156,7 @@ public sealed class InstanceLauncher
         {
             Started = true,
             Process = process,
+            CommandPreview = command.ToDisplayString(),
             Verification = verification,
             Compatibility = compatibility,
             Issues = issues,

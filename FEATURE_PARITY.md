@@ -36,7 +36,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | ID | Capability | Our implementation | Status | Evidence |
 | --- | --- | --- | --- | --- |
 | B01 | Create vanilla instance | Instance store creates the directory skeleton and metadata | VERIFIED | V001 |
-| B02 | Create loader instance | Loader selection persisted on the instance | IMPLEMENTED | V002 |
+| B02 | Create loader instance | Loader and loader version persisted on the instance, then installed | VERIFIED | V026.1, V002 |
 | B03 | Create modpack instance | From `.mrpack`, CurseForge zip, or a browsed pack project | VERIFIED | V005.1 and V007.2 (`.mrpack`); CurseForge zip path IMPLEMENTED, live install BLOCKED EXTERNAL (K05) |
 | B04 | Clone instance | Copy with isolation | VERIFIED | InstanceManagerTests |
 | B05 | Rename instance | Rename metadata and directory safely | VERIFIED | InstanceManagerTests |
@@ -102,7 +102,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | E07 | Custom Java path | Added by hand, probed before it is accepted, dropped when it stops working | VERIFIED | V021.3, V021.4 |
 | E08 | Automatic Java provisioning | Mojang runtime catalog, file manifest, download, verify | VERIFIED | V017.1 live download of java-runtime-gamma, probed by running it, reused on a second call |
 | E09 | Runtime validation | Runs the runtime before use | VERIFIED | V001.1 |
-| E10 | JVM/RAM editor | Memory and custom JVM argument model | IMPLEMENTED | tests |
+| E10 | JVM/RAM editor | Memory and custom JVM arguments reach the launched command | VERIFIED | V026.2 |
 
 ## F. Accounts and authentication
 
@@ -232,7 +232,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 
 | ID | Capability | Our implementation | Status | Evidence |
 | --- | --- | --- | --- | --- |
-| N01 | Instance log viewer | Tail logs with bounded memory | IMPLEMENTED | log tail in the instance Logs tab |
+| N01 | Instance log viewer | The newest log, read as a bounded tail | VERIFIED | V026.3 |
 | N02 | Crash report parsing | Description, cause, stack frames, reported mod list, system details | VERIFIED | V008.1 real 1.8.8 report; `CrashReportTests` for Fabric and NeoForge shapes |
 | N03 | Mod attribution from crash | Stack frames matched to installed mods, with the report's own suspects kept separate | VERIFIED | V008.2 (48 real mods, no false positives); `CrashReportTests` |
 | N04 | Diagnostics bundle export | Redacted zip of launcher logs, operations, instance metadata, game logs, and crash analysis | VERIFIED | V008.3; `DiagnosticsTests` |
@@ -263,7 +263,7 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 | P02 | Path safety | Canonicalisation and containment before writes | VERIFIED | tests |
 | P03 | Malicious metadata defence | Size caps, depth caps, parse failures as typed errors | IMPLEMENTED | tests |
 | P04 | Network resilience | Offline fallback, retries, timeouts | VERIFIED | V001.2, tests |
-| P05 | Performance with large packs | Caching, incremental scans, no UI-thread blocking | IMPLEMENTED | V001.3 |
+| P05 | Performance with large packs | Metadata cache keyed on file fingerprint; scans off the UI thread | VERIFIED | V026.4; V001.3 |
 | P06 | Visual QA pass | Full screen/state sweep with fixes | VERIFIED | V004 |
 | P07 | Security audit | Adversarial review of untrusted paths | VERIFIED | docs/SECURITY.md audit log |
 | P08 | Repository hygiene | `.gitignore`, no secrets, no build output committed | VERIFIED | git history |
@@ -273,6 +273,12 @@ A row is never `VERIFIED` because a class, screen, button, interface, or mock-on
 ## Summary
 
 | Status | Count |
+| --- | --- |
+| NOT STARTED | 0 |
+| IN PROGRESS | 0 |
+| IMPLEMENTED | 13 |
+| VERIFIED | 144 |
+| BLOCKED EXTERNAL | 15 |
 | --- | --- |
 | NOT STARTED | 0 |
 | IN PROGRESS | 0 |

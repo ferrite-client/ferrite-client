@@ -26,10 +26,17 @@ public sealed class ModScanner
 
     private readonly ILogger<ModScanner> _logger;
 
-    public ModScanner(ILogger<ModScanner> logger)
+    public ModScanner(ILogger<ModScanner> logger, ModMetadataCache? cache = null)
     {
         _logger = logger;
+        Cache = cache ?? new ModMetadataCache();
     }
+
+    /// <summary>
+    /// Metadata already read out of unchanged files. Shared by every scan this scanner performs, so
+    /// reopening the mod tab does not open every jar again.
+    /// </summary>
+    public ModMetadataCache Cache { get; }
 
     /// <summary>Scans a folder for mods off the calling thread. Never throws for one bad file.</summary>
     public Task<IReadOnlyList<ModMetadata>> ScanAsync(string modsDirectory, CancellationToken cancellationToken) =>
@@ -64,8 +71,27 @@ public sealed class ModScanner
     {
         var fileName = Path.GetFileName(path);
         var enabled = !fileName.EndsWith(".disabled", StringComparison.OrdinalIgnoreCase);
-        var size = new FileInfo(path).Length;
+        var info = new FileInfo(path);
+        var size = info.Length;
 
+        // The descriptor can only have changed if the file's own fingerprint did.
+        if (Cache.TryGet(path, size, info.LastWriteTimeUtc.Ticks, out var cached))
+        {
+            return cached;
+        }
+
+        var metadata = ReadUncached(path, fileName, size, enabled, cancellationToken);
+        Cache.Set(path, size, info.LastWriteTimeUtc.Ticks, metadata);
+        return metadata;
+    }
+
+    private ModMetadata ReadUncached(
+        string path,
+        string fileName,
+        long size,
+        bool enabled,
+        CancellationToken cancellationToken)
+    {
         try
         {
             using var archive = ZipFile.OpenRead(path);

@@ -106,16 +106,7 @@ public sealed partial class LibraryViewModel
         {
             _shell.BeginActivity($"Creating {name}...");
 
-            var record = await _services.Instances.CreateAsync(
-                new InstanceRecord
-                {
-                    Id = Guid.NewGuid(),
-                    Name = name,
-                    MinecraftVersion = NewVersion.Id,
-                    Loader = NewLoader,
-                    LoaderVersion = NewLoaderVersion?.Version,
-                },
-                CancellationToken.None).ConfigureAwait(true);
+            var record = await CreateInstanceRecordAsync(name).ConfigureAwait(true);
 
             var versionId = InstanceLauncher.LaunchVersionId(record);
             if (NewLoader is not LoaderKind.Vanilla && NewLoaderVersion is not null)
@@ -175,5 +166,23 @@ public sealed partial class LibraryViewModel
             IsBusy = false;
             _shell.EndActivity();
         }
+    }
+
+    /// <summary>
+    /// Writes the instance's metadata from the form: the chosen version, loader, and loader version.
+    /// Separate from the install that follows so the persistence half can be checked on its own.
+    /// </summary>
+    internal async Task<InstanceRecord> CreateInstanceRecordAsync(string? name = null)
+    {
+        var record = new InstanceRecord
+        {
+            Id = Guid.NewGuid(),
+            Name = string.IsNullOrWhiteSpace(name ?? NewName) ? "New instance" : (name ?? NewName)!.Trim(),
+            MinecraftVersion = NewVersion?.Id ?? string.Empty,
+            Loader = NewLoader,
+            LoaderVersion = NewLoaderVersion?.Version,
+        };
+
+        return await _services.Instances.CreateAsync(record, CancellationToken.None).ConfigureAwait(true);
     }
 }

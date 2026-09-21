@@ -83,6 +83,10 @@ internal static partial class Scenarios
                 : "  The pin differs from the automatic choice, so the run distinguishes them.");
 
         instance.JavaPath = viaDefault ? null : pinned.ExecutablePath;
+        // A per-instance memory setting and custom JVM argument, so this run also shows that the
+        // instance's own launch settings reach the command the game is started with.
+        instance.MemoryMb = 3072;
+        instance.JvmArguments = ["-Dferrite.verify.marker=1"];
         await services.Instances.SaveAsync(instance, cancellationToken).ConfigureAwait(false);
 
         var result = await services.InstanceLauncher
@@ -128,6 +132,23 @@ internal static partial class Scenarios
         var process = result.Process;
         Console.WriteLine($"Started pid {process.ProcessId}; log: {process.LogFilePath}");
         Console.WriteLine($"Process image: {process.ExecutablePath ?? "unavailable"}");
+
+        // The command the product built, with credentials redacted. The instance's memory setting and
+        // its custom JVM argument have to be in it, and the launch token must not be.
+        var settingsReachedTheCommand = true;
+        if (result.CommandPreview is { } preview)
+        {
+            Console.WriteLine("Command (credentials redacted):");
+            Console.WriteLine("  " + preview);
+            var memoryOk = preview.Contains("-Xmx3072M", StringComparison.Ordinal);
+            var argumentOk = preview.Contains("-Dferrite.verify.marker=1", StringComparison.Ordinal);
+            var redactedOk = !preview.Contains("verify-pipeline-token", StringComparison.Ordinal);
+            settingsReachedTheCommand = memoryOk && argumentOk && redactedOk;
+            Console.WriteLine(
+                $"  instance memory in command: {memoryOk}; custom JVM argument in command: {argumentOk}; "
+                + $"launch token redacted: {redactedOk}");
+        }
+
         await Task.Delay(TimeSpan.FromSeconds(seconds), cancellationToken).ConfigureAwait(false);
 
         var log = await ReadLogAsync(process.LogFilePath, cancellationToken).ConfigureAwait(false);
@@ -163,7 +184,13 @@ internal static partial class Scenarios
             return 4;
         }
 
-        return matches ? 0 : 5;
+        if (!settingsReachedTheCommand)
+        {
+            Console.WriteLine("FAIL: the instance's own launch settings did not reach the command.");
+            return 5;
+        }
+
+        return matches ? 0 : 6;
     }
 
     /// <summary>

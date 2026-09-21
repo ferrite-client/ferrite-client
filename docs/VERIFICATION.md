@@ -1688,3 +1688,65 @@ modpack is V005.1 and V005.2, which installed Fabulously Optimized through the s
   provider needs a user-issued API key (`HUMAN_ACTION_REQUIRED.md` H2), which is the same blocker as
   K05.
 - At most six gallery frames are fetched, and only when a project panel is opened.
+
+---
+
+## V026 - Instance creation, launch settings, the log tab, and large-pack scanning (2026-09-21)
+
+### V026.1 The creation form writes the loader onto the instance
+
+Command: `dotnet run --project tests/Ferrite.App.Tests -- -class Ferrite.App.Tests.LibraryCreateTests`
+
+The form's persistence step is driven with a version, `fabric`, and `0.19.5` selected: the record that
+lands in the store carries the loader and its version, its launch version id is
+`fabric-loader-0.19.5-1.21.1`, and a reload of the store agrees. A vanilla creation writes no loader
+version and launches `26.3` directly. Verifies B02 for the persistence half; V002 is the live half
+(Fabric installed and launched).
+
+### V026.2 Memory and JVM arguments reach the command line
+
+Command: `Ferrite.Verify instance-launch 26.3 --java Microsoft --seconds 50`
+
+The instance is given `MemoryMb = 3072` and a custom `-Dferrite.verify.marker=1`, and launched through
+the product's own `InstanceLauncher`. From the run:
+
+```
+Command (credentials redacted):
+  "...\java-runtime-epsilon\bin\java.exe" ... -XX:+UseZGC -Xmx3072M
+  -Dlog4j.configurationFile=... -Dferrite.verify.marker=1 net.minecraft.client.main.Main
+  --username FerriteVerify ... --uuid ***redacted*** --accessToken ***redacted***
+  --clientId ***redacted*** --xuid ***redacted*** --versionType release
+  instance memory in command: True; custom JVM argument in command: True; launch token redacted: True
+The game's own log shows it reached the renderer (Setting user / LWJGL).
+```
+
+The command itself is new evidence this entry adds: `InstanceLaunchResult.CommandPreview` carries the
+redacted command, so a diagnostic log or report can show how the game was launched. Verifies E10, and
+re-confirms F10's redaction on the product launch path rather than the harness's own builder.
+
+### V026.3 The log tab reads a bounded tail
+
+Command: `dotnet run --project tests/Ferrite.App.Tests -- -class Ferrite.App.Tests.InstanceLogTests`
+
+A 200,000-line, 6.8 MB `latest.log` is read: exactly the last 400 lines come back, starting at line
+199,600 and ending at 199,999, and the first lines are absent. With two logs present, the one with the
+newer write time is shown; with none, the tab says so. Verifies N01.
+
+### V026.4 Rescanning a large pack no longer reopens every jar
+
+Commands: `dotnet run --project tests/Ferrite.Core.Tests -- -class Ferrite.Core.Tests.ModScanCacheTests`
+
+200 real mod archives are scanned twice. The first scan opens all 200 and records 200 misses and no
+hits; the second returns the same list from the metadata cache with 200 hits and no misses, and is
+faster than the first because it opens nothing. Replacing one jar re-reads exactly that jar (1 miss,
+19 hits of 20), and disabling a mod is a different file path with its own entry, so the disabled
+state is never served from the enabled entry.
+
+**Why this matters.** The brief calls out "repeatedly parsing unchanged JAR metadata" as a hot path to
+avoid; opening every jar on every visit to the mod tab was exactly that.
+
+**Limitations, stated precisely.** The cache is keyed on size and last-write time, so a file replaced
+with different bytes but an identical size and timestamp would be served from the cache. Filesystems
+that rewrite a file in place without changing its size need the timestamp to move, which is how
+ordinary writes behave. The scanner's off-thread behaviour (`ScanAsync` wraps `Scan` in `Task.Run`) is
+by construction and is not separately measured here.
