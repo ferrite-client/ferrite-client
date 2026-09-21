@@ -1533,3 +1533,68 @@ gallery.
   listing, enable/disable, and removal. The in-game list remains the place to order packs.
 - Thumbnails are decoded on demand when the Files tab opens. A folder with thousands of screenshots
   would spend time decoding them; a lazier paging scheme is not implemented.
+
+---
+
+## V023 - The library list, and what a delete does to user data (2026-09-21)
+
+### V023.1 Search, ordering, and per-instance size
+
+Command: `dotnet run --project tests/Ferrite.App.Tests -- -class Ferrite.App.Tests.LibraryListTests`
+
+Three real instances are created on a temporary data root, each with a file of a different size in its
+`mods` folder and a different `LastLaunchedAt`, so every order has a distinct expected answer:
+
+- the default order is most recently played first;
+- ordering by name and by size both produce the documented order, and the size order uses the real
+  byte count the card reports (`SizeBytes >= 65536` for the largest instance), which is the value
+  computed off the UI thread when the card loads;
+- the search box matches a name, a Minecraft version, and a loader, and a query that matches nothing
+  returns an empty list.
+
+The order control itself is the drop-down rendered next to the search box in `LibraryView.axaml`.
+
+### V023.2 Deleting an instance keeps it
+
+Command: `dotnet run --project tests/Ferrite.Core.Tests -- -class Ferrite.Core.Tests.InstanceManagerTests`
+
+An instance with `options.txt` and a world inside it is deleted through the same call the library card
+makes. The instance directory is gone, the whole tree is present under
+`backups/instance-<name>-<timestamp>-<id>/minecraft/`, and the instance is no longer in the library
+list. Verified by reading the user's file back out of the backup.
+
+**Interpretation.** Verifies B14, B15, and B16. B16 covers instances (moved to backups) and content
+removed from an instance (mods, packs, and datapacks, all moved to
+`backups/removed-content/<instance>/` per V020.2 and V022.1).
+
+---
+
+## V024 - Structured logging and settings persistence (2026-09-21)
+
+Command: `dotnet run --project tests/Ferrite.Core.Tests -- -class Ferrite.Core.Tests.LauncherDiagnosticsTests`
+
+Both of these are failure-path features, so they are verified by making them fail.
+
+### V024.1 The log file
+
+Real log lines are written through `FileLoggerProvider` into a real directory and then read back:
+
+- each line parses as its own JSON object with `ts`, `level`, `category`, and `message`;
+- a message containing a bearer token is written with the token replaced, checked against the raw
+  bytes of the file rather than against the API's return value;
+- with a 512-byte limit and 40 lines logged, the file rotates: `ferrite.log` is still the current
+  file and a `.1` file exists, so a long session does not grow one unbounded file.
+
+### V024.2 The settings document
+
+- A half-written document (`{"schemaVersion": 1, "maxConcurrentDownloads": `) loads as defaults, and
+  the damaged file is copied into `backups/settings-*.json` with its original content intact.
+- A document from a **newer** schema is refused rather than mangled: defaults are used, the newer file
+  is preserved in backups, and the file on disk is left exactly as the newer build wrote it.
+- An **older** document is migrated forward: the schema version is set to the current one, an
+  out-of-range download concurrency is corrected, an unrelated setting is preserved, and the migrated
+  document is written back.
+
+**Limitations, stated precisely.** These verify the file logger and the settings store as components.
+A GUI session's own log file is the same provider wired by `AppLogging`, but this entry does not
+inspect a log produced by an interactive session.

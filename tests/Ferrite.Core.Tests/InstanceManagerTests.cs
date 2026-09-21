@@ -120,6 +120,37 @@ public sealed class InstanceManagerTests : IDisposable
                 TestContext.Current.CancellationToken));
     }
 
+    /// <summary>
+    /// Deleting an instance must not destroy it: the whole directory moves into the launcher's
+    /// backups folder, with the user's files inside it.
+    /// </summary>
+    [Fact]
+    public async Task Deleting_an_instance_keeps_it_in_backups()
+    {
+        var record = await CreateInstanceAsync("Precious");
+        var gameDirectory = _paths.InstanceGameDirectory(record.Id);
+        await File.WriteAllTextAsync(Path.Combine(gameDirectory, "options.txt"), "fov:95");
+        var worldDirectory = Path.Combine(gameDirectory, "saves", "world");
+        Directory.CreateDirectory(worldDirectory);
+        await File.WriteAllTextAsync(Path.Combine(worldDirectory, "level.dat"), "nbt");
+
+        await _store.DeleteAsync(record.Id, moveToBackups: true, TestContext.Current.CancellationToken);
+
+        Assert.False(Directory.Exists(_paths.InstanceDirectory(record.Id)));
+        var moved = Directory.EnumerateDirectories(_paths.BackupsDirectory)
+            .Where(directory => Path.GetFileName(directory).StartsWith("instance-Precious-", StringComparison.Ordinal))
+            .ToList();
+        var backup = Assert.Single(moved);
+        Assert.Equal(
+            "fov:95",
+            await File.ReadAllTextAsync(Path.Combine(backup, "minecraft", "options.txt")));
+
+        // It is gone from the library as well, so the list and the disk agree.
+        Assert.DoesNotContain(
+            await _store.LoadAllAsync(TestContext.Current.CancellationToken),
+            candidate => candidate.Id == record.Id);
+    }
+
     private async Task<InstanceRecord> CreateInstanceAsync(string name) =>
         await _store.CreateAsync(
             new InstanceRecord
