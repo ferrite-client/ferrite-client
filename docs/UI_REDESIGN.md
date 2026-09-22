@@ -157,15 +157,24 @@ Defects found this way and fixed:
    rail row flashed pale. Fixed by adding `FerriteClear`.
 4. Library cards had different heights, so Play buttons did not line up across a row.
 5. Card artwork tiles were too dark to read as a placeholder.
+6. Two section actions used the accent without being their section's primary action ("Choose a
+   structure file" beside Preview, "Prepare files" beside Start server), so the accent lost its
+   meaning. Both are now ordinary buttons and the real primary action carries the accent.
 
 ## DPI, theme, and localization QA
 
 - Both themes are designed, not inverted. The light theme has its own surfaces, its own text tones
   (faint text was darkened until it cleared AA against the light sunken surface), and its own
   semantic soft washes, and it is rendered in the screenshot pass.
-- The rail collapses, the library column count is measured from the window, the instance rail is
-  fixed width so content grids keep their columns, and the minimum supported window (1024x680) is
-  covered by a rendering test.
+- DPI is rendered, not assumed. `ResponsiveAndDpiTests` drives the headless host's own render-scaling
+  change at 100%, 125%, 150%, and 200% and asserts the frame grows with the scale and that the rail,
+  the title bar, and the page all survive it, both for the shell and for the instance page with its
+  hero action. What this cannot cover is the *native* caption buttons in the extended title bar,
+  which is why that remains a manual pass.
+- Responsiveness is asserted rather than eyeballed: the library grid's column count is measured from
+  the window and has to be non-decreasing from 1024 to 2560, the instance page has to keep Play and
+  all eleven rail destinations at the minimum supported window (1024x680), and the toolbar wraps
+  instead of clipping.
 - Every new string was added to both the English and Polish tables, and a test fails the build if a
   key is used in one place and missing in the other, if the placeholders differ between languages,
   if a key is defined and never used, or if a view asks for a key that does not exist. The Polish
@@ -173,10 +182,11 @@ Defects found this way and fixed:
 
 ## Unresolved issues
 
-- **Snap Layouts and DPI behaviour** are implemented through the platform's own decoration roles,
-  which is the supported path, but they cannot be exercised in a headless renderer. They need a
-  manual pass on Windows at 100%, 125%, 150%, and 200% with the window maximised, restored, and
-  dragged between monitors.
+- **The native window chrome needs a manual pass.** Window dragging, double-click to maximise,
+  drag-to-edge snapping, the Snap Layouts flyout, resize borders, and the alignment of the platform's
+  own caption buttons inside the extended title bar are implemented through Avalonia's decoration
+  roles, which is the supported path, but a headless renderer has no native frame to exercise them
+  against. The client-area layout at each DPI scale is verified by test; the frame is not.
 - **Downloads has no retry or cancel.** The launcher runs one operation at a time, so "active" is a
   single entry; it now shows the engine's real file count, byte counts, and transfer rate. Retry and
   cancellation would need the download engine to expose those operations, and inventing buttons for

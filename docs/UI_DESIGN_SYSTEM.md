@@ -144,6 +144,11 @@ an empty state, and an icon-only button always carries a name and a tooltip.
 | `.segment` (+ `.active`) | Grouped exclusive choice | View switches and short filters. |
 | `.nav-footer` (+ `.active`) | Matches a rail row | The account switcher and Settings. |
 
+The accent is used at most once per screen or region, and it always answers "what is the one thing to
+do here?". A section button that is merely *available* is a default button, not a primary one: on the
+instance page "Choose a structure file" and "Prepare files" are ordinary buttons, while Play and
+"Start server" are the actions that carry the accent.
+
 ### Inputs
 
 Text boxes, combo boxes, and numeric inputs share one shape: sunken fill, 1px border, `RadiusMd`, a
