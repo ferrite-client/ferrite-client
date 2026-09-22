@@ -169,7 +169,7 @@ public sealed partial class BrowseViewModel
     {
         if (SelectedResult is { } project)
         {
-            ShellOpen.Url(ProjectPageUrl(project));
+            ShellOpen.Url(ProjectPageUrl(project.Summary));
         }
     }
 

@@ -20,6 +20,20 @@ public sealed partial class InstanceDetailViewModel
     [ObservableProperty]
     private bool _isAdvising;
 
+    /// <summary>True once a check has produced a report, so the tab can tell "not run" from "clean".</summary>
+    public bool HasAdvisorText => !string.IsNullOrWhiteSpace(AdvisorText);
+
+    /// <summary>True before the instance has been checked at all.</summary>
+    public bool ShowsAssistantEmptyState => !HasAdvisorText && !IsAdvising;
+
+    partial void OnAdvisorTextChanged(string value)
+    {
+        OnPropertyChanged(nameof(HasAdvisorText));
+        OnPropertyChanged(nameof(ShowsAssistantEmptyState));
+    }
+
+    partial void OnIsAdvisingChanged(bool value) => OnPropertyChanged(nameof(ShowsAssistantEmptyState));
+
     [RelayCommand]
     private async Task AskAssistantAsync()
     {

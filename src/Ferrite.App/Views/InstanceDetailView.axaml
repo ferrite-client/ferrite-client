@@ -591,13 +591,25 @@
                                      Text="{Binding CompatibilityText}" IsVisible="{Binding HasCompatibility}" />
                           <TextBlock Classes="faint" Text="{Binding Note}" />
                         </StackPanel>
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                          <Button Content="{DynamicResource L.Instance.Disable}" IsVisible="{Binding IsEnabled}"
-                                  Command="{Binding ToggleCommand}" />
-                          <Button Content="{DynamicResource L.Instance.Enable}" IsVisible="{Binding !IsEnabled}"
-                                  Command="{Binding ToggleCommand}" />
-                          <Button Content="{DynamicResource L.Common.OpenFolder}" Command="{Binding OpenFolderCommand}" />
-                          <Button Classes="danger" Content="{DynamicResource L.Common.Remove}" Command="{Binding RemoveCommand}" />
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                          <Button Classes="chip" Content="{DynamicResource L.Instance.Disable}"
+                                  IsVisible="{Binding IsEnabled}" Command="{Binding ToggleCommand}" />
+                          <Button Classes="chip" Content="{DynamicResource L.Instance.Enable}"
+                                  IsVisible="{Binding !IsEnabled}" Command="{Binding ToggleCommand}" />
+                          <Button Classes="ghost icon-button sm"
+                                  AutomationProperties.Name="{DynamicResource L.Instance.Actions}"
+                                  ToolTip.Tip="{DynamicResource L.Instance.Actions}">
+                            <controls:IconGlyph Data="{StaticResource Icon.More}" Width="14" Height="14" />
+                            <Button.Flyout>
+                              <MenuFlyout>
+                                <MenuItem Header="{DynamicResource L.Common.OpenFolder}"
+                                          Command="{Binding OpenFolderCommand}" />
+                                <MenuItem Header="{DynamicResource L.Common.Remove}"
+                                          Foreground="{DynamicResource FerriteDanger}"
+                                          Command="{Binding RemoveCommand}" />
+                              </MenuFlyout>
+                            </Button.Flyout>
+                          </Button>
                         </StackPanel>
                       </Grid>
                     </Border>
@@ -622,13 +634,25 @@
                           <TextBlock Classes="faint" Text="{Binding SizeText}" />
                           <TextBlock Classes="faint" Text="{Binding Note}" />
                         </StackPanel>
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                          <Button Content="{DynamicResource L.Instance.Disable}" IsVisible="{Binding IsEnabled}"
-                                  Command="{Binding ToggleCommand}" />
-                          <Button Content="{DynamicResource L.Instance.Enable}" IsVisible="{Binding !IsEnabled}"
-                                  Command="{Binding ToggleCommand}" />
-                          <Button Content="{DynamicResource L.Common.OpenFolder}" Command="{Binding OpenFolderCommand}" />
-                          <Button Classes="danger" Content="{DynamicResource L.Common.Remove}" Command="{Binding RemoveCommand}" />
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                          <Button Classes="chip" Content="{DynamicResource L.Instance.Disable}"
+                                  IsVisible="{Binding IsEnabled}" Command="{Binding ToggleCommand}" />
+                          <Button Classes="chip" Content="{DynamicResource L.Instance.Enable}"
+                                  IsVisible="{Binding !IsEnabled}" Command="{Binding ToggleCommand}" />
+                          <Button Classes="ghost icon-button sm"
+                                  AutomationProperties.Name="{DynamicResource L.Instance.Actions}"
+                                  ToolTip.Tip="{DynamicResource L.Instance.Actions}">
+                            <controls:IconGlyph Data="{StaticResource Icon.More}" Width="14" Height="14" />
+                            <Button.Flyout>
+                              <MenuFlyout>
+                                <MenuItem Header="{DynamicResource L.Common.OpenFolder}"
+                                          Command="{Binding OpenFolderCommand}" />
+                                <MenuItem Header="{DynamicResource L.Common.Remove}"
+                                          Foreground="{DynamicResource FerriteDanger}"
+                                          Command="{Binding RemoveCommand}" />
+                              </MenuFlyout>
+                            </Button.Flyout>
+                          </Button>
                         </StackPanel>
                       </Grid>
                     </Border>
@@ -993,9 +1017,26 @@
           </StackPanel>
           <Border Grid.Row="1" Classes="card">
             <ScrollViewer>
-              <SelectableTextBlock Classes="mono" Text="{Binding AdvisorText}" />
+              <SelectableTextBlock Classes="mono" TextWrapping="Wrap"
+                                   Text="{Binding AdvisorText}"
+                                   IsVisible="{Binding HasAdvisorText}" />
             </ScrollViewer>
           </Border>
+
+          <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center"
+                      Spacing="10" MaxWidth="460" IsVisible="{Binding ShowsAssistantEmptyState}">
+            <controls:IconGlyph Data="{StaticResource Icon.Assistant}" Width="28" Height="28"
+                                Opacity="0.5" HorizontalAlignment="Center" />
+            <TextBlock Classes="muted" TextAlignment="Center"
+                       Text="{DynamicResource L.Instance.AssistantEmpty}" />
+          </StackPanel>
+
+          <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center"
+                      Spacing="10" MaxWidth="460" IsVisible="{Binding IsAdvising}">
+            <TextBlock Classes="muted" TextAlignment="Center"
+                       Text="{DynamicResource L.Instance.AssistantRunning}" />
+            <ProgressBar IsIndeterminate="True" Width="220" />
+          </StackPanel>
         </Grid>
       </TabItem>
 
@@ -1004,10 +1045,12 @@
     <TextBlock Grid.Row="2" Classes="muted" Margin="0,12,0,0" Text="{Binding StatusNote}" />
 
     <!-- Mod group editor -->
-    <Border Grid.Row="0" Grid.RowSpan="3" Margin="-24" Padding="24"
-            Background="{DynamicResource FerriteSurface}" IsVisible="{Binding IsManagingModGroups}">
-      <Border Classes="card" MaxWidth="520" VerticalAlignment="Center" HorizontalAlignment="Center">
-        <StackPanel Spacing="12">
+    <Border Grid.Row="0" Grid.RowSpan="3"
+            Background="{DynamicResource FerriteScrim}" IsVisible="{Binding IsManagingModGroups}">
+      <Border Classes="overlay" Width="520" MaxHeight="640" Padding="20"
+              VerticalAlignment="Center" HorizontalAlignment="Center">
+        <ScrollViewer>
+        <StackPanel Spacing="14">
           <TextBlock Classes="h2" Text="{DynamicResource L.Instance.ModGroups}" />
           <TextBlock Classes="muted" TextWrapping="Wrap"
                      Text="{DynamicResource L.Instance.ModGroupHint}" />
@@ -1049,6 +1092,7 @@
             <Button Classes="primary" Content="{DynamicResource L.Common.Add}" Command="{Binding AddModGroupCommand}" />
           </StackPanel>
         </StackPanel>
+        </ScrollViewer>
       </Border>
     </Border>
 

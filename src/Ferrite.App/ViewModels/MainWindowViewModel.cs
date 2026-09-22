@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using Ferrite.App.Localization;
 using Ferrite.App.Services;
 using Ferrite.Core.Diagnostics;
+using Ferrite.Core.Download;
 using Ferrite.Core.Minecraft;
 using Microsoft.Extensions.Logging;
 
@@ -55,6 +56,13 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     [ObservableProperty]
     private bool _isActivityIndeterminate = true;
+
+    /// <summary>
+    /// The last download progress the launcher reported, so the downloads view can show what is
+    /// actually moving rather than only that something is. Null when no transfer is in flight.
+    /// </summary>
+    [ObservableProperty]
+    private DownloadProgress? _transfer;
 
     [ObservableProperty]
     private string? _errorMessage;
@@ -207,6 +215,8 @@ public sealed partial class MainWindowViewModel : ObservableObject
         Downloads.Refresh();
     }
 
+    partial void OnTransferChanged(DownloadProgress? value) => Downloads.Refresh();
+
     public async Task InitializeAsync()
     {
         await _services.Operations.LoadAsync(CancellationToken.None).ConfigureAwait(true);
@@ -317,6 +327,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         IsActivityVisible = true;
         IsActivityIndeterminate = indeterminate;
         ActivityFraction = 0;
+        Transfer = null;
     }
 
     public void ReportActivity(InstallProgress progress)
@@ -340,6 +351,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         IsActivityVisible = true;
         IsActivityIndeterminate = false;
         ActivityFraction = progress.Download?.Fraction ?? 0;
+        Transfer = progress.Download;
         Downloads.Refresh();
     }
 
@@ -354,6 +366,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
         IsActivityVisible = false;
         ActivityFraction = 0;
+        Transfer = null;
 
         Downloads.Refresh();
 

@@ -64,6 +64,8 @@ internal static class StringsPl
             ["L.Downloads.NoMatches"] =
                 "Żadna operacja nie pasuje do wyszukiwania ani filtra.",
             ["L.Downloads.SearchPlaceholder"] = "Szukaj operacji",
+            ["L.Downloads.Files"] = "{0} z {1} plików",
+            ["L.Downloads.FailedFiles"] = "Nieudane: {0}",
 
             ["L.Library.SearchInstances"] = "Szukaj instancji",
             ["L.Library.SortRecent"] = "Ostatnio uruchamiane",
@@ -107,6 +109,14 @@ internal static class StringsPl
             ["L.Library.Count"] = "Instancje: {0}",
             ["L.Library.OpenInstance"] = "Otwórz {0}",
 
+            ["L.Picker.MinecraftMods"] = "Mody Minecrafta",
+            ["L.Picker.MinecraftModpack"] = "Modpack Minecrafta",
+            ["L.Picker.ModrinthModpack"] = "Modpack Modrinth",
+            ["L.Picker.OptiFineInstaller"] = "Instalator OptiFine",
+            ["L.Picker.MinecraftStructure"] = "Struktura Minecrafta",
+            ["L.Picker.ZipArchive"] = "Archiwum ZIP",
+            ["L.Picker.Images"] = "Obrazy",
+
             ["L.Browse.Search"] = "Szukaj",
             ["L.Browse.RefreshInstances"] = "Odśwież instancje",
             ["L.Browse.FieldMinecraftVersion"] = "Wersja Minecrafta",
@@ -145,6 +155,14 @@ internal static class StringsPl
             ["L.Browse.Results"] = "Wyniki: {0:N0}",
             ["L.Browse.Installed"] = "Zainstalowano {0} plik(ów) w instancji {1}",
             ["L.Browse.Warnings"] = "Ostrzeżenia: {0}",
+            ["L.Browse.DownloadsCount"] = "{0:N0} pobrań",
+            ["L.Browse.TypeMod"] = "Mod",
+            ["L.Browse.TypeModpack"] = "Modpack",
+            ["L.Browse.TypeResourcePack"] = "Paczka zasobów",
+            ["L.Browse.TypeShader"] = "Shader",
+            ["L.Browse.TypeDatapack"] = "Datapack",
+            ["L.Browse.TypePlugin"] = "Wtyczka",
+            ["L.Browse.TypeUnknown"] = "Treść",
 
             ["L.Accounts.Hint"] =
                 "Logowanie korzysta z przepływu device code Microsoftu. Ferrite nigdy nie widzi ani nie zapisuje Twojego hasła.",
@@ -424,6 +442,9 @@ internal static class StringsPl
             ["L.Instance.AssistantHint"] =
                 "Czyta logi, raporty awarii, mody i pliki tej instancji.",
             ["L.Instance.AssistantRunning"] = "Sprawdzanie instancji...",
+            ["L.Instance.AssistantEmpty"] =
+                "Uruchom sprawdzanie, a Ferrite poda, co znalazł w logach, raportach awarii, modach "
+                + "i plikach tej instancji.",
             ["L.Instance.AssistantFoundProblems"] = "Asystent znalazł coś do działania.",
             ["L.Instance.AssistantClean"] = "Asystent nie znalazł nic do działania.",
             ["L.Instance.SortName"] = "Sortuj według nazwy",

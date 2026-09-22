@@ -64,6 +64,8 @@ internal static class StringsEn
             ["L.Downloads.NoMatches"] =
                 "No operation matches the current search or filter.",
             ["L.Downloads.SearchPlaceholder"] = "Search operations",
+            ["L.Downloads.Files"] = "{0} of {1} files",
+            ["L.Downloads.FailedFiles"] = "{0} failed",
 
             ["L.Library.SearchInstances"] = "Search instances",
             ["L.Library.SortRecent"] = "Recently played",
@@ -107,6 +109,14 @@ internal static class StringsEn
             ["L.Library.Count"] = "{0} instance(s)",
             ["L.Library.OpenInstance"] = "Open {0}",
 
+            ["L.Picker.MinecraftMods"] = "Minecraft mods",
+            ["L.Picker.MinecraftModpack"] = "Minecraft modpack",
+            ["L.Picker.ModrinthModpack"] = "Modrinth modpack",
+            ["L.Picker.OptiFineInstaller"] = "OptiFine installer",
+            ["L.Picker.MinecraftStructure"] = "Minecraft structure",
+            ["L.Picker.ZipArchive"] = "Zip archive",
+            ["L.Picker.Images"] = "Images",
+
             ["L.Browse.Search"] = "Search",
             ["L.Browse.RefreshInstances"] = "Refresh instances",
             ["L.Browse.FieldMinecraftVersion"] = "Minecraft version",
@@ -145,6 +155,14 @@ internal static class StringsEn
             ["L.Browse.Results"] = "{0:N0} results",
             ["L.Browse.Installed"] = "Installed {0} file(s) into {1}",
             ["L.Browse.Warnings"] = "{0} warning(s)",
+            ["L.Browse.DownloadsCount"] = "{0:N0} downloads",
+            ["L.Browse.TypeMod"] = "Mod",
+            ["L.Browse.TypeModpack"] = "Modpack",
+            ["L.Browse.TypeResourcePack"] = "Resource pack",
+            ["L.Browse.TypeShader"] = "Shader",
+            ["L.Browse.TypeDatapack"] = "Datapack",
+            ["L.Browse.TypePlugin"] = "Plugin",
+            ["L.Browse.TypeUnknown"] = "Content",
 
             ["L.Accounts.Hint"] =
                 "Sign-in uses Microsoft's device-code flow. Ferrite never sees or stores your password.",
@@ -423,6 +441,9 @@ internal static class StringsEn
             ["L.Instance.AssistantHint"] =
                 "Reads this instance's own logs, crash reports, mods, and files.",
             ["L.Instance.AssistantRunning"] = "Checking the instance...",
+            ["L.Instance.AssistantEmpty"] =
+                "Run a check and Ferrite reports what it found in this instance's own logs, crash "
+                + "reports, mods, and files.",
             ["L.Instance.AssistantFoundProblems"] = "The assistant found something to act on.",
             ["L.Instance.AssistantClean"] = "The assistant found nothing to act on.",
             ["L.Instance.SortName"] = "Sort by name",

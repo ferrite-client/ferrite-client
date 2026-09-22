@@ -293,6 +293,12 @@
                                      TextTrimming="CharacterEllipsis" />
                           <ProgressBar Value="{Binding Fraction}" IsIndeterminate="{Binding !HasMeasuredProgress}"
                                        Classes="thin" />
+                          <StackPanel Orientation="Horizontal" Spacing="12"
+                                      IsVisible="{Binding HasTransfer}">
+                            <TextBlock Classes="faint" Text="{Binding FilesText}" TextWrapping="NoWrap" />
+                            <TextBlock Classes="faint" Text="{Binding BytesText}" TextWrapping="NoWrap" />
+                            <TextBlock Classes="faint" Text="{Binding SpeedText}" TextWrapping="NoWrap" />
+                          </StackPanel>
                         </StackPanel>
                       </Border>
                     </DataTemplate>

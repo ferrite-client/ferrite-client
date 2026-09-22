@@ -74,7 +74,7 @@ public sealed class BrowseModpackInstallTests : IDisposable
             TargetInstance = target,
         };
         viewModel.SelectedProvider = viewModel.Providers.Single(provider => provider.Name == "curseforge");
-        viewModel.SelectedResult = new ContentSummary(
+        viewModel.SelectedResult = new ContentSummaryViewModel(new ContentSummary(
             "modrinth",
             "packproject",
             "fixture-pack",
@@ -85,7 +85,8 @@ public sealed class BrowseModpackInstallTests : IDisposable
             null,
             "someone",
             ["adventure"],
-            DateTimeOffset.UtcNow);
+            DateTimeOffset.UtcNow),
+            _services);
         return (viewModel, shell);
     }
 

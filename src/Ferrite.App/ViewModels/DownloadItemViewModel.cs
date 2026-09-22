@@ -1,5 +1,7 @@
 using Ferrite.App.Localization;
 using Ferrite.Core.Diagnostics;
+using Ferrite.Core.Download;
+using Ferrite.Core.Util;
 
 namespace Ferrite.App.ViewModels;
 
@@ -17,7 +19,8 @@ public sealed class DownloadItemViewModel
         TimeSpan? duration,
         OperationOutcome? outcome,
         double fraction,
-        bool isRunning)
+        bool isRunning,
+        DownloadProgress? transfer)
     {
         Name = name;
         Detail = detail;
@@ -26,6 +29,7 @@ public sealed class DownloadItemViewModel
         Outcome = outcome;
         Fraction = fraction;
         IsRunning = isRunning;
+        Transfer = transfer;
     }
 
     public string Name { get; }
@@ -43,6 +47,32 @@ public sealed class DownloadItemViewModel
     public bool HasMeasuredProgress => Fraction > 0;
 
     public bool IsRunning { get; }
+
+    /// <summary>The live transfer behind a running operation, when the launcher reported one.</summary>
+    public DownloadProgress? Transfer { get; }
+
+    public bool HasTransfer => Transfer is not null;
+
+    /// <summary>How many of the planned files are done.</summary>
+    public string FilesText => Transfer is { } transfer
+        ? Localizer.Format("L.Downloads.Files", transfer.CompletedFiles, transfer.TotalFiles)
+        : string.Empty;
+
+    /// <summary>Bytes transferred against the bytes this operation planned to move.</summary>
+    public string BytesText => Transfer is { } transfer
+        ? $"{ByteSize.Format(transfer.CompletedBytes)} / {ByteSize.Format(transfer.TotalBytes)}"
+        : string.Empty;
+
+    /// <summary>The current rate, or nothing while the engine has not measured one yet.</summary>
+    public string SpeedText => Transfer is { BytesPerSecond: > 1 } transfer
+        ? $"{ByteSize.Format((long)transfer.BytesPerSecond)}/s"
+        : string.Empty;
+
+    public string FailedText => Transfer is { FailedFiles: > 0 } transfer
+        ? Localizer.Format("L.Downloads.FailedFiles", transfer.FailedFiles)
+        : string.Empty;
+
+    public bool HasFailures => Transfer is { FailedFiles: > 0 };
 
     public bool HasDetail => !string.IsNullOrWhiteSpace(Detail);
 
@@ -79,14 +109,20 @@ public sealed class DownloadItemViewModel
         entry.Duration,
         entry.Outcome,
         fraction: 0,
-        isRunning: false);
+        isRunning: false,
+        transfer: null);
 
-    public static DownloadItemViewModel Running(string name, string? detail, double fraction) => new(
+    public static DownloadItemViewModel Running(
+        string name,
+        string? detail,
+        double fraction,
+        DownloadProgress? transfer = null) => new(
         name,
         detail,
         DateTimeOffset.UtcNow,
         duration: null,
         outcome: null,
         fraction,
-        isRunning: true);
+        isRunning: true,
+        transfer);
 }

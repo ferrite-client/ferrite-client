@@ -173,20 +173,26 @@ Defects found this way and fixed:
 
 ## Unresolved issues
 
-- **File-picker filter descriptions** are still English ("Minecraft mods", "Zip archive"). The dialog
-  titles are localized; the filter labels are not.
 - **Snap Layouts and DPI behaviour** are implemented through the platform's own decoration roles,
   which is the supported path, but they cannot be exercised in a headless renderer. They need a
   manual pass on Windows at 100%, 125%, 150%, and 200% with the window maximised, restored, and
   dragged between monitors.
-- **Result rows use a content-type glyph rather than per-project artwork.** The project detail pane
-  does load and show the provider's real icon. Fetching and caching an icon for every search result
-  needs a per-result view model and a bounded image cache; the search result list is currently bound
-  directly to the provider's summary records.
-- **Downloads shows history, not per-transfer rows.** The launcher runs one operation at a time, so
-  "active" is a single entry with a real fraction. Per-file rows, retry, and cancellation would need
-  the download engine to expose those operations, and inventing buttons for behaviour that does not
-  exist would be worse than not having them.
+- **Downloads has no retry or cancel.** The launcher runs one operation at a time, so "active" is a
+  single entry; it now shows the engine's real file count, byte counts, and transfer rate. Retry and
+  cancellation would need the download engine to expose those operations, and inventing buttons for
+  behaviour that does not exist would be worse than not having them.
 - **Mod rows keep an enable/disable chip per row.** A switch would be the orthogonally correct
   control, but enabling a mod renames the file on disk and reports failure per file, so the action
   stays an explicit command rather than a two-way toggle that can silently fail.
+
+## Closed since the first pass
+
+- **File-picker titles and filter descriptions are localized.** Every `FilePickerFileType` label and
+  every dialog title now comes from the string table.
+- **Search results show the provider's own artwork.** `ContentSummaryViewModel` decodes each result's
+  icon when its row is realised and releases it when the row scrolls away, so a page of results never
+  holds more images than the viewport. A result with no icon falls back to the content-type glyph.
+- **The assistant, the files sections, and the pack rows have deliberate states.** The assistant says
+  what it will do before it runs and shows a progress bar while it does it; each file section carries
+  its own glyph and sentence when empty; and pack rows dropped three text buttons for a quiet
+  enable/disable chip plus a menu.

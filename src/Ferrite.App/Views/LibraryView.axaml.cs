@@ -144,7 +144,10 @@ public partial class LibraryView : UserControl
             FileTypeFilter =
             [
                 // Both pack formats: the archive's own root entry decides which installer runs.
-                new FilePickerFileType("Minecraft modpack") { Patterns = ["*.mrpack", "*.zip"] },
+                new FilePickerFileType(Localizer.Get("L.Picker.MinecraftModpack"))
+                {
+                    Patterns = ["*.mrpack", "*.zip"],
+                },
             ],
         });
 

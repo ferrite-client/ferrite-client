@@ -34,7 +34,7 @@ public sealed partial class BrowseViewModel : ObservableObject
     /// <summary>A provider the user can browse, labelled for display.</summary>
     public sealed record ProviderOption(string Name, string DisplayName);
 
-    public ObservableCollection<ContentSummary> Results { get; } = [];
+    public ObservableCollection<ContentSummaryViewModel> Results { get; } = [];
 
     public ObservableCollection<ContentVersion> Versions { get; } = [];
 
@@ -65,7 +65,7 @@ public sealed partial class BrowseViewModel : ObservableObject
     private string? _loaderFilter;
 
     [ObservableProperty]
-    private ContentSummary? _selectedResult;
+    private ContentSummaryViewModel? _selectedResult;
 
     [ObservableProperty]
     private ContentVersion? _selectedVersion;
@@ -93,7 +93,7 @@ public sealed partial class BrowseViewModel : ObservableObject
         .FirstOrDefault(provider => provider.Name == (SelectedProvider?.Name ?? string.Empty))
         ?? _services.ContentProviders[0];
 
-    /// <summary>Set when the active provider cannot be queried, such as a missing API key.</summary>
+    /// <summary>Set when the active provider cannot be queried.</summary>
     public string? ProviderNote => ActiveProvider.UnavailableReason;
 
     public string SearchPlaceholder => Localizer.Format(
@@ -129,11 +129,11 @@ public sealed partial class BrowseViewModel : ObservableObject
         }
     }
 
-    partial void OnSelectedResultChanged(ContentSummary? value)
+    partial void OnSelectedResultChanged(ContentSummaryViewModel? value)
     {
         OnPropertyChanged(nameof(HasSelection));
         _ = LoadVersionsAsync();
-        _ = LoadProjectDetailsAsync(value);
+        _ = LoadProjectDetailsAsync(value?.Summary);
         _ = RefreshSelectedSavedAsync();
     }
 
@@ -209,7 +209,7 @@ public sealed partial class BrowseViewModel : ObservableObject
             Results.Clear();
             foreach (var hit in result.Hits)
             {
-                Results.Add(hit);
+                Results.Add(new ContentSummaryViewModel(hit, _services));
             }
 
             ResultSummary = Localizer.Format("L.Browse.Results", result.TotalHits);

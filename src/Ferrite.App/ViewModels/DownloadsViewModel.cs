@@ -67,9 +67,10 @@ public sealed partial class DownloadsViewModel : ObservableObject
         if (_shell.IsActivityVisible)
         {
             Active.Add(DownloadItemViewModel.Running(
-                _shell.ActivityText ?? Localizer.Get("L.Downloads.Working"),
+                name: _shell.ActivityText ?? Localizer.Get("L.Downloads.Working"),
                 detail: null,
-                _shell.IsActivityIndeterminate ? 0 : _shell.ActivityFraction));
+                fraction: _shell.IsActivityIndeterminate ? 0 : _shell.ActivityFraction,
+                transfer: _shell.Transfer));
         }
 
         var query = SearchText?.Trim() ?? string.Empty;

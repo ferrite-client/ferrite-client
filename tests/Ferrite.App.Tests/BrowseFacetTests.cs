@@ -144,11 +144,8 @@ public sealed class BrowseFacetTests : IDisposable
         _viewModel.CategoryChoices.Add(new ContentTag("optimization", "Optimization", null));
         _viewModel.SelectedGameVersion = _viewModel.GameVersionChoices[1];
         _viewModel.SelectedCategory = _viewModel.CategoryChoices[1];
-        // The project panel only renders for a selected result, and the unconfigured CurseForge
-        // provider is what keeps this render deterministic: it cannot answer, so nothing is fetched.
-        _viewModel.SelectedProvider = _viewModel.Providers.Single(provider => provider.Name == "curseforge");
-        _viewModel.Results.Add(new ContentSummary(
-            "curseforge",
+        _viewModel.Results.Add(new ContentSummaryViewModel(new ContentSummary(
+            "modrinth",
             "238222",
             "jei",
             "Just Enough Items",
@@ -158,7 +155,8 @@ public sealed class BrowseFacetTests : IDisposable
             null,
             "mezz",
             ["Map and Information"],
-            DateTimeOffset.UtcNow));
+            DateTimeOffset.UtcNow),
+            _services));
         _viewModel.SelectedResult = _viewModel.Results[0];
         _viewModel.ProjectMeta = "jellysquid3 · LGPL-3.0-only";
         // The panel shows the description the way the view model prepares it for display.

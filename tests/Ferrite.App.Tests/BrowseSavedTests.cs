@@ -60,7 +60,7 @@ public sealed class BrowseSavedTests : IDisposable
         Assert.True(_viewModel.IsSavedView);
         Assert.Equal(2, _viewModel.Results.Count);
         Assert.Contains("2", _viewModel.ResultSummary, StringComparison.Ordinal);
-        Assert.All(_viewModel.Results, result => Assert.Equal("modrinth", result.Provider));
+        Assert.All(_viewModel.Results, result => Assert.Equal("modrinth", result.Summary.Provider));
     }
 
     [Avalonia.Headless.XUnit.AvaloniaFact]
@@ -84,7 +84,7 @@ public sealed class BrowseSavedTests : IDisposable
         Assert.Empty(_viewModel.Results);
 
         // Select a project the way a search would, then save it.
-        _viewModel.Results.Add(Project("sodium", "Sodium"));
+        _viewModel.Results.Add(new ContentSummaryViewModel(Project("sodium", "Sodium"), _services));
         _viewModel.SelectedResult = _viewModel.Results[0];
         Assert.Equal(Localizer.Get("L.Browse.Save"), _viewModel.SavedButtonText);
 

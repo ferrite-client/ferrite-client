@@ -30,6 +30,10 @@ public sealed partial class LibraryViewModel : ObservableObject
             LoaderKind.Forge,
         ];
         SelectedSort = SortChoices[0];
+        // The folder filter always offers "all folders", even before the first refresh, so it never
+        // renders as an empty box.
+        GroupChoices.Add(new ChoiceOption(string.Empty, Localizer.Get("L.Library.GroupAll")));
+        SelectedGroup = GroupChoices[0];
     }
 
     public ObservableCollection<InstanceCardViewModel> Instances { get; } = [];

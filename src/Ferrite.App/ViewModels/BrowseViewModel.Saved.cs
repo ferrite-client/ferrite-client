@@ -74,7 +74,7 @@ public sealed partial class BrowseViewModel
         try
         {
             var saved = await _services.SavedProjects
-                .ToggleAsync(project, CancellationToken.None)
+                .ToggleAsync(project.Summary, CancellationToken.None)
                 .ConfigureAwait(true);
             IsSelectedSaved = saved;
             await RefreshSavedCountAsync().ConfigureAwait(true);
@@ -110,7 +110,7 @@ public sealed partial class BrowseViewModel
             foreach (var entry in saved.Where(entry =>
                          string.Equals(entry.Provider, provider, StringComparison.OrdinalIgnoreCase)))
             {
-                Results.Add(ToSummary(entry));
+            Results.Add(new ContentSummaryViewModel(ToSummary(entry), _services));
             }
 
             ResultSummary = Localizer.Format("L.Browse.SavedSummary", Results.Count);

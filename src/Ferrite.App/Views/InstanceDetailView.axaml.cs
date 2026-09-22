@@ -111,7 +111,10 @@ public partial class InstanceDetailView : UserControl
             AllowMultiple = true,
             FileTypeFilter =
             [
-                new FilePickerFileType("Minecraft mods") { Patterns = ["*.jar", "*.zip"] },
+                new FilePickerFileType(Localizer.Get("L.Picker.MinecraftMods"))
+                {
+                    Patterns = ["*.jar", "*.zip"],
+                },
             ],
         });
 
@@ -147,7 +150,10 @@ public partial class InstanceDetailView : UserControl
             AllowMultiple = false,
             FileTypeFilter =
             [
-                new FilePickerFileType("Minecraft modpack") { Patterns = ["*.mrpack", "*.zip"] },
+                new FilePickerFileType(Localizer.Get("L.Picker.MinecraftModpack"))
+                {
+                    Patterns = ["*.mrpack", "*.zip"],
+                },
             ],
         });
 
@@ -174,7 +180,10 @@ public partial class InstanceDetailView : UserControl
             DefaultExtension = "mrpack",
             FileTypeChoices =
             [
-                new FilePickerFileType("Modrinth modpack") { Patterns = ["*.mrpack"] },
+                new FilePickerFileType(Localizer.Get("L.Picker.ModrinthModpack"))
+                {
+                    Patterns = ["*.mrpack"],
+                },
             ],
         });
 
@@ -208,7 +217,10 @@ public partial class InstanceDetailView : UserControl
             AllowMultiple = false,
             FileTypeFilter =
             [
-                new FilePickerFileType("OptiFine installer") { Patterns = ["*.jar"] },
+                new FilePickerFileType(Localizer.Get("L.Picker.OptiFineInstaller"))
+                {
+                    Patterns = ["*.jar"],
+                },
             ],
         });
 
@@ -247,7 +259,10 @@ public partial class InstanceDetailView : UserControl
             AllowMultiple = false,
             FileTypeFilter =
             [
-                new FilePickerFileType("Minecraft structure") { Patterns = ["*.nbt"] },
+                new FilePickerFileType(Localizer.Get("L.Picker.MinecraftStructure"))
+                {
+                    Patterns = ["*.nbt"],
+                },
             ],
         });
 
@@ -291,7 +306,10 @@ public partial class InstanceDetailView : UserControl
             DefaultExtension = "zip",
             FileTypeChoices =
             [
-                new FilePickerFileType("Zip archive") { Patterns = ["*.zip"] },
+                new FilePickerFileType(Localizer.Get("L.Picker.ZipArchive"))
+                {
+                    Patterns = ["*.zip"],
+                },
             ],
         });
 
@@ -321,7 +339,10 @@ public partial class InstanceDetailView : UserControl
             AllowMultiple = false,
             FileTypeFilter =
             [
-                new FilePickerFileType("Images") { Patterns = ["*.png", "*.jpg", "*.jpeg", "*.webp"] },
+                new FilePickerFileType(Localizer.Get("L.Picker.Images"))
+                {
+                    Patterns = ["*.png", "*.jpg", "*.jpeg", "*.webp"],
+                },
             ],
         });
 

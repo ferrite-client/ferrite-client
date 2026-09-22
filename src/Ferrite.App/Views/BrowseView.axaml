@@ -111,15 +111,22 @@
         <Grid>
           <ListBox Classes="results" ItemsSource="{Binding Results}"
                    SelectedItem="{Binding SelectedResult}"
+                   ContainerPrepared="OnResultPrepared"
+                   ContainerClearing="OnResultClearing"
                    Background="{DynamicResource FerriteClear}" BorderThickness="0" Padding="0">
             <ListBox.ItemTemplate>
-              <DataTemplate DataType="ct:ContentSummary">
+              <DataTemplate DataType="vm:ContentSummaryViewModel">
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="11">
-                  <Border Grid.Column="0" Width="38" Height="38"
+                  <Border Grid.Column="0" Width="40" Height="40"
                           CornerRadius="{DynamicResource RadiusSm}"
+                          ClipToBounds="True"
                           Background="{DynamicResource FerriteSurfaceRaised}">
-                    <controls:IconGlyph Data="{StaticResource Icon.Content}" Width="17" Height="17"
-                                        HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <Panel>
+                      <controls:IconGlyph Data="{StaticResource Icon.Content}" Width="17" Height="17"
+                                          HorizontalAlignment="Center" VerticalAlignment="Center" />
+                      <Image Source="{Binding Icon}" Stretch="UniformToFill"
+                             IsVisible="{Binding HasIcon}" />
+                    </Panel>
                   </Border>
                   <StackPanel Grid.Column="1" Spacing="2">
                     <TextBlock Text="{Binding Title}" TextWrapping="NoWrap"
@@ -128,9 +135,8 @@
                                TextWrapping="Wrap" TextTrimming="CharacterEllipsis" />
                     <StackPanel Orientation="Horizontal" Spacing="10">
                       <TextBlock Classes="faint" Text="{Binding Author}" TextWrapping="NoWrap" />
-                      <TextBlock Classes="faint"
-                                 Text="{Binding Downloads, StringFormat='{}{0:N0} downloads'}" />
-                      <TextBlock Classes="faint" Text="{Binding ProjectType}" />
+                      <TextBlock Classes="faint" Text="{Binding DownloadsText}" TextWrapping="NoWrap" />
+                      <TextBlock Classes="faint" Text="{Binding TypeText}" TextWrapping="NoWrap" />
                     </StackPanel>
                   </StackPanel>
                 </Grid>
@@ -183,7 +189,7 @@
                            TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" />
                 <StackPanel Orientation="Horizontal" Spacing="8">
                   <Border Classes="badge plain">
-                    <TextBlock Text="{Binding SelectedResult.ProjectType}" />
+                    <TextBlock Text="{Binding SelectedResult.TypeText}" />
                   </Border>
                   <Border Classes="badge plain">
                     <TextBlock Text="{Binding SelectedResult.Provider}" />
