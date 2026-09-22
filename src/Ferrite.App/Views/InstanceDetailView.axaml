@@ -604,7 +604,10 @@
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
-              <TextBlock Classes="faint" Text="{DynamicResource L.Instance.NoResourcePacks}" IsVisible="{Binding !HasResourcePacks}" />
+              <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding !HasResourcePacks}">
+                <controls:IconGlyph Data="{StaticResource Icon.Layers}" Width="14" Height="14" Opacity="0.6" />
+                <TextBlock Classes="faint" Text="{DynamicResource L.Instance.NoResourcePacks}" />
+              </StackPanel>
             </StackPanel>
 
             <StackPanel Spacing="6">
@@ -632,7 +635,10 @@
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
-              <TextBlock Classes="faint" Text="{DynamicResource L.Instance.NoShaderPacks}" IsVisible="{Binding !HasShaderPacks}" />
+              <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding !HasShaderPacks}">
+                <controls:IconGlyph Data="{StaticResource Icon.Layers}" Width="14" Height="14" Opacity="0.6" />
+                <TextBlock Classes="faint" Text="{DynamicResource L.Instance.NoShaderPacks}" />
+              </StackPanel>
             </StackPanel>
 
             <StackPanel Spacing="6">
@@ -704,7 +710,10 @@
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
-              <TextBlock Classes="faint" Text="{DynamicResource L.Instance.NoScreenshots}" IsVisible="{Binding !HasScreenshots}" />
+              <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding !HasScreenshots}">
+                <controls:IconGlyph Data="{StaticResource Icon.Image}" Width="14" Height="14" Opacity="0.6" />
+                <TextBlock Classes="faint" Text="{DynamicResource L.Instance.NoScreenshots}" />
+              </StackPanel>
             </StackPanel>
           </StackPanel>
         </ScrollViewer>
