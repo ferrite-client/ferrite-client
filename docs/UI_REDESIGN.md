@@ -213,6 +213,9 @@ States, scale, and text are rendered rather than reasoned about, in `InterfaceSt
   own caption buttons inside the extended title bar are implemented through Avalonia's decoration
   roles, which is the supported path, but a headless renderer has no native frame to exercise them
   against. The client-area layout at each DPI scale is verified by test; the frame is not.
+  What is verified is the contract those behaviours depend on: the window extends its client area,
+  the strip declares the title-bar role, and the rail toggle inside it declares the user role so a
+  click does not become a window move.
 - **Downloads has no retry or cancel.** The launcher runs one operation at a time, so "active" is a
   single entry; it now shows the engine's real file count, byte counts, and transfer rate. Retry and
   cancellation would need the download engine to expose those operations, and inventing buttons for
