@@ -181,6 +181,11 @@ States, scale, and text are rendered rather than reasoned about, in `InterfaceSt
   the shape the results will take, and the empty message is suppressed so it can never appear over a
   request that is still in flight. The test asserts which panel is drawn, not merely that a control
   exists, because a hidden control stays in the visual tree.
+- **Signed in** is rendered too. `AccountsPageTests` writes an account record the way the sign-in
+  flow stores one, reads it back through the real store, and checks that the manager lists both
+  accounts, marks the active one, follows it into the rail footer, and trims a long player name. Without
+  a live Microsoft account the sign-in itself still cannot be exercised, which is unchanged from the
+  repository's existing position on that.
 
 ## DPI, theme, and localization QA
 
