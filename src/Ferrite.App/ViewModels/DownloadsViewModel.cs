@@ -21,7 +21,7 @@ public sealed partial class DownloadsViewModel : ObservableObject
     private string _searchText = string.Empty;
 
     [ObservableProperty]
-    private ChoiceOption _selectedFilter = new(Localizer.Get("L.Downloads.FilterAll"), "all");
+    private ChoiceOption _selectedFilter = new("all", Localizer.Get("L.Downloads.FilterAll"));
 
     public DownloadsViewModel(AppServices services, MainWindowViewModel shell)
     {
@@ -29,9 +29,9 @@ public sealed partial class DownloadsViewModel : ObservableObject
         _shell = shell;
         Filters =
         [
-            new(Localizer.Get("L.Downloads.FilterAll"), "all"),
-            new(Localizer.Get("L.Downloads.FilterFinished"), "succeeded"),
-            new(Localizer.Get("L.Downloads.FilterFailed"), "failed"),
+            new("all", Localizer.Get("L.Downloads.FilterAll")),
+            new("succeeded", Localizer.Get("L.Downloads.FilterFinished")),
+            new("failed", Localizer.Get("L.Downloads.FilterFailed")),
         ];
     }
 

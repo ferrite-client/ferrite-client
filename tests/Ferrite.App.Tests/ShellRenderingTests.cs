@@ -792,6 +792,31 @@ public sealed class ShellRenderingTests : IDisposable
 
         Save(frame!, "library-grid");
 
+        // The grid reflows to the window rather than assuming a column count.
+        window.Width = 1024;
+        window.Height = 680;
+        window.CaptureRenderedFrame();
+        var narrow = window.CaptureRenderedFrame();
+        Assert.NotNull(narrow);
+        Save(narrow!, "library-narrow");
+
+        // The same screen in the light theme, so both themes are looked at and not only asserted.
+        window.Width = 1360;
+        window.Height = 860;
+        Ferrite.App.App.ApplyTheme(ThemeVariant.Light);
+        try
+        {
+            window.CaptureRenderedFrame();
+            var light = window.CaptureRenderedFrame();
+            Assert.NotNull(light);
+            Save(light!, "library-light");
+        }
+        finally
+        {
+            Ferrite.App.App.ApplyTheme(ThemeVariant.Dark);
+            window.CaptureRenderedFrame();
+        }
+
         shell.Library.SelectedView = shell.Library.ViewChoices.Single(choice => choice.Value == "list");
         window.CaptureRenderedFrame();
         var listFrame = window.CaptureRenderedFrame();

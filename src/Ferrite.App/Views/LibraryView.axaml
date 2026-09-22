@@ -26,7 +26,7 @@
     </Style>
 
     <Style Selector="Button.card-art">
-      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Background" Value="{DynamicResource FerriteClear}" />
       <Setter Property="BorderThickness" Value="0" />
       <Setter Property="CornerRadius" Value="0" />
       <Setter Property="Padding" Value="0" />
@@ -36,7 +36,7 @@
     </Style>
 
     <Style Selector="Button.card-art /template/ Border#PART_Root">
-      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Background" Value="{DynamicResource FerriteClear}" />
     </Style>
 
     <Style Selector="Button.card-art:pointerover /template/ Border#PART_Root">
@@ -46,13 +46,15 @@
 
   <Grid RowDefinitions="Auto,*,Auto">
 
-    <!-- Toolbar -->
-    <Grid Grid.Row="0" ColumnDefinitions="Auto,Auto,Auto,*,Auto" ColumnSpacing="10"
-          Margin="24,18,24,14">
-      <TextBox Grid.Column="0" Width="250"
+    <!--
+      Toolbar. A wrapping panel, not a fixed row: at the minimum supported window width the actions
+      have to move to a second line rather than be clipped off the right edge.
+    -->
+    <WrapPanel Grid.Row="0" Orientation="Horizontal" ItemHeight="34" Margin="24,18,24,12">
+      <TextBox Width="250" Margin="0,0,10,10"
                PlaceholderText="{DynamicResource L.Library.SearchInstances}"
                Text="{Binding SearchText}" />
-      <ComboBox Grid.Column="1" Width="150" ItemsSource="{Binding GroupChoices}"
+      <ComboBox Width="150" Margin="0,0,10,10" ItemsSource="{Binding GroupChoices}"
                 SelectedItem="{Binding SelectedGroup}"
                 AutomationProperties.Name="{DynamicResource L.Library.FieldGroup}">
         <ComboBox.ItemTemplate>
@@ -61,7 +63,7 @@
           </DataTemplate>
         </ComboBox.ItemTemplate>
       </ComboBox>
-      <ComboBox Grid.Column="2" Width="164" ItemsSource="{Binding SortChoices}"
+      <ComboBox Width="164" Margin="0,0,10,10" ItemsSource="{Binding SortChoices}"
                 SelectedItem="{Binding SelectedSort}"
                 AutomationProperties.Name="{DynamicResource L.Library.SortLabel}">
         <ComboBox.ItemTemplate>
@@ -70,35 +72,34 @@
           </DataTemplate>
         </ComboBox.ItemTemplate>
       </ComboBox>
-
-      <TextBlock Grid.Column="3" Classes="faint" VerticalAlignment="Center" Margin="4,0"
-                 Text="{Binding CountText}" />
-
-      <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="10">
-        <Border CornerRadius="{DynamicResource RadiusSm}"
-                Background="{DynamicResource FerriteSurfaceSunken}"
-                BorderBrush="{DynamicResource FerriteBorder}" BorderThickness="1"
-                VerticalAlignment="Center">
-          <ListBox Classes="segments" ItemsSource="{Binding ViewChoices}"
-                   SelectedItem="{Binding SelectedView, Mode=TwoWay}"
-                   AutomationProperties.Name="{DynamicResource L.Library.ViewLabel}">
-            <ListBox.ItemsPanel>
-              <ItemsPanelTemplate>
-                <StackPanel Orientation="Horizontal" />
-              </ItemsPanelTemplate>
-            </ListBox.ItemsPanel>
-            <ListBox.ItemTemplate>
-              <DataTemplate DataType="vm:ChoiceOption">
-                <TextBlock Text="{Binding Label}" />
-              </DataTemplate>
-            </ListBox.ItemTemplate>
-          </ListBox>
-        </Border>
-        <Button Content="{DynamicResource L.Library.ImportModpack}" Click="OnImportModpackClick" />
-        <Button Classes="primary" Content="{DynamicResource L.Library.NewInstance}"
-                Command="{Binding OpenCreateCommand}" />
-      </StackPanel>
-    </Grid>
+      <TextBlock Classes="faint" Margin="4,0,12,10" VerticalAlignment="Center"
+                 Text="{Binding CountText}" TextWrapping="NoWrap" />
+      <Border Margin="0,0,10,10" CornerRadius="{DynamicResource RadiusSm}"
+              Background="{DynamicResource FerriteSurfaceSunken}"
+              BorderBrush="{DynamicResource FerriteBorder}" BorderThickness="1"
+              VerticalAlignment="Center">
+        <ListBox Classes="segments" ItemsSource="{Binding ViewChoices}"
+                 SelectedItem="{Binding SelectedView, Mode=TwoWay}"
+                 VerticalAlignment="Center"
+                 AutomationProperties.Name="{DynamicResource L.Library.ViewLabel}">
+          <ListBox.ItemsPanel>
+            <ItemsPanelTemplate>
+              <StackPanel Orientation="Horizontal" />
+            </ItemsPanelTemplate>
+          </ListBox.ItemsPanel>
+          <ListBox.ItemTemplate>
+            <DataTemplate DataType="vm:ChoiceOption">
+              <TextBlock Text="{Binding Label}" />
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </Border>
+      <Button Margin="0,0,10,10" Content="{DynamicResource L.Library.ImportModpack}"
+              VerticalAlignment="Center" Click="OnImportModpackClick" />
+      <Button Classes="primary" Margin="0,0,0,10" VerticalAlignment="Center"
+              Content="{DynamicResource L.Library.NewInstance}"
+              Command="{Binding OpenCreateCommand}" />
+    </WrapPanel>
 
     <!-- Instances -->
     <Grid Grid.Row="1">

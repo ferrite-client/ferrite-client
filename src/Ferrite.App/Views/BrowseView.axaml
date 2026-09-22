@@ -2,29 +2,45 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:Ferrite.App.ViewModels"
              xmlns:ct="clr-namespace:Ferrite.Core.Content;assembly=Ferrite.Core"
+             xmlns:controls="clr-namespace:Ferrite.App.Controls"
              x:Class="Ferrite.App.Views.BrowseView"
              x:DataType="vm:BrowseViewModel">
 
-  <Grid RowDefinitions="Auto,*" Margin="24">
+  <Grid RowDefinitions="Auto,Auto,*" Margin="24">
 
-    <StackPanel Grid.Row="0" Spacing="10" Margin="0,0,0,16">
-      <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto" ColumnSpacing="10">
-        <TextBox Grid.Column="0" PlaceholderText="{Binding SearchPlaceholder}"
-                 Text="{Binding SearchText}" />
-        <Button Grid.Column="1" Classes="primary" Content="{DynamicResource L.Browse.Search}" Command="{Binding SearchCommand}" />
-        <Button Grid.Column="2" Content="{DynamicResource L.Browse.RefreshInstances}" Command="{Binding RefreshInstancesCommand}" />
-        <Button Grid.Column="3" Classes="chip" VerticalAlignment="Center"
-                Content="{DynamicResource L.Browse.Saved}" IsVisible="{Binding IsSearchView}"
-                Command="{Binding ShowSavedCommand}" />
-        <Button Grid.Column="4" Classes="chip" VerticalAlignment="Center"
-                Content="{DynamicResource L.Browse.SearchResults}" IsVisible="{Binding IsSavedView}"
-                Command="{Binding ShowSearchCommand}" />
-      </Grid>
+    <!-- Search and the view switch -->
+    <WrapPanel Grid.Row="0" Orientation="Horizontal" ItemHeight="34" Margin="0,0,0,12">
+      <TextBox Width="380" Margin="0,0,10,10" Text="{Binding SearchText}"
+               PlaceholderText="{Binding SearchPlaceholder}"
+               AutomationProperties.Name="{Binding SearchPlaceholder}" />
+      <Button Classes="primary" Margin="0,0,10,10" VerticalAlignment="Center"
+              Content="{DynamicResource L.Browse.Search}" Command="{Binding SearchCommand}" />
 
-      <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*" ColumnSpacing="10">
-        <StackPanel Grid.Column="0" Spacing="4">
+      <TextBlock Classes="faint" VerticalAlignment="Center" Margin="4,0,12,10"
+                 TextWrapping="NoWrap" Text="{Binding ResultSummary}" />
+
+      <Border Margin="0,0,0,10" CornerRadius="{DynamicResource RadiusSm}"
+              Background="{DynamicResource FerriteSurfaceSunken}"
+              BorderBrush="{DynamicResource FerriteBorder}" BorderThickness="1"
+              VerticalAlignment="Center">
+        <StackPanel Orientation="Horizontal">
+          <Button Classes="segment" Content="{DynamicResource L.Browse.SearchResults}"
+                  Classes.active="{Binding IsSearchView}"
+                  Command="{Binding ShowSearchCommand}" />
+          <Button Classes="segment" Content="{DynamicResource L.Browse.Saved}"
+                  Classes.active="{Binding IsSavedView}"
+                  Command="{Binding ShowSavedCommand}" />
+        </StackPanel>
+      </Border>
+    </WrapPanel>
+
+    <!-- Facets -->
+    <StackPanel Grid.Row="1" Spacing="8" Margin="0,0,0,14">
+      <WrapPanel Orientation="Horizontal">
+        <StackPanel Spacing="4" Margin="0,0,10,0">
           <TextBlock Classes="label" Text="{DynamicResource L.Browse.FieldProvider}" />
-          <ComboBox ItemsSource="{Binding Providers}" SelectedItem="{Binding SelectedProvider}" Width="150">
+          <ComboBox Width="150" ItemsSource="{Binding Providers}" SelectedItem="{Binding SelectedProvider}"
+                    AutomationProperties.Name="{DynamicResource L.Browse.FieldProvider}">
             <ComboBox.ItemTemplate>
               <DataTemplate>
                 <TextBlock Text="{Binding DisplayName}" />
@@ -32,17 +48,15 @@
             </ComboBox.ItemTemplate>
           </ComboBox>
         </StackPanel>
-        <StackPanel Grid.Column="1" Spacing="4">
+        <StackPanel Spacing="4" Margin="0,0,10,0">
           <TextBlock Classes="label" Text="{DynamicResource L.Browse.FieldProjectType}" />
-          <ComboBox ItemsSource="{Binding ProjectTypes}" SelectedItem="{Binding SelectedProjectType}" Width="130" />
+          <ComboBox Width="140" ItemsSource="{Binding ProjectTypes}" SelectedItem="{Binding SelectedProjectType}"
+                    AutomationProperties.Name="{DynamicResource L.Browse.FieldProjectType}" />
         </StackPanel>
-        <StackPanel Grid.Column="2" Spacing="4">
-          <TextBlock Classes="label" Text="{DynamicResource L.Browse.FieldSort}" />
-          <ComboBox ItemsSource="{Binding SortOptions}" SelectedItem="{Binding SelectedSort}" Width="130" />
-        </StackPanel>
-        <StackPanel Grid.Column="3" Spacing="4">
+        <StackPanel Spacing="4" Margin="0,0,10,0">
           <TextBlock Classes="label" Text="{DynamicResource L.Browse.FieldCategory}" />
-          <ComboBox ItemsSource="{Binding CategoryChoices}" SelectedItem="{Binding SelectedCategory}" Width="170">
+          <ComboBox Width="170" ItemsSource="{Binding CategoryChoices}" SelectedItem="{Binding SelectedCategory}"
+                    AutomationProperties.Name="{DynamicResource L.Browse.FieldCategory}">
             <ComboBox.ItemTemplate>
               <DataTemplate DataType="ct:ContentTag">
                 <TextBlock Text="{Binding DisplayName}" />
@@ -50,9 +64,11 @@
             </ComboBox.ItemTemplate>
           </ComboBox>
         </StackPanel>
-        <StackPanel Grid.Column="4" Spacing="4">
+        <StackPanel Spacing="4" Margin="0,0,10,0">
           <TextBlock Classes="label" Text="{DynamicResource L.Browse.FieldMinecraftVersion}" />
-          <ComboBox ItemsSource="{Binding GameVersionChoices}" SelectedItem="{Binding SelectedGameVersion}" Width="150">
+          <ComboBox Width="150" ItemsSource="{Binding GameVersionChoices}"
+                    SelectedItem="{Binding SelectedGameVersion}"
+                    AutomationProperties.Name="{DynamicResource L.Browse.FieldMinecraftVersion}">
             <ComboBox.ItemTemplate>
               <DataTemplate DataType="ct:ContentTag">
                 <TextBlock Text="{Binding DisplayName}" />
@@ -60,9 +76,10 @@
             </ComboBox.ItemTemplate>
           </ComboBox>
         </StackPanel>
-        <StackPanel Grid.Column="5" Spacing="4">
+        <StackPanel Spacing="4" Margin="0,0,10,0">
           <TextBlock Classes="label" Text="{DynamicResource L.Browse.FieldLoader}" />
-          <ComboBox ItemsSource="{Binding LoaderChoices}" SelectedItem="{Binding SelectedLoader}" Width="130">
+          <ComboBox Width="130" ItemsSource="{Binding LoaderChoices}" SelectedItem="{Binding SelectedLoader}"
+                    AutomationProperties.Name="{DynamicResource L.Browse.FieldLoader}">
             <ComboBox.ItemTemplate>
               <DataTemplate DataType="ct:ContentTag">
                 <TextBlock Text="{Binding DisplayName}" />
@@ -70,12 +87,15 @@
             </ComboBox.ItemTemplate>
           </ComboBox>
         </StackPanel>
-        <TextBlock Grid.Column="6" Classes="faint" VerticalAlignment="Bottom" Margin="0,0,0,6"
-                   Text="{Binding ResultSummary}" />
-      </Grid>
+        <StackPanel Spacing="4">
+          <TextBlock Classes="label" Text="{DynamicResource L.Browse.FieldSort}" />
+          <ComboBox Width="150" ItemsSource="{Binding SortOptions}" SelectedItem="{Binding SelectedSort}"
+                    AutomationProperties.Name="{DynamicResource L.Browse.FieldSort}" />
+        </StackPanel>
+      </WrapPanel>
 
       <StackPanel Spacing="2">
-        <TextBlock Classes="muted" TextWrapping="Wrap" Text="{Binding StatusNote}"
+        <TextBlock Classes="faint" TextWrapping="Wrap" Text="{Binding StatusNote}"
                    IsVisible="{Binding StatusNote, Converter={x:Static ObjectConverters.IsNotNull}}" />
         <TextBlock Classes="faint" TextWrapping="Wrap" Text="{Binding CacheNote}"
                    IsVisible="{Binding CacheNote, Converter={x:Static ObjectConverters.IsNotNull}}" />
@@ -84,83 +104,154 @@
       </StackPanel>
     </StackPanel>
 
-    <Grid Grid.Row="1" ColumnDefinitions="2*,3*" ColumnSpacing="16">
+    <!-- Results and detail -->
+    <Grid Grid.Row="2" ColumnDefinitions="2*,3*" ColumnSpacing="18">
 
-      <Border Grid.Column="0" Classes="card" Padding="8">
+      <Border Grid.Column="0" Classes="panel" Padding="6">
         <Grid>
-          <ListBox ItemsSource="{Binding Results}" SelectedItem="{Binding SelectedResult}"
-                   Background="Transparent">
+          <ListBox Classes="results" ItemsSource="{Binding Results}"
+                   SelectedItem="{Binding SelectedResult}"
+                   Background="{DynamicResource FerriteClear}" BorderThickness="0" Padding="0">
             <ListBox.ItemTemplate>
-              <DataTemplate>
-                <StackPanel Spacing="2" Margin="4,6">
-                  <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
-                  <TextBlock Classes="faint" Text="{Binding Description}" MaxLines="2" TextTrimming="CharacterEllipsis" />
-                  <StackPanel Orientation="Horizontal" Spacing="10">
-                    <TextBlock Classes="faint" Text="{Binding Author}" />
-                    <TextBlock Classes="faint" Text="{Binding Downloads, StringFormat='{}{0:N0} downloads'}" />
+              <DataTemplate DataType="ct:ContentSummary">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="11">
+                  <Border Grid.Column="0" Width="38" Height="38"
+                          CornerRadius="{DynamicResource RadiusSm}"
+                          Background="{DynamicResource FerriteSurfaceRaised}">
+                    <controls:IconGlyph Data="{StaticResource Icon.Content}" Width="17" Height="17"
+                                        HorizontalAlignment="Center" VerticalAlignment="Center" />
+                  </Border>
+                  <StackPanel Grid.Column="1" Spacing="2">
+                    <TextBlock Text="{Binding Title}" TextWrapping="NoWrap"
+                               TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Title}" />
+                    <TextBlock Classes="faint" Text="{Binding Description}" MaxLines="2"
+                               TextWrapping="Wrap" TextTrimming="CharacterEllipsis" />
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                      <TextBlock Classes="faint" Text="{Binding Author}" TextWrapping="NoWrap" />
+                      <TextBlock Classes="faint"
+                                 Text="{Binding Downloads, StringFormat='{}{0:N0} downloads'}" />
+                      <TextBlock Classes="faint" Text="{Binding ProjectType}" />
+                    </StackPanel>
                   </StackPanel>
-                </StackPanel>
+                </Grid>
               </DataTemplate>
             </ListBox.ItemTemplate>
           </ListBox>
-          <TextBlock Classes="muted" Margin="12" VerticalAlignment="Top"
-                     IsVisible="{Binding !HasResults}"
-                     Text="{Binding EmptyMessage}" />
+
+          <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="10"
+                      MaxWidth="380" IsVisible="{Binding !HasResults}">
+            <controls:IconGlyph Data="{StaticResource Icon.Discover}" Width="28" Height="28"
+                                Opacity="0.5" HorizontalAlignment="Center" />
+            <TextBlock Classes="muted" TextAlignment="Center" Text="{Binding EmptyMessage}" />
+          </StackPanel>
         </Grid>
       </Border>
 
-      <Border Grid.Column="1" Classes="card" IsVisible="{Binding HasSelection}">
-        <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="12">
-          <StackPanel Grid.Row="0" Spacing="4">
-            <TextBlock Classes="h2" Text="{Binding SelectedResult.Title}" />
-            <TextBlock Classes="muted" Text="{Binding SelectedResult.Description}" />
-            <TextBlock Classes="faint" Text="{Binding SelectedResult.ProjectType}" />
-          </StackPanel>
+      <!-- Nothing selected -->
+      <Border Grid.Column="1" Classes="panel" IsVisible="{Binding !HasSelection}">
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="10" MaxWidth="380">
+          <controls:IconGlyph Data="{StaticResource Icon.Search}" Width="28" Height="28"
+                              Opacity="0.5" HorizontalAlignment="Center" />
+          <TextBlock Classes="muted" TextAlignment="Center"
+                     Text="{DynamicResource L.Browse.SelectProject}" />
+        </StackPanel>
+      </Border>
 
-          <StackPanel Grid.Row="1" Spacing="8">
-            <StackPanel Spacing="4">
-              <TextBlock Classes="label" Text="{DynamicResource L.Browse.InstallInto}" />
-              <ComboBox ItemsSource="{Binding Instances}" SelectedItem="{Binding TargetInstance}"
-                        HorizontalAlignment="Stretch">
-                <ComboBox.ItemTemplate>
-                  <DataTemplate>
-                    <TextBlock Text="{Binding Name}" />
-                  </DataTemplate>
-                </ComboBox.ItemTemplate>
-              </ComboBox>
-            </StackPanel>
+      <!-- Project detail -->
+      <Border Grid.Column="1" Classes="panel" Padding="0" IsVisible="{Binding HasSelection}">
+        <Grid RowDefinitions="Auto,*,Auto">
 
-            <StackPanel Spacing="4">
-              <TextBlock Classes="label" Text="{DynamicResource L.Browse.FieldVersion}" />
-              <ComboBox ItemsSource="{Binding Versions}" SelectedItem="{Binding SelectedVersion}"
-                        HorizontalAlignment="Stretch">
-                <ComboBox.ItemTemplate>
-                  <DataTemplate>
-                    <StackPanel Orientation="Horizontal" Spacing="10">
-                      <TextBlock Text="{Binding VersionNumber}" />
-                      <TextBlock Classes="faint" Text="{Binding VersionType}" />
-                    </StackPanel>
-                  </DataTemplate>
-                </ComboBox.ItemTemplate>
-              </ComboBox>
-            </StackPanel>
+          <!-- Hero -->
+          <Border Grid.Row="0" Padding="18" CornerRadius="8,8,0,0"
+                  Background="{DynamicResource FerriteSurfaceRaised}">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16">
+              <Border Grid.Column="0" Width="64" Height="64"
+                      CornerRadius="{DynamicResource RadiusMd}" ClipToBounds="True"
+                      Background="{DynamicResource FerriteSurfaceSunken}">
+                <Panel>
+                  <controls:IconGlyph Data="{StaticResource Icon.Content}" Width="26" Height="26"
+                                      HorizontalAlignment="Center" VerticalAlignment="Center" />
+                  <Image Source="{Binding ProjectIcon}" Stretch="UniformToFill"
+                         IsVisible="{Binding HasProjectIcon}" />
+                </Panel>
+              </Border>
+              <StackPanel Grid.Column="1" Spacing="5" VerticalAlignment="Center">
+                <TextBlock Classes="h1" Text="{Binding SelectedResult.Title}"
+                           TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"
+                           ToolTip.Tip="{Binding SelectedResult.Title}" />
+                <TextBlock Classes="meta" Text="{Binding SelectedResult.Description}"
+                           TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" />
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <Border Classes="badge plain">
+                    <TextBlock Text="{Binding SelectedResult.ProjectType}" />
+                  </Border>
+                  <Border Classes="badge plain">
+                    <TextBlock Text="{Binding SelectedResult.Provider}" />
+                  </Border>
+                  <TextBlock Classes="faint" VerticalAlignment="Center"
+                             Text="{Binding SelectedResult.Author}" TextWrapping="NoWrap"
+                             TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+              </StackPanel>
+            </Grid>
+          </Border>
 
-            <CheckBox Content="{DynamicResource L.Browse.IncludeOptional}"
-                      IsChecked="{Binding IncludeOptionalDependencies}" />
-          </StackPanel>
+          <!-- Body -->
+          <ScrollViewer Grid.Row="1" Padding="18">
+            <StackPanel Spacing="18">
 
-          <ScrollViewer Grid.Row="2">
-            <StackPanel Spacing="14">
-              <StackPanel Spacing="4" IsVisible="{Binding HasProjectMeta}">
+              <!-- Install -->
+              <StackPanel Spacing="10">
+                <TextBlock Classes="label" Text="{DynamicResource L.Browse.InstallInto}" />
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                  <ComboBox Grid.Column="0" HorizontalAlignment="Stretch"
+                            ItemsSource="{Binding Instances}" SelectedItem="{Binding TargetInstance}"
+                            AutomationProperties.Name="{DynamicResource L.Browse.InstallInto}">
+                    <ComboBox.ItemTemplate>
+                      <DataTemplate>
+                        <TextBlock Text="{Binding Name}" />
+                      </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                  </ComboBox>
+                  <Button Grid.Column="1" Classes="ghost" Content="{DynamicResource L.Browse.RefreshInstances}"
+                          Command="{Binding RefreshInstancesCommand}" />
+                </Grid>
+
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                  <StackPanel Grid.Column="0" Spacing="5">
+                    <TextBlock Classes="label" Text="{DynamicResource L.Browse.FieldVersion}" />
+                    <ComboBox HorizontalAlignment="Stretch"
+                              ItemsSource="{Binding Versions}" SelectedItem="{Binding SelectedVersion}"
+                              AutomationProperties.Name="{DynamicResource L.Browse.FieldVersion}"
+                              ToolTip.Tip="{Binding SelectedVersion.Changelog}">
+                      <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                          <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="{Binding VersionNumber}" />
+                            <TextBlock Classes="faint" Text="{Binding VersionType}" />
+                          </StackPanel>
+                        </DataTemplate>
+                      </ComboBox.ItemTemplate>
+                    </ComboBox>
+                  </StackPanel>
+                  <CheckBox Grid.Column="1" VerticalAlignment="Bottom" Margin="0,0,0,5"
+                            Content="{DynamicResource L.Browse.IncludeOptional}"
+                            IsChecked="{Binding IncludeOptionalDependencies}" />
+                </Grid>
+              </StackPanel>
+
+              <Border Classes="divider" />
+
+              <StackPanel Spacing="6" IsVisible="{Binding HasProjectMeta}">
                 <TextBlock Classes="label" Text="{DynamicResource L.Browse.About}" />
                 <TextBlock Classes="muted" TextWrapping="Wrap" Text="{Binding ProjectMeta}" />
               </StackPanel>
 
-              <StackPanel Spacing="4" IsVisible="{Binding HasProjectBody}">
+              <StackPanel Spacing="6" IsVisible="{Binding HasProjectBody}">
                 <TextBlock Classes="mono" TextWrapping="Wrap" Text="{Binding ProjectBody}" />
               </StackPanel>
 
-              <StackPanel Spacing="6" IsVisible="{Binding HasGallery}">
+              <StackPanel Spacing="8" IsVisible="{Binding HasGallery}">
                 <TextBlock Classes="label" Text="{DynamicResource L.Browse.Gallery}" />
                 <ItemsControl ItemsSource="{Binding Gallery}">
                   <ItemsControl.ItemsPanel>
@@ -170,11 +261,20 @@
                   </ItemsControl.ItemsPanel>
                   <ItemsControl.ItemTemplate>
                     <DataTemplate DataType="vm:GalleryImageViewModel">
-                      <Border Classes="card" Width="200" Margin="0,0,10,10">
-                        <StackPanel Spacing="4">
-                          <Image Source="{Binding Image}" Height="110" Stretch="Uniform"
-                                 IsVisible="{Binding HasImage}" />
-                          <TextBlock Classes="faint" Text="{Binding Note}" TextWrapping="Wrap" />
+                      <Border Width="220" Margin="0,0,10,10"
+                              CornerRadius="{DynamicResource RadiusMd}" ClipToBounds="True"
+                              Background="{DynamicResource FerriteSurfaceRaised}">
+                        <StackPanel Spacing="6">
+                          <Panel Height="124" Background="{DynamicResource FerriteSurfaceSunken}">
+                            <controls:IconGlyph Data="{StaticResource Icon.Image}" Width="22" Height="22"
+                                                Opacity="0.4"
+                                                HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <Image Source="{Binding Image}" Stretch="UniformToFill"
+                                   IsVisible="{Binding HasImage}" />
+                          </Panel>
+                          <TextBlock Classes="faint" Margin="10,0,10,10" Text="{Binding Note}"
+                                     TextWrapping="Wrap" MaxLines="2"
+                                     TextTrimming="CharacterEllipsis" />
                         </StackPanel>
                       </Border>
                     </DataTemplate>
@@ -182,7 +282,7 @@
                 </ItemsControl>
               </StackPanel>
 
-              <StackPanel Spacing="4">
+              <StackPanel Spacing="6">
                 <TextBlock Classes="label" Text="{DynamicResource L.Browse.Changelog}" />
                 <TextBlock Classes="mono" TextWrapping="Wrap" Text="{Binding SelectedVersion.Changelog}" />
                 <TextBlock Classes="faint" Text="{DynamicResource L.Browse.NoChangelog}"
@@ -191,20 +291,23 @@
             </StackPanel>
           </ScrollViewer>
 
-          <StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
-            <Button Content="{Binding SavedButtonText}" Command="{Binding ToggleSavedCommand}" />
-            <Button Content="{DynamicResource L.Browse.OpenProjectPage}" Command="{Binding OpenProjectPageCommand}" />
-            <Button Classes="primary" Content="{DynamicResource L.Browse.Install}" IsEnabled="{Binding CanInstall}"
-                    Command="{Binding InstallCommand}" />
-          </StackPanel>
+          <!-- Actions -->
+          <Border Grid.Row="2" Padding="18,14" CornerRadius="0,0,8,8"
+                  BorderBrush="{DynamicResource FerriteDivider}" BorderThickness="0,1,0,0">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+              <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
+                <Button Content="{Binding SavedButtonText}" Command="{Binding ToggleSavedCommand}" />
+                <Button Content="{DynamicResource L.Browse.OpenProjectPage}"
+                        Command="{Binding OpenProjectPageCommand}" />
+              </StackPanel>
+              <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                <Button Classes="primary" Content="{DynamicResource L.Browse.Install}"
+                        IsEnabled="{Binding CanInstall}" Command="{Binding InstallCommand}" />
+              </StackPanel>
+            </Grid>
+          </Border>
         </Grid>
       </Border>
-
-      <Border Grid.Column="1" Classes="card" IsVisible="{Binding !HasSelection}">
-        <TextBlock Classes="muted" VerticalAlignment="Center" HorizontalAlignment="Center"
-                   Text="{DynamicResource L.Browse.SelectProject}" />
-      </Border>
-
     </Grid>
 
   </Grid>

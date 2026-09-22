@@ -416,6 +416,23 @@
     <Setter Property="Background" Value="{DynamicResource FerriteAccentSoft}" />
   </Style>
 
+  <!-- Search results: a dense list of content rows rather than a grid of cards. -->
+  <Style Selector="ListBox.results ListBoxItem">
+    <Setter Property="Padding" Value="10,8" />
+    <Setter Property="MinHeight" Value="0" />
+  </Style>
+
+  <!--
+    A selected search result lifts the row and marks its leading edge. Filling the whole row with the
+    accent made the result the loudest thing on the page, which competed with the project hero.
+  -->
+  <Style Selector="ListBox.results ListBoxItem:selected /template/ Border#PART_Root">
+    <Setter Property="Background" Value="{DynamicResource FerriteSurfaceRaised}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource FerriteAccent}" />
+    <Setter Property="BorderThickness" Value="3,0,0,0" />
+    <Setter Property="CornerRadius" Value="0,6,6,0" />
+  </Style>
+
   <!--
     Segmented switch: a small exclusive choice, used for view switches and short filters. It is a
     ListBox so arrow keys move between the options and the selected one is announced.

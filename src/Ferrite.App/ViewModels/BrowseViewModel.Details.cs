@@ -1,7 +1,9 @@
 using System.Collections.ObjectModel;
+using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Ferrite.App.Localization;
 using Ferrite.Core.Content;
+using Ferrite.Core.Net;
 
 namespace Ferrite.App.ViewModels;
 
@@ -54,6 +56,40 @@ public sealed partial class BrowseViewModel
     public ObservableCollection<GalleryImageViewModel> Gallery { get; } = [];
 
     public bool HasGallery => Gallery.Count > 0;
+
+    /// <summary>The project's own icon, so the detail view leads with the provider's artwork.</summary>
+    [ObservableProperty]
+    private Bitmap? _projectIcon;
+
+    public bool HasProjectIcon => ProjectIcon is not null;
+
+    private const int MaxIconBytes = 2 * 1024 * 1024;
+    private const int IconDecodeWidth = 256;
+
+    /// <summary>
+    /// Fetches and decodes a project icon. A missing or broken icon is simply no icon: the detail view
+    /// falls back to a typographic header rather than showing a broken frame.
+    /// </summary>
+    private async Task<Bitmap?> LoadIconAsync(string? url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            return null;
+        }
+
+        try
+        {
+            var bytes = await _services.Http
+                .GetBytesAsync(url, MaxIconBytes, CancellationToken.None)
+                .ConfigureAwait(true);
+            using var stream = new MemoryStream(bytes, writable: false);
+            return Bitmap.DecodeToWidth(stream, IconDecodeWidth);
+        }
+        catch (Exception exception) when (exception is IOException or HttpException or ArgumentException)
+        {
+            return null;
+        }
+    }
 
     /// <summary>
     /// Loads the provider's vocabularies for the facets the browser offers. A provider that has no
@@ -189,11 +225,13 @@ public sealed partial class BrowseViewModel
         ProjectDetails = null;
         ProjectBody = null;
         ProjectMeta = null;
+        ProjectIcon = null;
         Gallery.Clear();
         OnPropertyChanged(nameof(HasGallery));
         OnPropertyChanged(nameof(HasProjectBody));
         OnPropertyChanged(nameof(HasProjectMeta));
         OnPropertyChanged(nameof(HasProjectDetails));
+        OnPropertyChanged(nameof(HasProjectIcon));
 
         if (summary is null)
         {
@@ -219,7 +257,9 @@ public sealed partial class BrowseViewModel
             ProjectDetails = project;
             ProjectBody = TrimBody(project.Body);
             ProjectMeta = DescribeProject(project, summary);
+            ProjectIcon = await LoadIconAsync(project.IconUrl ?? summary.IconUrl).ConfigureAwait(true);
             OnPropertyChanged(nameof(HasProjectDetails));
+            OnPropertyChanged(nameof(HasProjectIcon));
             OnPropertyChanged(nameof(HasProjectBody));
             OnPropertyChanged(nameof(HasProjectMeta));
 

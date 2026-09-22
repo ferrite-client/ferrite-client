@@ -77,7 +77,7 @@ Status values:
 | Mods: bulk enable/disable/remove | Tab | Mods tab selection action bar | kept |
 | Mods: groups (create/remove) | Tab | Mods tab group filter + manage dialog | kept |
 | Content: available updates, select, update | Tab | Content tab | kept |
-| Content: resource packs, shader packs, datapacks, screenshots | Files tab | Content tab | consolidated |
+| Content: resource packs, shader packs, datapacks, screenshots | Files tab | Files tab | kept |
 | Worlds: list, backup, play, duplicate, delete, open saves | Tab | Worlds tab | kept |
 | Servers: saved servers, add, ping all, LAN discovery | Tab | Servers tab | kept |
 | Logs: launcher log, crash reports, crash analysis | Tab | Logs tab with severity filter and search | kept |
