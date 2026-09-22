@@ -97,7 +97,7 @@
   <Style Selector="Button.danger-solid">
     <Setter Property="Background" Value="{DynamicResource FerriteDanger}" />
     <Setter Property="BorderBrush" Value="{DynamicResource FerriteDanger}" />
-    <Setter Property="Foreground" Value="#FFFFFF" />
+    <Setter Property="Foreground" Value="{DynamicResource FerriteDangerText}" />
     <Setter Property="FontWeight" Value="SemiBold" />
   </Style>
 

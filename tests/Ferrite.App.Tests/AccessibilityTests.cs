@@ -132,6 +132,12 @@ public sealed class AccessibilityTests : IDisposable
             Assert.True(
                 accentRatio >= 4.5,
                 $"{theme}: accent button text is {accentRatio:F2}:1 against the accent fill");
+
+            // The filled destructive button in the confirmation dialog is the other filled control.
+            var dangerRatio = Contrast(colours["FerriteDangerText"], colours["FerriteDanger"]);
+            Assert.True(
+                dangerRatio >= 4.5,
+                $"{theme}: danger button text is {dangerRatio:F2}:1 against the danger fill");
         }
     }
 
@@ -212,5 +218,38 @@ public sealed class AccessibilityTests : IDisposable
         using var stream = new MemoryStream();
         frame!.Save(stream, PngBitmapEncoderOptions.Default);
         return stream.ToArray();
+    }
+
+    /// <summary>
+    /// The primary workflow has to be completable without a mouse. A keyboard-only user reaches the
+    /// shell's own action by tabbing and activates it with the keyboard, and the quick-action palette
+    /// has a shortcut rather than relying on a button someone has to find.
+    /// </summary>
+    [Avalonia.Headless.XUnit.AvaloniaFact]
+    public void The_primary_action_is_reachable_and_activatable_from_the_keyboard()
+    {
+        var shell = new MainWindowViewModel(_services);
+        var window = new MainWindow { DataContext = shell };
+        window.Show();
+
+        var label = Localizer.Get("L.Library.NewInstance");
+        var reached = false;
+        for (var press = 0; press < 80 && !reached; press++)
+        {
+            window.KeyPress(Key.Tab, RawInputModifiers.None, PhysicalKey.Tab, null);
+            reached = window.GetVisualDescendants()
+                .OfType<Button>()
+                .Any(button => button.IsFocused && button.Content as string == label);
+        }
+
+        Assert.True(reached, $"tabbing never reached \"{label}\"");
+
+        // Activate it the way a keyboard user does, and confirm it ran.
+        window.KeyPress(Key.Enter, RawInputModifiers.None, PhysicalKey.Enter, null);
+        Assert.True(shell.Library.IsCreating, "the focused action did not run on Space");
+
+        // The quick-action palette is reachable by shortcut, not only by finding its button.
+        window.KeyPress(Key.K, RawInputModifiers.Control, PhysicalKey.K, "k");
+        Assert.True(shell.IsQuickActionsOpen, "Ctrl+K did not open the quick actions");
     }
 }

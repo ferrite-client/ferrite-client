@@ -37,8 +37,6 @@
       <SolidColorBrush x:Key="FerriteTextMuted" Color="#9AA2AD" />
       <!-- Used at 12px and up, so it still clears AA against both page and raised surfaces. -->
       <SolidColorBrush x:Key="FerriteTextFaint" Color="#8C95A2" />
-      <SolidColorBrush x:Key="FerriteTextOnAccent" Color="#1A1409" />
-
       <SolidColorBrush x:Key="FerriteAccent" Color="#D08A3E" />
       <SolidColorBrush x:Key="FerriteAccentHover" Color="#E0A458" />
       <SolidColorBrush x:Key="FerriteAccentPressed" Color="#B87A31" />
@@ -50,6 +48,11 @@
       <SolidColorBrush x:Key="FerriteWarning" Color="#D8B04A" />
       <SolidColorBrush x:Key="FerriteWarningSoft" Color="#322A16" />
       <SolidColorBrush x:Key="FerriteDanger" Color="#D2665C" />
+      <!--
+        Text on the danger fill. White would sit at 3.6:1 on this fill, so the filled destructive
+        button uses a dark warm tone instead and clears AA.
+      -->
+      <SolidColorBrush x:Key="FerriteDangerText" Color="#2A1210" />
       <SolidColorBrush x:Key="FerriteDangerSoft" Color="#331C1A" />
       <SolidColorBrush x:Key="FerriteInfo" Color="#5E9FD8" />
       <SolidColorBrush x:Key="FerriteInfoSoft" Color="#17262F" />
@@ -93,8 +96,6 @@
       <SolidColorBrush x:Key="FerriteText" Color="#1C1E22" />
       <SolidColorBrush x:Key="FerriteTextMuted" Color="#5A6068" />
       <SolidColorBrush x:Key="FerriteTextFaint" Color="#5A616A" />
-      <SolidColorBrush x:Key="FerriteTextOnAccent" Color="#FFFFFF" />
-
       <SolidColorBrush x:Key="FerriteAccent" Color="#A5621B" />
       <SolidColorBrush x:Key="FerriteAccentHover" Color="#8E5215" />
       <SolidColorBrush x:Key="FerriteAccentPressed" Color="#7A4611" />
@@ -106,6 +107,7 @@
       <SolidColorBrush x:Key="FerriteWarning" Color="#7C611B" />
       <SolidColorBrush x:Key="FerriteWarningSoft" Color="#F1E9D2" />
       <SolidColorBrush x:Key="FerriteDanger" Color="#B03A2E" />
+      <SolidColorBrush x:Key="FerriteDangerText" Color="#FFFFFF" />
       <SolidColorBrush x:Key="FerriteDangerSoft" Color="#F5DEDA" />
       <SolidColorBrush x:Key="FerriteInfo" Color="#2A5F8F" />
       <SolidColorBrush x:Key="FerriteInfoSoft" Color="#DCE8F2" />
