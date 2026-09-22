@@ -165,6 +165,19 @@ Defects found this way and fixed:
    structure file" beside Preview, "Prepare files" beside Start server), so the accent lost its
    meaning. Both are now ordinary buttons and the real primary action carries the accent.
 
+States, scale, and text are rendered rather than reasoned about, in `InterfaceStatesTests`:
+
+- **Launch** is captured in all four states. Ready offers Play; launching removes both Play and Stop,
+  says "Starting Minecraft", and shows the launcher's own operation and measured progress; running
+  offers Stop and names the instance; and the settled state returns to Play with no progress left
+  behind. The assertions are on which control is visible, not on which word happens to be in the
+  visual tree.
+- **Scale** is a 250-mod instance. The model holds all 250, the filter line says so, and the number of
+  realised rows has to be a quarter of that or fewer, which is what makes a pack of that size usable.
+- **Pathological text** is a 120-character name with CJK characters, an emoji, and 40 Arabic
+  characters, plus an 80-character modpack name. The card keeps its exact width and height, the
+  labels trim with the full value in a tooltip, and the modpack badge stays inside its bound.
+
 ## DPI, theme, and localization QA
 
 - Both themes are designed, not inverted. The light theme has its own surfaces, its own text tones
