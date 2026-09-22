@@ -207,8 +207,11 @@ persistent error banner.
 ## States
 
 - **Empty**: an icon, one sentence saying what to do next, and the action itself where one exists.
-- **Loading**: skeletons or a real progress bar. An indefinite spinner is a last resort, and a
-  progress bar only ever shows measured progress.
+- **Loading**: `Border.skeleton` blocks in the shape the content will take (the content browser does
+  this while a search runs), or a real progress bar. An indefinite spinner is a last resort, a
+  progress bar only ever shows measured progress, and a skeleton is preferred because it does not
+  move the layout when the content arrives. While content is loading, the empty state is suppressed:
+  "nothing matched" must never appear over a request that is still in flight.
 - **Error**: what failed, what to do about it, and the technical detail where the launcher knows one.
   No raw stack traces as primary UI, and no "something went wrong" when Ferrite knows what went wrong.
 - **Disabled**: 45% opacity, with the reason visible somewhere on screen.

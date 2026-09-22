@@ -177,6 +177,10 @@ States, scale, and text are rendered rather than reasoned about, in `InterfaceSt
 - **Pathological text** is a 120-character name with CJK characters, an emoji, and 40 Arabic
   characters, plus an 80-character modpack name. The card keeps its exact width and height, the
   labels trim with the full value in a tooltip, and the modpack badge stays inside its bound.
+- **Loading** is a skeleton, not a spinner: a running search replaces the results pane with blocks in
+  the shape the results will take, and the empty message is suppressed so it can never appear over a
+  request that is still in flight. The test asserts which panel is drawn, not merely that a control
+  exists, because a hidden control stays in the visual tree.
 
 ## DPI, theme, and localization QA
 

@@ -145,10 +145,44 @@
           </ListBox>
 
           <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="10"
-                      MaxWidth="380" IsVisible="{Binding !HasResults}">
+                      Name="EmptyResultsPanel"
+                      MaxWidth="380" IsVisible="{Binding ShowsEmptyResults}">
             <controls:IconGlyph Data="{StaticResource Icon.Discover}" Width="28" Height="28"
                                 Opacity="0.5" HorizontalAlignment="Center" />
             <TextBlock Classes="muted" TextAlignment="Center" Text="{Binding EmptyMessage}" />
+          </StackPanel>
+
+          <!-- Skeletons take the shape of the result rows while a search is in flight. -->
+          <StackPanel Name="SkeletonPanel" Margin="10,4" Spacing="20" IsVisible="{Binding IsBusy}">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="11">
+              <Border Grid.Column="0" Classes="skeleton" Width="40" Height="40" />
+              <StackPanel Grid.Column="1" Spacing="7">
+                <Border Classes="skeleton" Height="13" Width="180" HorizontalAlignment="Left" />
+                <Border Classes="skeleton" Height="11" HorizontalAlignment="Stretch" />
+                <Border Classes="skeleton" Height="11" Width="260" HorizontalAlignment="Left" />
+              </StackPanel>
+            </Grid>
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="11">
+              <Border Grid.Column="0" Classes="skeleton" Width="40" Height="40" />
+              <StackPanel Grid.Column="1" Spacing="7">
+                <Border Classes="skeleton" Height="13" Width="220" HorizontalAlignment="Left" />
+                <Border Classes="skeleton" Height="11" Width="320" HorizontalAlignment="Left" />
+              </StackPanel>
+            </Grid>
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="11">
+              <Border Grid.Column="0" Classes="skeleton" Width="40" Height="40" />
+              <StackPanel Grid.Column="1" Spacing="7">
+                <Border Classes="skeleton" Height="13" Width="150" HorizontalAlignment="Left" />
+                <Border Classes="skeleton" Height="11" HorizontalAlignment="Stretch" />
+              </StackPanel>
+            </Grid>
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="11">
+              <Border Grid.Column="0" Classes="skeleton" Width="40" Height="40" />
+              <StackPanel Grid.Column="1" Spacing="7">
+                <Border Classes="skeleton" Height="13" Width="200" HorizontalAlignment="Left" />
+                <Border Classes="skeleton" Height="11" Width="240" HorizontalAlignment="Left" />
+              </StackPanel>
+            </Grid>
           </StackPanel>
         </Grid>
       </Border>

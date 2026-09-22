@@ -131,6 +131,26 @@
   </Style>
 
   <!--
+    A skeleton block: the shape of the content that is coming, pulsing slowly enough to read as
+    "loading" rather than as a broken frame. It is used instead of an indefinite spinner wherever the
+    content has a known shape, because a skeleton does not move the layout when the content arrives.
+  -->
+  <Style Selector="Border.skeleton">
+    <Setter Property="Background" Value="{DynamicResource FerriteSurfaceRaised}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource RadiusSm}" />
+    <Style.Animations>
+      <Animation Duration="0:0:1.6" IterationCount="INFINITE" PlaybackDirection="Alternate">
+        <KeyFrame Cue="0%">
+          <Setter Property="Opacity" Value="0.40" />
+        </KeyFrame>
+        <KeyFrame Cue="100%">
+          <Setter Property="Opacity" Value="0.85" />
+        </KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+
+  <!--
     Pills. Reserved for compact statuses, tags, loader/version badges, and counts - the places where a
     rounded shape genuinely says "this is a label".
   -->

@@ -161,6 +161,52 @@ public sealed class InterfaceStatesTests : IDisposable
     }
 
     /// <summary>
+    /// The content browser has nothing to show and nothing in flight before a search, and skeletons
+    /// rather than an empty message while one is running. A skeleton is also why the layout does not
+    /// jump when results arrive: it has the shape the results will have.
+    /// </summary>
+    [AvaloniaFact]
+    public void The_discover_pane_shows_skeletons_while_searching()
+    {
+        var shell = new MainWindowViewModel(_services);
+        var browse = new BrowseViewModel(_services, shell);
+        var window = new Window
+        {
+            Content = new BrowseView { DataContext = browse },
+            Width = 1200,
+            Height = 800,
+        };
+        window.Show();
+
+        // Idle and empty: the empty state is the honest answer, not a spinner. Hidden controls stay in
+        // the visual tree, so this asserts on which panel is drawn rather than on what exists.
+        Assert.True(browse.ShowsEmptyResults);
+        Assert.True(Panel(window, "EmptyResultsPanel")!.IsVisible);
+        Assert.False(Panel(window, "SkeletonPanel")!.IsVisible);
+
+        browse.IsBusy = true;
+        window.CaptureRenderedFrame();
+        var frame = window.CaptureRenderedFrame();
+        Assert.NotNull(frame);
+
+        Assert.False(browse.ShowsEmptyResults);
+        Assert.False(Panel(window, "EmptyResultsPanel")!.IsVisible);
+        Assert.True(Panel(window, "SkeletonPanel")!.IsVisible);
+        var skeletons = window.GetVisualDescendants()
+            .OfType<Border>()
+            .Count(border => border.Classes.Contains("skeleton"));
+        Assert.True(skeletons >= 4, $"only {skeletons} skeleton block(s) rendered");
+        Save(frame!, "discover-loading");
+
+        browse.IsBusy = false;
+        Assert.True(browse.ShowsEmptyResults);
+        Assert.True(Panel(window, "EmptyResultsPanel")!.IsVisible);
+    }
+
+    private static StackPanel? Panel(Control root, string name) =>
+        root.GetVisualDescendants().OfType<StackPanel>().FirstOrDefault(panel => panel.Name == name);
+
+    /// <summary>
     /// A real modded pack. The list has to hold the whole collection in the model while rendering only
     /// the rows on screen, or a pack of a few hundred mods becomes unusable.
     /// </summary>

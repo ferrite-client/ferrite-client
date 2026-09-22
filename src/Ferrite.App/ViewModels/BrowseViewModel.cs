@@ -102,6 +102,12 @@ public sealed partial class BrowseViewModel : ObservableObject
 
     public bool HasResults => Results.Count > 0;
 
+    /// <summary>
+    /// Nothing to show *and* nothing on its way. While a search is running the results pane shows
+    /// skeletons instead, so the empty message never appears over a request that is still in flight.
+    /// </summary>
+    public bool ShowsEmptyResults => !HasResults && !IsBusy;
+
     public bool HasSelection => SelectedResult is not null;
 
     public bool CanInstall => TargetInstance is not null && SelectedVersion is not null;
@@ -118,6 +124,7 @@ public sealed partial class BrowseViewModel : ObservableObject
         CacheNote = null;
         StatusNote = null;
         OnPropertyChanged(nameof(HasResults));
+        OnPropertyChanged(nameof(ShowsEmptyResults));
         _ = LoadFacetsAsync();
         if (IsSavedView)
         {
@@ -138,6 +145,8 @@ public sealed partial class BrowseViewModel : ObservableObject
     }
 
     partial void OnSelectedVersionChanged(ContentVersion? value) => OnPropertyChanged(nameof(CanInstall));
+
+    partial void OnIsBusyChanged(bool value) => OnPropertyChanged(nameof(ShowsEmptyResults));
 
     partial void OnTargetInstanceChanged(InstanceRecord? value) => OnPropertyChanged(nameof(CanInstall));
 
@@ -215,6 +224,7 @@ public sealed partial class BrowseViewModel : ObservableObject
             ResultSummary = Localizer.Format("L.Browse.Results", result.TotalHits);
             RefreshCacheNote();
             OnPropertyChanged(nameof(HasResults));
+            OnPropertyChanged(nameof(ShowsEmptyResults));
             SelectedResult = Results.FirstOrDefault();
         }
         catch (Exception exception)
