@@ -42,6 +42,7 @@ internal static class StringsEn
             ["L.Common.Repair"] = "Repair",
             ["L.Common.Save"] = "Save",
             ["L.Shell.Error"] = "Something went wrong",
+            ["L.Shell.CopyDetails"] = "Copy details",
             ["L.Activity.Resolving"] = "Resolving metadata...",
             ["L.Activity.Planning"] = "Planning {0}...",
             ["L.Activity.Downloading"] = "Downloading...",

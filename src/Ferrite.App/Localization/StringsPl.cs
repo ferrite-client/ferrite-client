@@ -42,6 +42,7 @@ internal static class StringsPl
             ["L.Common.Repair"] = "Napraw",
             ["L.Common.Save"] = "Zapisz",
             ["L.Shell.Error"] = "Coś poszło nie tak",
+            ["L.Shell.CopyDetails"] = "Kopiuj szczegóły",
             ["L.Activity.Resolving"] = "Odczytywanie metadanych...",
             ["L.Activity.Planning"] = "Planowanie: {0}...",
             ["L.Activity.Downloading"] = "Pobieranie...",

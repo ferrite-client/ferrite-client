@@ -437,4 +437,18 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     [RelayCommand]
     private void DismissError() => ClearError();
+
+    /// <summary>
+    /// Takes the user to the diagnostics category, where the support bundle that includes this failure
+    /// can be exported. The banner explains what happened; this is the way to hand it to someone.
+    /// </summary>
+    [RelayCommand]
+    private void OpenDiagnostics()
+    {
+        Settings.SelectedCategory = Settings.Categories
+            .FirstOrDefault(category => string.Equals(category.Value, "diagnostics", StringComparison.Ordinal))
+            ?? Settings.SelectedCategory;
+        CurrentPage = AppPage.Settings;
+        ClearError();
+    }
 }

@@ -207,6 +207,36 @@ public sealed class InterfaceStatesTests : IDisposable
         root.GetVisualDescendants().OfType<StackPanel>().FirstOrDefault(panel => panel.Name == name);
 
     /// <summary>
+    /// A failure the launcher knows about has to say what failed and offer a next step. The banner
+    /// names the provider's answer, can copy it, and leads to the diagnostics bundle that would carry
+    /// it to someone who can act on it.
+    /// </summary>
+    [AvaloniaFact]
+    public void An_error_banner_explains_the_failure_and_offers_recovery()
+    {
+        var shell = new MainWindowViewModel(_services);
+        var window = new MainWindow { DataContext = shell, Width = 1360, Height = 860 };
+        window.Show();
+
+        shell.ReportError("Modrinth refused the request (HTTP 429, rate limited).");
+        window.CaptureRenderedFrame();
+        var frame = window.CaptureRenderedFrame();
+        Assert.NotNull(frame);
+
+        Assert.True(shell.HasError);
+        var texts = Texts(window);
+        Assert.Contains("Modrinth refused the request (HTTP 429, rate limited).", texts);
+        Assert.Contains("Copy details", texts);
+        Assert.Contains("Diagnostics", texts);
+        Save(frame!, "shell-error");
+
+        shell.OpenDiagnosticsCommand.Execute(null);
+        Assert.Equal(AppPage.Settings, shell.CurrentPage);
+        Assert.Equal("diagnostics", shell.Settings.SelectedCategory.Value);
+        Assert.False(shell.HasError);
+    }
+
+    /// <summary>
     /// A real modded pack. The list has to hold the whole collection in the model while rendering only
     /// the rows on screen, or a pack of a few hundred mods becomes unusable.
     /// </summary>
