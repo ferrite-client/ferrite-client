@@ -1,179 +1,469 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:Ferrite.App.ViewModels"
+             xmlns:controls="clr-namespace:Ferrite.App.Controls"
              x:Class="Ferrite.App.Views.LibraryView"
              x:DataType="vm:LibraryViewModel">
 
-  <Grid RowDefinitions="Auto,*,Auto" Margin="24">
+  <UserControl.Styles>
+    <!--
+      An instance card. Artwork on top, then only the facts that decide a launch: name, version and
+      loader, update/modpack identity, and when it was last played.
+    -->
+    <Style Selector="Border.instance-card">
+      <Setter Property="Background" Value="{DynamicResource FerriteSurfaceRaised}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource FerriteBorder}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="{DynamicResource RadiusLg}" />
+      <Setter Property="ClipToBounds" Value="True" />
+      <Setter Property="Width" Value="238" />
+      <Setter Property="Height" Value="286" />
+      <Setter Property="Margin" Value="0,0,14,14" />
+    </Style>
 
-    <Grid Grid.Row="0" ColumnDefinitions="*,160,160,Auto,Auto" ColumnSpacing="12" Margin="0,0,0,16">
-        <TextBox Grid.Column="0" PlaceholderText="{DynamicResource L.Library.SearchInstances}" Text="{Binding SearchText}" />
-        <ComboBox Grid.Column="1" HorizontalAlignment="Stretch" ItemsSource="{Binding SortChoices}"
-                  SelectedItem="{Binding SelectedSort}">
-          <ComboBox.ItemTemplate>
-            <DataTemplate DataType="vm:ChoiceOption">
-              <TextBlock Text="{Binding Label}" />
-            </DataTemplate>
-          </ComboBox.ItemTemplate>
-        </ComboBox>
-        <ComboBox Grid.Column="2" HorizontalAlignment="Stretch" ItemsSource="{Binding GroupChoices}"
-                  SelectedItem="{Binding SelectedGroup}"
-                  AutomationProperties.Name="{DynamicResource L.Library.FieldGroup}">
-          <ComboBox.ItemTemplate>
-            <DataTemplate DataType="vm:ChoiceOption">
-              <TextBlock Text="{Binding Label}" />
-            </DataTemplate>
-          </ComboBox.ItemTemplate>
-        </ComboBox>
-        <Button Grid.Column="3" Content="{DynamicResource L.Library.ImportModpack}" Click="OnImportModpackClick" />
-        <Button Grid.Column="4" Classes="primary" Content="{DynamicResource L.Library.NewInstance}"
-              Command="{Binding OpenCreateCommand}" />
+    <Style Selector="Border.instance-card:pointerover">
+      <Setter Property="BorderBrush" Value="{DynamicResource FerriteBorderStrong}" />
+    </Style>
+
+    <Style Selector="Button.card-art">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CornerRadius" Value="0" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="MinHeight" Value="0" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Setter Property="VerticalContentAlignment" Value="Stretch" />
+    </Style>
+
+    <Style Selector="Button.card-art /template/ Border#PART_Root">
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <Style Selector="Button.card-art:pointerover /template/ Border#PART_Root">
+      <Setter Property="Background" Value="{DynamicResource FerriteHover}" />
+    </Style>
+  </UserControl.Styles>
+
+  <Grid RowDefinitions="Auto,*,Auto">
+
+    <!-- Toolbar -->
+    <Grid Grid.Row="0" ColumnDefinitions="Auto,Auto,Auto,*,Auto" ColumnSpacing="10"
+          Margin="24,18,24,14">
+      <TextBox Grid.Column="0" Width="250"
+               PlaceholderText="{DynamicResource L.Library.SearchInstances}"
+               Text="{Binding SearchText}" />
+      <ComboBox Grid.Column="1" Width="150" ItemsSource="{Binding GroupChoices}"
+                SelectedItem="{Binding SelectedGroup}"
+                AutomationProperties.Name="{DynamicResource L.Library.FieldGroup}">
+        <ComboBox.ItemTemplate>
+          <DataTemplate DataType="vm:ChoiceOption">
+            <TextBlock Text="{Binding Label}" />
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+      <ComboBox Grid.Column="2" Width="164" ItemsSource="{Binding SortChoices}"
+                SelectedItem="{Binding SelectedSort}"
+                AutomationProperties.Name="{DynamicResource L.Library.SortLabel}">
+        <ComboBox.ItemTemplate>
+          <DataTemplate DataType="vm:ChoiceOption">
+            <TextBlock Text="{Binding Label}" />
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+
+      <TextBlock Grid.Column="3" Classes="faint" VerticalAlignment="Center" Margin="4,0"
+                 Text="{Binding CountText}" />
+
+      <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="10">
+        <Border CornerRadius="{DynamicResource RadiusSm}"
+                Background="{DynamicResource FerriteSurfaceSunken}"
+                BorderBrush="{DynamicResource FerriteBorder}" BorderThickness="1"
+                VerticalAlignment="Center">
+          <ListBox Classes="segments" ItemsSource="{Binding ViewChoices}"
+                   SelectedItem="{Binding SelectedView, Mode=TwoWay}"
+                   AutomationProperties.Name="{DynamicResource L.Library.ViewLabel}">
+            <ListBox.ItemsPanel>
+              <ItemsPanelTemplate>
+                <StackPanel Orientation="Horizontal" />
+              </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+            <ListBox.ItemTemplate>
+              <DataTemplate DataType="vm:ChoiceOption">
+                <TextBlock Text="{Binding Label}" />
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+        </Border>
+        <Button Content="{DynamicResource L.Library.ImportModpack}" Click="OnImportModpackClick" />
+        <Button Classes="primary" Content="{DynamicResource L.Library.NewInstance}"
+                Command="{Binding OpenCreateCommand}" />
+      </StackPanel>
     </Grid>
 
-    <ScrollViewer Grid.Row="1">
-      <ItemsControl ItemsSource="{Binding VisibleInstances}">
-        <ItemsControl.ItemTemplate>
-          <DataTemplate DataType="vm:InstanceCardViewModel">
-            <Border Classes="card" Margin="0,0,0,10">
-              <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
-                <StackPanel Grid.Column="0" Spacing="4">
-                  <TextBlock Classes="h2" Text="{Binding Name}" />
-                  <TextBlock Classes="muted" Text="{Binding Subtitle}" />
-                  <TextBlock Classes="faint" Text="{Binding ModpackText}" IsVisible="{Binding HasModpack}" />
-                  <Button Classes="chip" HorizontalAlignment="Left" Content="{Binding GroupButtonText}"
-                          Command="{Binding GroupCommand}" />
-                  <StackPanel Orientation="Horizontal" Spacing="14" Margin="0,4,0,0">
-                    <TextBlock Classes="faint" Text="{Binding MemoryText}" />
-                    <TextBlock Classes="faint" Text="{Binding SizeText}" />
-                    <TextBlock Classes="faint" Text="{Binding LastPlayedText}" />
-                  </StackPanel>
-                  <TextBlock Classes="faint" Text="{Binding StatusNote}" />
-                </StackPanel>
+    <!-- Instances -->
+    <Grid Grid.Row="1">
+      <!-- Grid view: rows of cards, so only the rows on screen are realised. -->
+      <ListBox Classes="cards"
+               IsVisible="{Binding IsGridView}"
+               ItemsSource="{Binding VisibleRows}"
+               Padding="24,0,10,12"
+               ContainerPrepared="OnCardRowPrepared"
+               ContainerClearing="OnCardRowClearing"
+               Background="Transparent" BorderThickness="0">
+        <ListBox.ItemsPanel>
+          <ItemsPanelTemplate>
+            <StackPanel Orientation="Vertical" />
+          </ItemsPanelTemplate>
+        </ListBox.ItemsPanel>
+        <ListBox.ItemTemplate>
+          <DataTemplate DataType="vm:InstanceRowViewModel">
+            <ItemsControl ItemsSource="{Binding Cards}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <StackPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="vm:InstanceCardViewModel">
+                  <Border Classes="instance-card">
+                    <Grid RowDefinitions="Auto,*">
 
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
-                            VerticalAlignment="Center">
-            <Button Classes="primary" Content="{DynamicResource L.Library.Play}" IsVisible="{Binding !IsRunning}"
-                          Command="{Binding PlayCommand}" />
-            <Button Content="{DynamicResource L.Library.Stop}" IsVisible="{Binding IsRunning}" Command="{Binding StopCommand}" />
-            <Button Content="{DynamicResource L.Library.Manage}" Command="{Binding OpenCommand}" />
-            <Button Content="{DynamicResource L.Library.Rename}" Command="{Binding RenameCommand}" />
-            <Button Content="{DynamicResource L.Library.Clone}" Command="{Binding CloneCommand}" />
-            <Button Content="{DynamicResource L.Common.Folder}" Command="{Binding OpenFolderCommand}" />
-            <Button Content="{DynamicResource L.Common.Repair}" Command="{Binding RepairCommand}" />
-            <Button Content="{DynamicResource L.Common.Delete}" Classes="danger" Command="{Binding DeleteCommand}" />
-                </StackPanel>
-              </Grid>
-            </Border>
+                      <Button Grid.Row="0" Classes="card-art"
+                              Command="{Binding OpenCommand}"
+                              AutomationProperties.Name="{Binding OpenLabel}"
+                              ToolTip.Tip="{Binding OpenLabel}">
+                        <Panel Height="104">
+                          <Border Background="{DynamicResource FerriteSurfaceSunken}" />
+                          <Border Background="{Binding AccentBrush}" Opacity="0.3"
+                                  IsVisible="{Binding HasAccentBrush}" />
+                          <TextBlock Text="{Binding Initial}" FontSize="40" FontWeight="SemiBold"
+                                     Opacity="0.2"
+                                     HorizontalAlignment="Center" VerticalAlignment="Center" />
+                          <Image Source="{Binding Artwork}" Stretch="UniformToFill"
+                                 IsVisible="{Binding HasArtwork}" />
+                          <Border VerticalAlignment="Top" HorizontalAlignment="Left" Margin="8"
+                                  IsVisible="{Binding IsRunning}">
+                            <Border Classes="badge success">
+                              <TextBlock Text="{DynamicResource L.Downloads.Running}" />
+                            </Border>
+                          </Border>
+                        </Panel>
+                      </Button>
+
+                      <Grid Grid.Row="1" Margin="12,10,12,12" RowDefinitions="Auto,Auto,Auto,*,Auto">
+                        <StackPanel Grid.Row="0" Spacing="2">
+                          <TextBlock Classes="h3" Text="{Binding Name}"
+                                     TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"
+                                     ToolTip.Tip="{Binding Name}" />
+                          <TextBlock Classes="meta" Text="{Binding Subtitle}"
+                                     TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"
+                                     ToolTip.Tip="{Binding Subtitle}" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="6" Margin="0,8,0,0">
+                          <Border Classes="badge plain" IsVisible="{Binding HasVersionBadge}">
+                            <TextBlock Text="{Binding VersionBadge}" />
+                          </Border>
+                          <Border Classes="badge plain" IsVisible="{Binding HasLoaderBadge}">
+                            <TextBlock Text="{Binding LoaderBadge}" />
+                          </Border>
+                        </StackPanel>
+
+                        <Border Grid.Row="2" Classes="badge accent" HorizontalAlignment="Left"
+                                Margin="0,6,0,0" IsVisible="{Binding HasModpack}" MaxWidth="200">
+                          <TextBlock Text="{Binding ModpackText}" TextTrimming="CharacterEllipsis"
+                                     ToolTip.Tip="{Binding ModpackText}" />
+                        </Border>
+
+                        <StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="10"
+                                    VerticalAlignment="Bottom" Margin="0,8,0,0">
+                          <TextBlock Classes="faint" Text="{Binding LastPlayedText}"
+                                     TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
+                          <TextBlock Classes="faint" Text="{Binding SizeText}" TextWrapping="NoWrap" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="4" Margin="0,10,0,0" Spacing="6">
+                          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                          <Button Grid.Column="0" Classes="primary"
+                                  HorizontalAlignment="Stretch"
+                                  HorizontalContentAlignment="Center"
+                                  IsVisible="{Binding !IsRunning}"
+                                  AutomationProperties.Name="{DynamicResource L.Library.Play}"
+                                  Command="{Binding PlayCommand}">
+                            <StackPanel Orientation="Horizontal" Spacing="7">
+                              <controls:IconGlyph Data="{StaticResource Icon.Play}" Width="14" Height="14"
+                                                  IsFilled="True" />
+                              <TextBlock Text="{DynamicResource L.Library.Play}" />
+                            </StackPanel>
+                          </Button>
+                          <Button Grid.Column="0" HorizontalAlignment="Stretch"
+                                  HorizontalContentAlignment="Center"
+                                  IsVisible="{Binding IsRunning}"
+                                  AutomationProperties.Name="{DynamicResource L.Library.Stop}"
+                                  Command="{Binding StopCommand}">
+                            <StackPanel Orientation="Horizontal" Spacing="7">
+                              <controls:IconGlyph Data="{StaticResource Icon.Stop}" Width="13" Height="13"
+                                                  IsFilled="True" />
+                              <TextBlock Text="{DynamicResource L.Library.Stop}" />
+                            </StackPanel>
+                          </Button>
+                          <Button Grid.Column="1" Classes="ghost icon-button"
+                                  AutomationProperties.Name="{DynamicResource L.Library.MoreActions}"
+                                  ToolTip.Tip="{DynamicResource L.Library.MoreActions}">
+                            <controls:IconGlyph Data="{StaticResource Icon.More}" Width="15" Height="15" />
+                            <Button.Flyout>
+                              <MenuFlyout>
+                                <MenuItem Header="{DynamicResource L.Library.Manage}"
+                                          Command="{Binding OpenCommand}" />
+                                <MenuItem Header="{DynamicResource L.Library.Rename}"
+                                          Command="{Binding RenameCommand}" />
+                                <MenuItem Header="{DynamicResource L.Library.Clone}"
+                                          Command="{Binding CloneCommand}" />
+                                <MenuItem Header="{DynamicResource L.Library.MoveToFolder}"
+                                          Command="{Binding GroupCommand}" />
+                                <MenuItem Header="{DynamicResource L.Common.OpenFolder}"
+                                          Command="{Binding OpenFolderCommand}" />
+                                <MenuItem Header="{DynamicResource L.Common.Repair}"
+                                          Command="{Binding RepairCommand}" />
+                                <MenuItem Header="{DynamicResource L.Common.Delete}"
+                                          Foreground="{DynamicResource FerriteDanger}"
+                                          Command="{Binding DeleteCommand}" />
+                              </MenuFlyout>
+                            </Button.Flyout>
+                          </Button>
+                          </Grid>
+
+                          <ProgressBar IsIndeterminate="True" Classes="thin"
+                                       IsVisible="{Binding IsBusy}" />
+                        </StackPanel>
+                      </Grid>
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
           </DataTemplate>
-        </ItemsControl.ItemTemplate>
-      </ItemsControl>
-    </ScrollViewer>
+        </ListBox.ItemTemplate>
+      </ListBox>
 
-    <TextBlock Grid.Row="1" Classes="muted" Margin="0,24,0,0" VerticalAlignment="Top"
-               IsVisible="{Binding !HasInstances}"
-                     Text="{DynamicResource L.Library.Empty}" />
+      <!-- List view: one dense row per instance. -->
+      <ListBox Classes="dense"
+               IsVisible="{Binding IsListView}"
+               ItemsSource="{Binding VisibleInstances}"
+               Margin="24,0,24,0"
+               ContainerPrepared="OnCardRowPrepared"
+               ContainerClearing="OnCardRowClearing"
+               Background="Transparent" BorderThickness="0" Padding="0">
+        <ListBox.ItemTemplate>
+          <DataTemplate DataType="vm:InstanceCardViewModel">
+            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="14">
+              <Border Grid.Column="0" Width="38" Height="38"
+                      CornerRadius="{DynamicResource RadiusSm}" ClipToBounds="True"
+                      Background="{DynamicResource FerriteSurfaceSunken}">
+                <Panel>
+                  <TextBlock Text="{Binding Initial}" FontWeight="SemiBold" Opacity="0.3"
+                             HorizontalAlignment="Center" VerticalAlignment="Center" />
+                  <Image Source="{Binding Artwork}" Stretch="UniformToFill"
+                         IsVisible="{Binding HasArtwork}" />
+                  <Image Source="{Binding Icon}" Stretch="Uniform"
+                         IsVisible="{Binding HasIcon}" />
+                </Panel>
+              </Border>
 
-    <TextBlock Grid.Row="2" Classes="muted" Text="{Binding ModpackStatus}" />
+              <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                <TextBlock Classes="h3" Text="{Binding Name}" TextWrapping="NoWrap"
+                           TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Name}" />
+                <TextBlock Classes="meta" Text="{Binding Subtitle}" TextWrapping="NoWrap"
+                           TextTrimming="CharacterEllipsis" />
+              </StackPanel>
 
-    <!-- Rename prompt -->
-    <Border Grid.Row="0" Grid.RowSpan="3" Margin="-24" Padding="24"
-            Background="{DynamicResource FerriteSurface}" IsVisible="{Binding IsRenaming}">
-      <Border Classes="card" MaxWidth="440" VerticalAlignment="Center" HorizontalAlignment="Center">
-        <StackPanel Spacing="12">
-              <TextBlock Classes="h2" Text="{DynamicResource L.Library.RenameTitle}" />
-          <TextBox Text="{Binding RenameName}" AutomationProperties.Name="{DynamicResource L.Library.FieldName}" />
-          <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
-              <Button Content="{DynamicResource L.Common.Cancel}" Command="{Binding CancelRenameCommand}" />
-              <Button Classes="primary" Content="{DynamicResource L.Library.Rename}" Command="{Binding ConfirmRenameCommand}" />
-          </StackPanel>
+              <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6"
+                          VerticalAlignment="Center">
+                <Border Classes="badge plain" IsVisible="{Binding HasVersionBadge}">
+                  <TextBlock Text="{Binding VersionBadge}" />
+                </Border>
+                <Border Classes="badge plain" IsVisible="{Binding HasLoaderBadge}">
+                  <TextBlock Text="{Binding LoaderBadge}" />
+                </Border>
+                <Border Classes="badge accent" IsVisible="{Binding HasModpack}" MaxWidth="180">
+                  <TextBlock Text="{Binding ModpackText}" TextTrimming="CharacterEllipsis" />
+                </Border>
+              </StackPanel>
+
+              <StackPanel Grid.Column="3" VerticalAlignment="Center" MinWidth="150">
+                <TextBlock Classes="faint" Text="{Binding LastPlayedText}" TextWrapping="NoWrap"
+                           TextTrimming="CharacterEllipsis" />
+                <TextBlock Classes="faint" Text="{Binding SizeText}" TextWrapping="NoWrap" />
+              </StackPanel>
+
+              <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="8"
+                          VerticalAlignment="Center">
+                <Button Classes="primary" IsVisible="{Binding !IsRunning}"
+                        Content="{DynamicResource L.Library.Play}"
+                        AutomationProperties.Name="{DynamicResource L.Library.Play}"
+                        Command="{Binding PlayCommand}" />
+                <Button IsVisible="{Binding IsRunning}"
+                        Content="{DynamicResource L.Library.Stop}"
+                        AutomationProperties.Name="{DynamicResource L.Library.Stop}"
+                        Command="{Binding StopCommand}" />
+                <Button Classes="ghost icon-button"
+                        AutomationProperties.Name="{DynamicResource L.Library.MoreActions}"
+                        ToolTip.Tip="{DynamicResource L.Library.MoreActions}">
+                  <controls:IconGlyph Data="{StaticResource Icon.More}" Width="15" Height="15" />
+                  <Button.Flyout>
+                    <MenuFlyout>
+                      <MenuItem Header="{DynamicResource L.Library.Manage}" Command="{Binding OpenCommand}" />
+                      <MenuItem Header="{DynamicResource L.Library.Rename}" Command="{Binding RenameCommand}" />
+                      <MenuItem Header="{DynamicResource L.Library.Clone}" Command="{Binding CloneCommand}" />
+                      <MenuItem Header="{DynamicResource L.Library.MoveToFolder}" Command="{Binding GroupCommand}" />
+                      <MenuItem Header="{DynamicResource L.Common.OpenFolder}" Command="{Binding OpenFolderCommand}" />
+                      <MenuItem Header="{DynamicResource L.Common.Repair}" Command="{Binding RepairCommand}" />
+                      <MenuItem Header="{DynamicResource L.Common.Delete}"
+                                Foreground="{DynamicResource FerriteDanger}"
+                                Command="{Binding DeleteCommand}" />
+                    </MenuFlyout>
+                  </Button.Flyout>
+                </Button>
+              </StackPanel>
+            </Grid>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+
+      <!-- Empty library -->
+      <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="14"
+                  MaxWidth="460" IsVisible="{Binding !HasVisibleInstances}">
+        <controls:IconGlyph Data="{StaticResource Icon.Library}" Width="34" Height="34"
+                            Opacity="0.5" HorizontalAlignment="Center" />
+        <TextBlock Classes="muted" TextAlignment="Center" Text="{DynamicResource L.Library.Empty}" />
+        <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+          <Button Content="{DynamicResource L.Library.ImportModpack}" Click="OnImportModpackClick" />
+          <Button Classes="primary" Content="{DynamicResource L.Library.NewInstance}"
+                  Command="{Binding OpenCreateCommand}" />
         </StackPanel>
-      </Border>
-    </Border>
+      </StackPanel>
+    </Grid>
 
-    <!-- Clone prompt -->
-    <Border Grid.Row="0" Grid.RowSpan="3" Margin="-24" Padding="24"
-            Background="{DynamicResource FerriteSurface}" IsVisible="{Binding IsCloning}">
-      <Border Classes="card" MaxWidth="440" VerticalAlignment="Center" HorizontalAlignment="Center">
-        <StackPanel Spacing="12">
-              <TextBlock Classes="h2" Text="{DynamicResource L.Library.CloneTitle}" />
-          <TextBlock Classes="muted"
-                     Text="{DynamicResource L.Library.CloneHint}" />
-          <TextBox Text="{Binding CloneName}" AutomationProperties.Name="{DynamicResource L.Library.FieldName}" />
-          <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
-              <Button Content="{DynamicResource L.Common.Cancel}" Command="{Binding CancelCloneCommand}" />
-              <Button Classes="primary" Content="{DynamicResource L.Library.Clone}" Command="{Binding ConfirmCloneCommand}" />
-          </StackPanel>
-        </StackPanel>
-      </Border>
-    </Border>
+    <TextBlock Grid.Row="2" Classes="faint" Margin="24,0,24,10"
+               Text="{Binding ModpackStatus}" TextWrapping="NoWrap"
+               TextTrimming="CharacterEllipsis" />
 
-    <!-- Folder prompt -->
-    <Border Grid.Row="0" Grid.RowSpan="3" Margin="-24" Padding="24"
-            Background="{DynamicResource FerriteSurface}" IsVisible="{Binding IsGrouping}">
-      <Border Classes="card" MaxWidth="440" VerticalAlignment="Center" HorizontalAlignment="Center">
-        <StackPanel Spacing="12">
-              <TextBlock Classes="h2" Text="{DynamicResource L.Library.GroupTitle}" />
-          <TextBlock Classes="muted" Text="{DynamicResource L.Library.GroupHint}" />
-          <TextBox Text="{Binding GroupName}" AutomationProperties.Name="{DynamicResource L.Library.FieldGroup}" />
-          <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
-              <Button Content="{DynamicResource L.Common.Cancel}" Command="{Binding CancelGroupCommand}" />
-              <Button Classes="primary" Content="{DynamicResource L.Library.Move}" Command="{Binding ConfirmGroupCommand}" />
-          </StackPanel>
-        </StackPanel>
-      </Border>
-    </Border>
-
-    <!-- Creation form -->
-    <Border Grid.Row="0" Grid.RowSpan="3" Margin="-24" Padding="24"
-            Background="{DynamicResource FerriteSurface}" IsVisible="{Binding IsCreating}">
-      <Border Classes="card" MaxWidth="560" VerticalAlignment="Center" HorizontalAlignment="Center">
+    <!-- Rename -->
+    <Border Grid.Row="0" Grid.RowSpan="3" Background="{DynamicResource FerriteScrim}"
+            IsVisible="{Binding IsRenaming}">
+      <Border Classes="overlay" Width="460" VerticalAlignment="Center" HorizontalAlignment="Center"
+              Padding="20">
         <StackPanel Spacing="14">
-              <TextBlock Classes="h2" Text="{DynamicResource L.Library.CreateTitle}" />
-
-          <StackPanel Spacing="4">
-              <TextBlock Classes="label" Text="{DynamicResource L.Library.FieldName}" />
-            <TextBox Text="{Binding NewName}" AutomationProperties.Name="{DynamicResource L.Library.FieldName}" />
-          </StackPanel>
-
-          <StackPanel Spacing="4">
-              <TextBlock Classes="label" Text="{DynamicResource L.Library.FieldMinecraftVersion}" />
-            <ComboBox ItemsSource="{Binding Versions}" SelectedItem="{Binding NewVersion}"
-                      HorizontalAlignment="Stretch">
-              <ComboBox.ItemTemplate>
-                <DataTemplate>
-                  <TextBlock Text="{Binding Id}" />
-                </DataTemplate>
-              </ComboBox.ItemTemplate>
-            </ComboBox>
-            <CheckBox Content="{DynamicResource L.Library.ShowSnapshots}" IsChecked="{Binding ShowSnapshots}" />
-          </StackPanel>
-
-          <StackPanel Spacing="4">
-              <TextBlock Classes="label" Text="{DynamicResource L.Library.FieldLoader}" />
-            <ComboBox ItemsSource="{Binding LoaderOptions}" SelectedItem="{Binding NewLoader}"
-                      HorizontalAlignment="Stretch" />
-          </StackPanel>
-
-          <StackPanel Spacing="4" IsVisible="{Binding NeedsLoaderVersion}">
-              <TextBlock Classes="label" Text="{DynamicResource L.Library.FieldLoaderVersion}" />
-            <ComboBox ItemsSource="{Binding LoaderVersions}" SelectedItem="{Binding NewLoaderVersion}"
-                      HorizontalAlignment="Stretch">
-              <ComboBox.ItemTemplate>
-                <DataTemplate>
-                  <TextBlock Text="{Binding Version}" />
-                </DataTemplate>
-              </ComboBox.ItemTemplate>
-            </ComboBox>
-          </StackPanel>
-
-          <TextBlock Text="{Binding FormError}" Foreground="{DynamicResource FerriteDanger}"
-                     IsVisible="{Binding HasFormError}" />
-
+          <TextBlock Classes="h2" Text="{DynamicResource L.Library.RenameTitle}" />
+          <TextBox Text="{Binding RenameName}"
+                   AutomationProperties.Name="{DynamicResource L.Library.FieldName}" />
           <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
-              <Button Content="{DynamicResource L.Common.Cancel}" Command="{Binding CancelCreateCommand}" />
-              <Button Classes="primary" Content="{DynamicResource L.Library.CreateAndInstall}" Command="{Binding CreateCommand}" />
+            <Button Content="{DynamicResource L.Common.Cancel}" Command="{Binding CancelRenameCommand}" />
+            <Button Classes="primary" Content="{DynamicResource L.Library.Rename}"
+                    Command="{Binding ConfirmRenameCommand}" />
           </StackPanel>
         </StackPanel>
+      </Border>
+    </Border>
+
+    <!-- Clone -->
+    <Border Grid.Row="0" Grid.RowSpan="3" Background="{DynamicResource FerriteScrim}"
+            IsVisible="{Binding IsCloning}">
+      <Border Classes="overlay" Width="460" VerticalAlignment="Center" HorizontalAlignment="Center"
+              Padding="20">
+        <StackPanel Spacing="14">
+          <TextBlock Classes="h2" Text="{DynamicResource L.Library.CloneTitle}" />
+          <TextBlock Classes="muted" Text="{DynamicResource L.Library.CloneHint}" />
+          <TextBox Text="{Binding CloneName}"
+                   AutomationProperties.Name="{DynamicResource L.Library.FieldName}" />
+          <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+            <Button Content="{DynamicResource L.Common.Cancel}" Command="{Binding CancelCloneCommand}" />
+            <Button Classes="primary" Content="{DynamicResource L.Library.Clone}"
+                    Command="{Binding ConfirmCloneCommand}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </Border>
+
+    <!-- Folder -->
+    <Border Grid.Row="0" Grid.RowSpan="3" Background="{DynamicResource FerriteScrim}"
+            IsVisible="{Binding IsGrouping}">
+      <Border Classes="overlay" Width="480" VerticalAlignment="Center" HorizontalAlignment="Center"
+              Padding="20">
+        <StackPanel Spacing="14">
+          <TextBlock Classes="h2" Text="{DynamicResource L.Library.GroupTitle}" />
+          <TextBlock Classes="muted" Text="{DynamicResource L.Library.GroupHint}" />
+          <TextBox Text="{Binding GroupName}"
+                   AutomationProperties.Name="{DynamicResource L.Library.FieldGroup}" />
+          <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+            <Button Content="{DynamicResource L.Common.Cancel}" Command="{Binding CancelGroupCommand}" />
+            <Button Classes="primary" Content="{DynamicResource L.Library.Move}"
+                    Command="{Binding ConfirmGroupCommand}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </Border>
+
+    <!-- Create -->
+    <Border Grid.Row="0" Grid.RowSpan="3" Background="{DynamicResource FerriteScrim}"
+            IsVisible="{Binding IsCreating}">
+      <Border Classes="overlay" Width="560" MaxHeight="640"
+              VerticalAlignment="Center" HorizontalAlignment="Center" Padding="20">
+        <ScrollViewer>
+          <StackPanel Spacing="16">
+            <TextBlock Classes="h2" Text="{DynamicResource L.Library.CreateTitle}" />
+
+            <StackPanel Spacing="5">
+              <TextBlock Classes="label" Text="{DynamicResource L.Library.FieldName}" />
+              <TextBox Text="{Binding NewName}"
+                       AutomationProperties.Name="{DynamicResource L.Library.FieldName}" />
+            </StackPanel>
+
+            <StackPanel Spacing="5">
+              <TextBlock Classes="label" Text="{DynamicResource L.Library.FieldMinecraftVersion}" />
+              <ComboBox ItemsSource="{Binding Versions}" SelectedItem="{Binding NewVersion}"
+                        HorizontalAlignment="Stretch"
+                        AutomationProperties.Name="{DynamicResource L.Library.FieldMinecraftVersion}">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate>
+                    <TextBlock Text="{Binding Id}" />
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+              <CheckBox Content="{DynamicResource L.Library.ShowSnapshots}"
+                        IsChecked="{Binding ShowSnapshots}" />
+            </StackPanel>
+
+            <StackPanel Spacing="5">
+              <TextBlock Classes="label" Text="{DynamicResource L.Library.FieldLoader}" />
+              <ComboBox ItemsSource="{Binding LoaderOptions}" SelectedItem="{Binding NewLoader}"
+                        HorizontalAlignment="Stretch"
+                        AutomationProperties.Name="{DynamicResource L.Library.FieldLoader}" />
+            </StackPanel>
+
+            <StackPanel Spacing="5" IsVisible="{Binding NeedsLoaderVersion}">
+              <TextBlock Classes="label" Text="{DynamicResource L.Library.FieldLoaderVersion}" />
+              <ComboBox ItemsSource="{Binding LoaderVersions}" SelectedItem="{Binding NewLoaderVersion}"
+                        HorizontalAlignment="Stretch"
+                        AutomationProperties.Name="{DynamicResource L.Library.FieldLoaderVersion}">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate>
+                    <TextBlock Text="{Binding Version}" />
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+            </StackPanel>
+
+            <TextBlock Text="{Binding FormError}" Classes="danger"
+                       IsVisible="{Binding HasFormError}" />
+
+            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+              <Button Content="{DynamicResource L.Common.Cancel}" Command="{Binding CancelCreateCommand}" />
+              <Button Classes="primary" Content="{DynamicResource L.Library.CreateAndInstall}"
+                      Command="{Binding CreateCommand}" />
+            </StackPanel>
+          </StackPanel>
+        </ScrollViewer>
       </Border>
     </Border>
 

@@ -1,0 +1,40 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:Ferrite.App.Controls">
+
+  <!--
+    Implicit control themes. These define how a control draws itself when no style has spoken for it,
+    so they belong in resources rather than in a style sheet.
+  -->
+
+  <!--
+    The icon scales as a whole, so a 16px and a 22px use of the same glyph keep the same apparent
+    stroke weight. The second path is what turns an outlined glyph into a solid one; it is harmless
+    when hidden, and when shown it fills inside the outline rather than instead of it.
+  -->
+  <ControlTheme x:Key="{x:Type controls:IconGlyph}" TargetType="controls:IconGlyph">
+    <Setter Property="Width" Value="18" />
+    <Setter Property="Height" Value="18" />
+    <Setter Property="Weight" Value="2" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Viewbox Stretch="Uniform"
+                 Width="{TemplateBinding Width}"
+                 Height="{TemplateBinding Height}">
+          <Canvas Width="24" Height="24">
+            <Path Data="{TemplateBinding Data}"
+                  Stroke="{TemplateBinding Foreground}"
+                  StrokeThickness="{TemplateBinding Weight}"
+                  StrokeLineCap="Round"
+                  StrokeJoin="Round"
+                  Fill="Transparent" />
+            <Path Data="{TemplateBinding Data}"
+                  Fill="{TemplateBinding Foreground}"
+                  IsVisible="{TemplateBinding IsFilled}" />
+          </Canvas>
+        </Viewbox>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+</ResourceDictionary>

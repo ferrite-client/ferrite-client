@@ -1,0 +1,133 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Ferrite.App.ViewModels"
+             xmlns:controls="clr-namespace:Ferrite.App.Controls"
+             x:Class="Ferrite.App.Views.DownloadsView"
+             x:DataType="vm:DownloadsViewModel">
+
+  <Grid RowDefinitions="Auto,Auto,*" Margin="24">
+
+    <!-- Header -->
+    <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,16">
+      <StackPanel Grid.Column="0" Spacing="2">
+        <TextBlock Classes="h1" Text="{DynamicResource L.Nav.Downloads}" />
+        <TextBlock Classes="muted" Text="{Binding SummaryText}" />
+      </StackPanel>
+      <Button Grid.Column="1" Classes="ghost icon-button"
+              VerticalAlignment="Center"
+              AutomationProperties.Name="{DynamicResource L.Common.Refresh}"
+              ToolTip.Tip="{DynamicResource L.Common.Refresh}"
+              Click="OnRefreshClick">
+        <controls:IconGlyph Data="{StaticResource Icon.Refresh}" />
+      </Button>
+    </Grid>
+
+    <!-- Filter bar -->
+    <Grid Grid.Row="1" ColumnDefinitions="*,Auto" ColumnSpacing="12" Margin="0,0,0,12">
+      <TextBox Grid.Column="0" MaxWidth="360" HorizontalAlignment="Left"
+               PlaceholderText="{DynamicResource L.Downloads.SearchPlaceholder}"
+               AutomationProperties.Name="{DynamicResource L.Downloads.SearchPlaceholder}"
+               Text="{Binding SearchText}" />
+      <Border Grid.Column="1" CornerRadius="{DynamicResource RadiusSm}"
+              Background="{DynamicResource FerriteSurfaceSunken}"
+              BorderBrush="{DynamicResource FerriteBorder}" BorderThickness="1">
+        <ListBox Classes="segments" ItemsSource="{Binding Filters}"
+                 SelectedItem="{Binding SelectedFilter, Mode=TwoWay}"
+                 AutomationProperties.Name="{DynamicResource L.Downloads.FilterAll}">
+          <ListBox.ItemsPanel>
+            <ItemsPanelTemplate>
+              <StackPanel Orientation="Horizontal" />
+            </ItemsPanelTemplate>
+          </ListBox.ItemsPanel>
+          <ListBox.ItemTemplate>
+            <DataTemplate DataType="vm:ChoiceOption">
+              <TextBlock Text="{Binding Label}" />
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </Border>
+    </Grid>
+
+    <!-- Operations -->
+    <Grid Grid.Row="2" RowDefinitions="Auto,*">
+      <StackPanel Grid.Row="0" Spacing="8" Margin="0,0,0,12"
+                  IsVisible="{Binding HasActive}">
+        <TextBlock Classes="label" Text="{DynamicResource L.Downloads.InProgress}" />
+        <ItemsControl ItemsSource="{Binding Active}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="vm:DownloadItemViewModel">
+              <Border Classes="panel" Margin="0,0,0,4">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                  <Border Grid.Column="0" Classes="badge info">
+                    <TextBlock Text="{DynamicResource L.Downloads.Running}" />
+                  </Border>
+                  <StackPanel Grid.Column="1" Spacing="6">
+                    <TextBlock Text="{Binding Name}" TextWrapping="NoWrap"
+                               TextTrimming="CharacterEllipsis" />
+                    <ProgressBar Value="{Binding Fraction}"
+                                 IsIndeterminate="{Binding !HasMeasuredProgress}"
+                                 Classes="thin" />
+                  </StackPanel>
+                </Grid>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+
+      <Grid Grid.Row="1" RowDefinitions="Auto,*">
+        <TextBlock Grid.Row="0" Classes="label" Margin="0,0,0,8"
+                   Text="{DynamicResource L.Downloads.History}" />
+
+        <ListBox Grid.Row="1" Classes="dense"
+                 ItemsSource="{Binding History}"
+                 Background="Transparent" BorderThickness="0" Padding="0">
+          <ListBox.ItemTemplate>
+            <DataTemplate DataType="vm:DownloadItemViewModel">
+              <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="12">
+                <Border Grid.Column="0" Classes="badge" MinWidth="86"
+                        Classes.info="{Binding IsRunningState}"
+                        Classes.success="{Binding IsSucceeded}"
+                        Classes.danger="{Binding IsFailed}">
+                  <TextBlock Text="{Binding StateText}" TextTrimming="CharacterEllipsis" />
+                </Border>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                  <TextBlock Text="{Binding Name}" TextWrapping="NoWrap"
+                             TextTrimming="CharacterEllipsis" />
+                  <TextBlock Classes="faint" Text="{Binding Detail}" TextWrapping="NoWrap"
+                             TextTrimming="CharacterEllipsis" IsVisible="{Binding HasDetail}" />
+                </StackPanel>
+                <TextBlock Grid.Column="2" Classes="faint" VerticalAlignment="Center"
+                           Text="{Binding StartedText}" TextWrapping="NoWrap" />
+                <TextBlock Grid.Column="3" Classes="faint" VerticalAlignment="Center"
+                           Text="{Binding DurationText}" TextWrapping="NoWrap" MinWidth="56"
+                           HorizontalAlignment="Right" />
+              </Grid>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+
+        <!-- Empty states -->
+        <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center"
+                    Spacing="8" MaxWidth="420"
+                    IsVisible="{Binding ShowsEmptyHistory}">
+          <controls:IconGlyph Data="{StaticResource Icon.Downloads}" Width="28" Height="28"
+                              Opacity="0.55" HorizontalAlignment="Center" />
+          <TextBlock Classes="muted" TextAlignment="Center"
+                     Text="{DynamicResource L.Settings.NoOperations}" />
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center"
+                    Spacing="8" MaxWidth="420"
+                    IsVisible="{Binding ShowsNoFilterMatches}">
+          <controls:IconGlyph Data="{StaticResource Icon.Search}" Width="28" Height="28"
+                              Opacity="0.55" HorizontalAlignment="Center" />
+          <TextBlock Classes="muted" TextAlignment="Center"
+                     Text="{DynamicResource L.Downloads.NoMatches}" />
+        </StackPanel>
+      </Grid>
+    </Grid>
+
+  </Grid>
+
+</UserControl>

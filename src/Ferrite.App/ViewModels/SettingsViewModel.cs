@@ -5,6 +5,7 @@ using Ferrite.App.Localization;
 using Ferrite.App.Services;
 using Ferrite.Core.Content;
 using Ferrite.Core.Diagnostics;
+using Ferrite.Core.Net;
 using Ferrite.Core.Minecraft;
 using Ferrite.Core.Platform;
 using Ferrite.Core.Storage;
@@ -23,7 +24,56 @@ public sealed partial class SettingsViewModel : ObservableObject
     {
         _services = services;
         _shell = shell;
-        RefreshCurseForgeKeyStatus();
+        Java = shell.Java;
+    }
+
+    /// <summary>
+    /// The Java runtime manager, hosted inside settings. Runtime discovery and provisioning are
+    /// launcher-wide concerns, so they belong next to the other global configuration rather than in
+    /// the top-level navigation.
+    /// </summary>
+    public JavaViewModel Java { get; }
+
+    /// <summary>The settings sections, in the order they appear in the category rail.</summary>
+    public IReadOnlyList<ChoiceOption> Categories { get; } =
+    [
+        new("appearance", Localizer.Get("L.Settings.Appearance")),
+        new("java", Localizer.Get("L.Nav.Java")),
+        new("network", Localizer.Get("L.Settings.Network")),
+        new("storage", Localizer.Get("L.Settings.Storage")),
+        new("updates", Localizer.Get("L.Settings.Updates")),
+        new("diagnostics", Localizer.Get("L.Settings.Diagnostics")),
+    ];
+
+    [ObservableProperty]
+    private ChoiceOption _selectedCategory = new("appearance", Localizer.Get("L.Settings.Appearance"));
+
+    public bool IsAppearanceCategory => Matches("appearance");
+
+    public bool IsJavaCategory => Matches("java");
+
+    public bool IsNetworkCategory => Matches("network");
+
+    public bool IsStorageCategory => Matches("storage");
+
+    public bool IsUpdatesCategory => Matches("updates");
+
+    public bool IsDiagnosticsCategory => Matches("diagnostics");
+
+    public string CategoryHeading => SelectedCategory.Label;
+
+    private bool Matches(string value) =>
+        string.Equals(SelectedCategory.Value, value, StringComparison.Ordinal);
+
+    partial void OnSelectedCategoryChanged(ChoiceOption value)
+    {
+        OnPropertyChanged(nameof(IsAppearanceCategory));
+        OnPropertyChanged(nameof(IsJavaCategory));
+        OnPropertyChanged(nameof(IsNetworkCategory));
+        OnPropertyChanged(nameof(IsStorageCategory));
+        OnPropertyChanged(nameof(IsUpdatesCategory));
+        OnPropertyChanged(nameof(IsDiagnosticsCategory));
+        OnPropertyChanged(nameof(CategoryHeading));
     }
 
     public IReadOnlyList<ThemeVariant> Themes { get; } =
@@ -66,17 +116,16 @@ public sealed partial class SettingsViewModel : ObservableObject
     private string _mirrorOverridesText = string.Empty;
 
     [ObservableProperty]
-    private string? _microsoftClientId;
-
-    [ObservableProperty]
     private bool _showSnapshots;
 
-    /// <summary>A key the user is entering. The stored key is never read back into the UI.</summary>
     [ObservableProperty]
-    private string? _newCurseForgeApiKey;
+    private bool _showHistoricalVersions;
 
     [ObservableProperty]
-    private string _curseForgeKeyStatus = string.Empty;
+    private int _defaultMemoryMb = 4096;
+
+    [ObservableProperty]
+    private int _logRetentionDays = 14;
 
     /// <summary>Most recent launcher operations, newest first.</summary>
     public ObservableCollection<OperationEntry> RecentOperations { get; } = [];
@@ -196,13 +245,13 @@ public sealed partial class SettingsViewModel : ObservableObject
         MaxConcurrentDownloads = settings.MaxConcurrentDownloads;
         ProxyUrl = settings.ProxyUrl;
         MirrorOverridesText = FormatMirrors(settings.MirrorOverrides);
-        MicrosoftClientId = settings.MicrosoftClientId;
         ShowSnapshots = settings.ShowSnapshotsInVersionList;
+        ShowHistoricalVersions = settings.ShowHistoricalVersions;
+        DefaultMemoryMb = settings.DefaultMemoryMb ?? LaunchPreflight.SuggestDefaultMemoryMb();
+        LogRetentionDays = settings.LogRetentionDays;
         UpdateFeedUrl = settings.UpdateFeedUrl;
         CheckForUpdatesOnStartup = settings.CheckForUpdatesOnStartup;
         DataRoot = _services.Paths.Root;
-        NewCurseForgeApiKey = null;
-        RefreshCurseForgeKeyStatus();
         RefreshOperations();
         await RefreshCacheSizeAsync().ConfigureAwait(true);
     }
@@ -263,19 +312,6 @@ public sealed partial class SettingsViewModel : ObservableObject
         }
     }
 
-    private void RefreshCurseForgeKeyStatus()
-    {
-        if (!_services.Credentials.HasCurseForgeApiKey)
-        {
-            CurseForgeKeyStatus = Localizer.Get("L.Settings.NoKeyStored");
-            return;
-        }
-
-        CurseForgeKeyStatus = _services.Credentials.IsDegraded
-            ? Localizer.Get("L.Settings.KeyStoredDegraded")
-            : Localizer.Get("L.Settings.KeyStoredProtected");
-    }
-
     [RelayCommand]
     private async Task SaveAsync()
     {
@@ -285,8 +321,10 @@ public sealed partial class SettingsViewModel : ObservableObject
         settings.MaxConcurrentDownloads = Math.Clamp(MaxConcurrentDownloads, 1, 64);
         settings.ProxyUrl = string.IsNullOrWhiteSpace(ProxyUrl) ? null : ProxyUrl.Trim();
         settings.MirrorOverrides = ParseMirrors(MirrorOverridesText);
-        settings.MicrosoftClientId = string.IsNullOrWhiteSpace(MicrosoftClientId) ? null : MicrosoftClientId.Trim();
         settings.ShowSnapshotsInVersionList = ShowSnapshots;
+        settings.ShowHistoricalVersions = ShowHistoricalVersions;
+        settings.DefaultMemoryMb = Math.Clamp(DefaultMemoryMb, 512, 65536);
+        settings.LogRetentionDays = Math.Clamp(LogRetentionDays, 1, 365);
         settings.UpdateFeedUrl = string.IsNullOrWhiteSpace(UpdateFeedUrl) ? null : UpdateFeedUrl.Trim();
         settings.CheckForUpdatesOnStartup = CheckForUpdatesOnStartup;
 
@@ -294,27 +332,21 @@ public sealed partial class SettingsViewModel : ObservableObject
         // The proxy, mirrors, and download concurrency are read by the running services, so a saved
         // change has to be pushed to them rather than waiting for a restart.
         _services.ApplyNetworkSettings();
-
-        if (!string.IsNullOrWhiteSpace(NewCurseForgeApiKey))
-        {
-            _services.Credentials.CurseForgeApiKey = NewCurseForgeApiKey;
-            _services.Credentials.Save();
-            NewCurseForgeApiKey = null;
-            RefreshCurseForgeKeyStatus();
-        }
-
         StatusNote = Localizer.Get("L.Settings.Saved");
         _shell.ReportStatus(StatusNote);
     }
 
-    [RelayCommand]
-    private void ClearCurseForgeKey()
+    /// <summary>Runs the normal signed update check when startup checking is enabled and configured.</summary>
+    internal async Task CheckForUpdatesOnStartupAsync()
     {
-        _services.Credentials.CurseForgeApiKey = null;
-        _services.Credentials.Save();
-        NewCurseForgeApiKey = null;
-        RefreshCurseForgeKeyStatus();
-        StatusNote = Localizer.Get("L.Settings.KeyRemoved");
+        if (!_services.Settings.Current.CheckForUpdatesOnStartup
+            || string.IsNullOrWhiteSpace(_services.Settings.Current.UpdateFeedUrl))
+        {
+            return;
+        }
+
+        UpdateFeedUrl = _services.Settings.Current.UpdateFeedUrl;
+        await CheckForUpdatesAsync().ConfigureAwait(true);
     }
 
     [RelayCommand]
@@ -354,7 +386,7 @@ public sealed partial class SettingsViewModel : ObservableObject
 
             var host = line[..separator].Trim();
             var mirror = line[(separator + 1)..].Trim();
-            if (host.Length == 0 || !Uri.TryCreate(mirror, UriKind.Absolute, out _))
+            if (!MirrorResolver.IsValidOverride(host, mirror))
             {
                 continue;
             }

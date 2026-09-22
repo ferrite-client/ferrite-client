@@ -219,8 +219,9 @@ public sealed class LocalizationTests
                 .ToList();
 
             Assert.Contains("Biblioteka", texts);
-            Assert.Contains("Przeglądaj", texts);
-            Assert.Contains("Launcher Minecrafta", texts);
+            Assert.Contains("Odkrywaj", texts);
+            Assert.Contains("Pobierania", texts);
+            Assert.Contains("Ustawienia", texts);
             Assert.DoesNotContain("Library", texts);
 
             var directory = Environment.GetEnvironmentVariable("FERRITE_UI_SHOTS");

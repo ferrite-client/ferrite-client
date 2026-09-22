@@ -1,170 +1,223 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:Ferrite.App.ViewModels"
+             xmlns:views="clr-namespace:Ferrite.App.Views"
              x:Class="Ferrite.App.Views.SettingsView"
              x:DataType="vm:SettingsViewModel">
 
-  <ScrollViewer Margin="24">
-    <StackPanel Spacing="18" MaxWidth="760" HorizontalAlignment="Left">
+  <Grid ColumnDefinitions="212,*" Margin="24">
 
-      <TextBlock Classes="h2" Text="{DynamicResource L.Settings.Appearance}" />
-      <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-        <StackPanel Grid.Column="0" Spacing="4">
-          <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldTheme}" />
-          <ComboBox ItemsSource="{Binding Themes}" SelectedItem="{Binding Theme}" HorizontalAlignment="Stretch" />
-        </StackPanel>
-        <StackPanel Grid.Column="1" Spacing="4">
-          <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldLanguage}" />
-          <ComboBox ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedLanguage}"
-                    HorizontalAlignment="Stretch">
-            <ComboBox.ItemTemplate>
-              <DataTemplate>
-                <TextBlock Text="{Binding DisplayName}" />
-              </DataTemplate>
-            </ComboBox.ItemTemplate>
-          </ComboBox>
-        </StackPanel>
-      </Grid>
-      <CheckBox Content="{DynamicResource L.Settings.ShowSnapshots}" IsChecked="{Binding ShowSnapshots}" />
-
-      <Border Height="1" Background="{DynamicResource FerriteBorder}" />
-
-      <TextBlock Classes="h2" Text="{DynamicResource L.Settings.Network}" />
-      <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-        <StackPanel Grid.Column="0" Spacing="4">
-          <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldConcurrentDownloads}" />
-          <NumericUpDown Value="{Binding MaxConcurrentDownloads}" Minimum="1" Maximum="64" Increment="1"
-                         AutomationProperties.Name="{DynamicResource L.Settings.FieldConcurrentDownloads}" />
-        </StackPanel>
-        <StackPanel Grid.Column="1" Spacing="4">
-          <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldProxy}" />
-          <TextBox Text="{Binding ProxyUrl}" PlaceholderText="http://host:port" />
-        </StackPanel>
-      </Grid>
-
-      <StackPanel Spacing="4">
-        <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldMirrors}" />
-        <TextBox Text="{Binding MirrorOverridesText}" AcceptsReturn="True" Height="72" Classes="mono"
-                 PlaceholderText="{DynamicResource L.Settings.MirrorsPlaceholder}" />
-        <TextBlock Classes="faint" TextWrapping="Wrap" Text="{DynamicResource L.Settings.MirrorsHint}" />
-      </StackPanel>
-
-      <Border Height="1" Background="{DynamicResource FerriteBorder}" />
-
-      <TextBlock Classes="h2" Text="{DynamicResource L.Settings.Accounts}" />
-      <StackPanel Spacing="4">
-        <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldClientId}" />
-        <TextBox Text="{Binding MicrosoftClientId}" AutomationProperties.Name="{DynamicResource L.Settings.FieldClientId}" />
-        <TextBlock Classes="faint"
-                   Text="{DynamicResource L.Settings.ClientIdHint}" />
-      </StackPanel>
-
-      <Border Height="1" Background="{DynamicResource FerriteBorder}" />
-
-      <TextBlock Classes="h2" Text="{DynamicResource L.Settings.Providers}" />
-      <StackPanel Spacing="4">
-        <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldCurseForgeKey}" />
-        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-          <TextBox Grid.Column="0" PasswordChar="*" Text="{Binding NewCurseForgeApiKey}"
-                   PlaceholderText="{DynamicResource L.Settings.CurseForgeKeyPlaceholder}" />
-          <Button Grid.Column="1" Classes="danger" Content="{DynamicResource L.Settings.RemoveKey}"
-                  Command="{Binding ClearCurseForgeKeyCommand}" />
-        </Grid>
-        <TextBlock Classes="faint" TextWrapping="Wrap" Text="{Binding CurseForgeKeyStatus}" />
-        <TextBlock Classes="faint" TextWrapping="Wrap"
-                   Text="{DynamicResource L.Settings.CurseForgeHint}" />
-      </StackPanel>
-
-      <Border Height="1" Background="{DynamicResource FerriteBorder}" />
-
-      <TextBlock Classes="h2" Text="{DynamicResource L.Settings.Storage}" />
-      <StackPanel Spacing="6">
-        <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldDataRoot}" />
-        <TextBlock Classes="mono" Text="{Binding DataRoot}" />
-        <TextBlock Classes="faint"
-                   Text="{DynamicResource L.Settings.DataRootHint}" />
-        <StackPanel Orientation="Horizontal" Spacing="10">
-          <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldCacheSize}" VerticalAlignment="Center" />
-          <TextBlock Text="{Binding CacheSizeText}" VerticalAlignment="Center" />
-        </StackPanel>
-        <StackPanel Orientation="Horizontal" Spacing="8">
-          <Button Content="{DynamicResource L.Settings.OpenDataFolder}" Command="{Binding OpenDataFolderCommand}" />
-          <Button Content="{DynamicResource L.Settings.OpenLogs}" Command="{Binding OpenLogsFolderCommand}" />
-          <Button Content="{DynamicResource L.Settings.RefreshSize}" Command="{Binding RefreshCacheSizeCommand}" />
-          <Button Classes="danger" Content="{DynamicResource L.Settings.ClearMetadataCache}" Command="{Binding ClearMetadataCacheCommand}" />
-        </StackPanel>
-        <StackPanel Orientation="Horizontal" Spacing="8">
-          <Button Content="{DynamicResource L.Settings.MoveDataFolder}" Click="OnMoveDataFolderClick" />
-          <Button Content="{DynamicResource L.Settings.UseDefaultDataFolder}"
-                  Command="{Binding UseDefaultDataFolderCommand}" />
-        </StackPanel>
-        <TextBlock Classes="faint" TextWrapping="Wrap" Text="{Binding DataRootStatus}"
-                   IsVisible="{Binding HasDataRootStatus}" />
-      </StackPanel>
-
-      <Border Height="1" Background="{DynamicResource FerriteBorder}" />
-
-      <TextBlock Classes="h2" Text="{DynamicResource L.Settings.Updates}" />
-      <StackPanel Spacing="6">
-        <StackPanel Spacing="4">
-          <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldUpdateFeed}" />
-          <TextBox Text="{Binding UpdateFeedUrl}" PlaceholderText="https://example.com/ferrite/" />
-        </StackPanel>
-        <CheckBox Content="{DynamicResource L.Settings.CheckOnStartup}"
-                  IsChecked="{Binding CheckForUpdatesOnStartup}" />
-        <StackPanel Orientation="Horizontal" Spacing="8">
-          <Button Classes="primary" Content="{DynamicResource L.Settings.CheckForUpdates}" Command="{Binding CheckForUpdatesCommand}" />
-          <Button Content="{DynamicResource L.Settings.DownloadAndVerify}" Command="{Binding StageUpdateCommand}" />
-          <Button Content="{DynamicResource L.Settings.OpenStaging}" Command="{Binding OpenStagingFolderCommand}" />
-        </StackPanel>
-        <TextBlock Classes="muted" TextWrapping="Wrap" Text="{Binding UpdateStatus}" />
-        <StackPanel Spacing="4" IsVisible="{Binding UpdateHandoffCommand, Converter={x:Static ObjectConverters.IsNotNull}}">
-          <TextBlock Classes="label" Text="{DynamicResource L.Settings.HandoffHint}" />
-          <SelectableTextBlock Classes="mono" TextWrapping="Wrap" Text="{Binding UpdateHandoffCommand}" />
-        </StackPanel>
-        <TextBlock Classes="faint" TextWrapping="Wrap"
-                   Text="{DynamicResource L.Settings.FeedHint}" />
-      </StackPanel>
-
-      <Border Height="1" Background="{DynamicResource FerriteBorder}" />
-
-      <TextBlock Classes="h2" Text="{DynamicResource L.Settings.Diagnostics}" />
-      <StackPanel Spacing="6">
-        <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldRecentOperations}" />
-        <ItemsControl ItemsSource="{Binding RecentOperations}">
-          <ItemsControl.ItemTemplate>
-            <DataTemplate>
-              <Grid ColumnDefinitions="150,90,*,Auto" ColumnSpacing="10" Margin="0,2">
-                <TextBlock Grid.Column="0" Text="{Binding StartedAt, StringFormat='{}{0:MM-dd HH:mm:ss}'}" />
-                <TextBlock Grid.Column="1" Text="{Binding OutcomeText}" />
-                <TextBlock Grid.Column="2" Text="{Binding Operation}" TextTrimming="CharacterEllipsis" />
-                <TextBlock Grid.Column="3" Classes="faint" Text="{Binding Duration}" />
-              </Grid>
-            </DataTemplate>
-          </ItemsControl.ItemTemplate>
-        </ItemsControl>
-        <TextBlock Classes="faint" Text="{DynamicResource L.Settings.NoOperations}" IsVisible="{Binding !HasRecentOperations}" />
-
-        <StackPanel Spacing="4" Margin="0,6,0,0">
-          <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldBundleNotes}" />
-          <TextBox Text="{Binding DiagnosticsNotes}" AcceptsReturn="True" Height="60"
-                   PlaceholderText="{DynamicResource L.Settings.BundleNotesPlaceholder}" />
-          <StackPanel Orientation="Horizontal" Spacing="8">
-            <Button Content="{DynamicResource L.Settings.ExportDiagnostics}" Click="OnExportDiagnosticsClick" />
-            <Button Content="{DynamicResource L.Settings.RefreshList}" Command="{Binding RefreshOperationsCommand}" />
-          </StackPanel>
-          <TextBlock Classes="muted" TextWrapping="Wrap" Text="{Binding DiagnosticsStatus}" />
-          <TextBlock Classes="faint" TextWrapping="Wrap"
-                     Text="{DynamicResource L.Settings.BundleHint}" />
-        </StackPanel>
-      </StackPanel>
-
-      <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,6,0,0">
-        <Button Classes="primary" Content="{DynamicResource L.Settings.SaveSettings}" Command="{Binding SaveCommand}" />
-        <TextBlock Classes="muted" VerticalAlignment="Center" Text="{Binding StatusNote}" />
-      </StackPanel>
-
+    <!-- Category navigation -->
+    <StackPanel Grid.Column="0" Spacing="8" Margin="0,0,20,0">
+      <ListBox Classes="rail" ItemsSource="{Binding Categories}"
+               SelectedItem="{Binding SelectedCategory, Mode=TwoWay}"
+               AutomationProperties.Name="{DynamicResource L.Nav.Settings}">
+        <ListBox.ItemTemplate>
+          <DataTemplate DataType="vm:ChoiceOption">
+            <TextBlock Text="{Binding Label}" />
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
     </StackPanel>
-  </ScrollViewer>
+
+    <!-- Category content -->
+    <Grid Grid.Column="1" RowDefinitions="Auto,*,Auto">
+      <TextBlock Grid.Row="0" Classes="h1" Margin="0,0,0,18" Text="{Binding CategoryHeading}" />
+
+      <ScrollViewer Grid.Row="1">
+        <StackPanel MaxWidth="760" HorizontalAlignment="Left" Spacing="18">
+
+          <!-- Appearance -->
+          <StackPanel Spacing="16" IsVisible="{Binding IsAppearanceCategory}">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="14">
+              <StackPanel Grid.Column="0" Spacing="5">
+                <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldTheme}" />
+                <ComboBox ItemsSource="{Binding Themes}" SelectedItem="{Binding Theme}"
+                          HorizontalAlignment="Stretch"
+                          AutomationProperties.Name="{DynamicResource L.Settings.FieldTheme}" />
+              </StackPanel>
+              <StackPanel Grid.Column="1" Spacing="5">
+                <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldLanguage}" />
+                <ComboBox ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedLanguage}"
+                          HorizontalAlignment="Stretch"
+                          AutomationProperties.Name="{DynamicResource L.Settings.FieldLanguage}">
+                  <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                      <TextBlock Text="{Binding DisplayName}" />
+                    </DataTemplate>
+                  </ComboBox.ItemTemplate>
+                </ComboBox>
+              </StackPanel>
+            </Grid>
+
+            <StackPanel Spacing="4">
+              <CheckBox Content="{DynamicResource L.Settings.ShowSnapshots}" IsChecked="{Binding ShowSnapshots}" />
+              <CheckBox Content="{DynamicResource L.Settings.ShowHistorical}"
+                        IsChecked="{Binding ShowHistoricalVersions}" />
+            </StackPanel>
+
+            <Border Classes="divider" />
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="14">
+              <StackPanel Grid.Column="0" Spacing="5">
+                <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldDefaultMemory}" />
+                <NumericUpDown Value="{Binding DefaultMemoryMb}" Minimum="512" Maximum="65536" Increment="256"
+                               AutomationProperties.Name="{DynamicResource L.Settings.FieldDefaultMemory}" />
+              </StackPanel>
+              <StackPanel Grid.Column="1" Spacing="5">
+                <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldLogRetention}" />
+                <NumericUpDown Value="{Binding LogRetentionDays}" Minimum="1" Maximum="365" Increment="1"
+                               AutomationProperties.Name="{DynamicResource L.Settings.FieldLogRetention}" />
+              </StackPanel>
+            </Grid>
+          </StackPanel>
+
+          <!-- Java -->
+          <views:JavaView DataContext="{Binding Java}" IsVisible="{Binding $parent[UserControl].((vm:SettingsViewModel)DataContext).IsJavaCategory}" />
+
+          <!-- Network -->
+          <StackPanel Spacing="16" IsVisible="{Binding IsNetworkCategory}">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="14">
+              <StackPanel Grid.Column="0" Spacing="5">
+                <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldConcurrentDownloads}" />
+                <NumericUpDown Value="{Binding MaxConcurrentDownloads}" Minimum="1" Maximum="64" Increment="1"
+                               AutomationProperties.Name="{DynamicResource L.Settings.FieldConcurrentDownloads}" />
+              </StackPanel>
+              <StackPanel Grid.Column="1" Spacing="5">
+                <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldProxy}" />
+                <TextBox Text="{Binding ProxyUrl}"
+                         PlaceholderText="{DynamicResource L.Settings.ProxyPlaceholder}"
+                         AutomationProperties.Name="{DynamicResource L.Settings.FieldProxy}" />
+              </StackPanel>
+            </Grid>
+
+            <StackPanel Spacing="6">
+              <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldMirrors}" />
+              <TextBox Text="{Binding MirrorOverridesText}" AcceptsReturn="True" Height="84" Classes="mono"
+                       PlaceholderText="{DynamicResource L.Settings.MirrorsPlaceholder}"
+                       AutomationProperties.Name="{DynamicResource L.Settings.FieldMirrors}" />
+              <TextBlock Classes="faint" TextWrapping="Wrap" Text="{DynamicResource L.Settings.MirrorsHint}" />
+            </StackPanel>
+          </StackPanel>
+
+          <!-- Storage -->
+          <StackPanel Spacing="16" IsVisible="{Binding IsStorageCategory}">
+            <StackPanel Spacing="6">
+              <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldDataRoot}" />
+              <SelectableTextBlock Classes="mono" TextWrapping="Wrap" Text="{Binding DataRoot}" />
+              <TextBlock Classes="faint" TextWrapping="Wrap" Text="{DynamicResource L.Settings.DataRootHint}" />
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Spacing="10">
+              <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldCacheSize}"
+                         VerticalAlignment="Center" />
+              <TextBlock Text="{Binding CacheSizeText}" VerticalAlignment="Center" />
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <Button Content="{DynamicResource L.Settings.OpenDataFolder}" Command="{Binding OpenDataFolderCommand}" />
+              <Button Content="{DynamicResource L.Settings.OpenLogs}" Command="{Binding OpenLogsFolderCommand}" />
+              <Button Content="{DynamicResource L.Settings.RefreshSize}" Command="{Binding RefreshCacheSizeCommand}" />
+              <Button Classes="danger" Content="{DynamicResource L.Settings.ClearMetadataCache}"
+                      Command="{Binding ClearMetadataCacheCommand}" />
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <Button Content="{DynamicResource L.Settings.MoveDataFolder}" Click="OnMoveDataFolderClick" />
+              <Button Content="{DynamicResource L.Settings.UseDefaultDataFolder}"
+                      Command="{Binding UseDefaultDataFolderCommand}" />
+            </StackPanel>
+
+            <TextBlock Classes="faint" TextWrapping="Wrap" Text="{Binding DataRootStatus}"
+                       IsVisible="{Binding HasDataRootStatus}" />
+          </StackPanel>
+
+          <!-- Updates -->
+          <StackPanel Spacing="16" IsVisible="{Binding IsUpdatesCategory}">
+            <StackPanel Spacing="5">
+              <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldUpdateFeed}" />
+              <TextBox Text="{Binding UpdateFeedUrl}"
+                       PlaceholderText="{DynamicResource L.Settings.UpdateFeedPlaceholder}"
+                       AutomationProperties.Name="{DynamicResource L.Settings.FieldUpdateFeed}" />
+            </StackPanel>
+
+            <CheckBox Content="{DynamicResource L.Settings.CheckOnStartup}"
+                      IsChecked="{Binding CheckForUpdatesOnStartup}" />
+
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <Button Classes="primary" Content="{DynamicResource L.Settings.CheckForUpdates}"
+                      Command="{Binding CheckForUpdatesCommand}" />
+              <Button Content="{DynamicResource L.Settings.DownloadAndVerify}" Command="{Binding StageUpdateCommand}" />
+              <Button Content="{DynamicResource L.Settings.OpenStaging}" Command="{Binding OpenStagingFolderCommand}" />
+            </StackPanel>
+
+            <TextBlock Classes="muted" TextWrapping="Wrap" Text="{Binding UpdateStatus}" />
+
+            <StackPanel Spacing="6"
+                        IsVisible="{Binding UpdateHandoffCommand, Converter={x:Static ObjectConverters.IsNotNull}}">
+              <TextBlock Classes="label" Text="{DynamicResource L.Settings.HandoffHint}" />
+              <Border Classes="panel">
+                <SelectableTextBlock Classes="mono" TextWrapping="Wrap" Text="{Binding UpdateHandoffCommand}" />
+              </Border>
+            </StackPanel>
+
+            <TextBlock Classes="faint" TextWrapping="Wrap" Text="{DynamicResource L.Settings.FeedHint}" />
+          </StackPanel>
+
+          <!-- Diagnostics -->
+          <StackPanel Spacing="16" IsVisible="{Binding IsDiagnosticsCategory}">
+            <StackPanel Spacing="8">
+              <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldRecentOperations}" />
+              <Border Classes="panel" Padding="0">
+                <ItemsControl ItemsSource="{Binding RecentOperations}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                      <Grid ColumnDefinitions="150,90,*,Auto" ColumnSpacing="10" Margin="12,6">
+                        <TextBlock Grid.Column="0" Classes="faint"
+                                   Text="{Binding StartedAt, StringFormat='{}{0:MM-dd HH:mm:ss}'}" />
+                        <TextBlock Grid.Column="1" Classes="faint" Text="{Binding OutcomeText}" />
+                        <TextBlock Grid.Column="2" Text="{Binding Operation}"
+                                   TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"
+                                   ToolTip.Tip="{Binding Operation}" />
+                        <TextBlock Grid.Column="3" Classes="faint" Text="{Binding Duration}" />
+                      </Grid>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </Border>
+              <TextBlock Classes="faint" Text="{DynamicResource L.Settings.NoOperations}"
+                         IsVisible="{Binding !HasRecentOperations}" />
+            </StackPanel>
+
+            <StackPanel Spacing="6">
+              <TextBlock Classes="label" Text="{DynamicResource L.Settings.FieldBundleNotes}" />
+              <TextBox Text="{Binding DiagnosticsNotes}" AcceptsReturn="True" Height="72"
+                       PlaceholderText="{DynamicResource L.Settings.BundleNotesPlaceholder}"
+                       AutomationProperties.Name="{DynamicResource L.Settings.FieldBundleNotes}" />
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Content="{DynamicResource L.Settings.ExportDiagnostics}" Click="OnExportDiagnosticsClick" />
+                <Button Classes="ghost" Content="{DynamicResource L.Settings.RefreshList}"
+                        Command="{Binding RefreshOperationsCommand}" />
+              </StackPanel>
+              <TextBlock Classes="muted" TextWrapping="Wrap" Text="{Binding DiagnosticsStatus}" />
+              <TextBlock Classes="faint" TextWrapping="Wrap" Text="{DynamicResource L.Settings.BundleHint}" />
+            </StackPanel>
+          </StackPanel>
+
+        </StackPanel>
+      </ScrollViewer>
+
+      <!-- Save -->
+      <Border Grid.Row="2" Margin="0,16,0,0" Padding="0,14,0,0"
+              BorderBrush="{DynamicResource FerriteDivider}" BorderThickness="0,1,0,0">
+        <StackPanel Orientation="Horizontal" Spacing="12">
+          <Button Classes="primary" Content="{DynamicResource L.Settings.SaveSettings}"
+                  Command="{Binding SaveCommand}" />
+          <TextBlock Classes="muted" VerticalAlignment="Center" Text="{Binding StatusNote}" />
+        </StackPanel>
+      </Border>
+    </Grid>
+
+  </Grid>
 
 </UserControl>

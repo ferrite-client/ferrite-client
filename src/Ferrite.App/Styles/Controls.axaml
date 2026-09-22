@@ -1,30 +1,68 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+  <!--
+    Ferrite's style sheet: typography, surfaces, inputs, and the small semantic pieces (badges,
+    banners, dividers) that views compose from. Anything visual that appears in more than one view
+    belongs here rather than in the view, so the application reads as one product.
+  -->
+
   <Style Selector="Window">
-    <Setter Property="Background" Value="{DynamicResource FerriteSurface}" />
+    <Setter Property="Background" Value="{DynamicResource FerriteBg}" />
     <Setter Property="FontFamily" Value="Inter, Segoe UI, sans-serif" />
-    <Setter Property="FontSize" Value="13" />
+    <Setter Property="FontSize" Value="{DynamicResource FontBody}" />
+    <Setter Property="Foreground" Value="{DynamicResource FerriteText}" />
   </Style>
 
+  <Style Selector="UserControl">
+    <Setter Property="FontFamily" Value="Inter, Segoe UI, sans-serif" />
+    <Setter Property="FontSize" Value="{DynamicResource FontBody}" />
+    <Setter Property="Foreground" Value="{DynamicResource FerriteText}" />
+  </Style>
+
+  <!--
+    Prose wraps by default so nothing is silently hidden. Dense rows opt out with
+    TextWrapping="NoWrap" plus a trimming mode, which is where an ellipsis is the honest answer.
+  -->
   <Style Selector="TextBlock">
     <Setter Property="Foreground" Value="{DynamicResource FerriteText}" />
     <Setter Property="TextWrapping" Value="Wrap" />
   </Style>
 
+  <!-- Typography scale -->
+  <Style Selector="TextBlock.display">
+    <Setter Property="FontSize" Value="{DynamicResource FontDisplay}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+
   <Style Selector="TextBlock.h1">
-    <Setter Property="FontSize" Value="22" />
+    <Setter Property="FontSize" Value="{DynamicResource FontPageTitle}" />
     <Setter Property="FontWeight" Value="SemiBold" />
   </Style>
 
   <Style Selector="TextBlock.h2">
-    <Setter Property="FontSize" Value="16" />
+    <Setter Property="FontSize" Value="{DynamicResource FontSection}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+
+  <Style Selector="TextBlock.h3">
+    <Setter Property="FontSize" Value="{DynamicResource FontBody}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+
+  <Style Selector="TextBlock.stat">
+    <Setter Property="FontSize" Value="18" />
     <Setter Property="FontWeight" Value="SemiBold" />
   </Style>
 
   <Style Selector="TextBlock.label">
-    <Setter Property="FontSize" Value="11" />
+    <Setter Property="FontSize" Value="{DynamicResource FontLabel}" />
     <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{DynamicResource FerriteTextMuted}" />
+  </Style>
+
+  <Style Selector="TextBlock.meta">
+    <Setter Property="FontSize" Value="{DynamicResource FontMeta}" />
     <Setter Property="Foreground" Value="{DynamicResource FerriteTextMuted}" />
   </Style>
 
@@ -34,152 +72,397 @@
 
   <Style Selector="TextBlock.faint">
     <Setter Property="Foreground" Value="{DynamicResource FerriteTextFaint}" />
-    <Setter Property="FontSize" Value="12" />
+    <Setter Property="FontSize" Value="{DynamicResource FontMeta}" />
+  </Style>
+
+  <Style Selector="TextBlock.accent">
+    <Setter Property="Foreground" Value="{DynamicResource FerriteAccent}" />
+  </Style>
+
+  <Style Selector="TextBlock.success">
+    <Setter Property="Foreground" Value="{DynamicResource FerriteSuccess}" />
+  </Style>
+
+  <Style Selector="TextBlock.warning">
+    <Setter Property="Foreground" Value="{DynamicResource FerriteWarning}" />
+  </Style>
+
+  <Style Selector="TextBlock.danger">
+    <Setter Property="Foreground" Value="{DynamicResource FerriteDanger}" />
   </Style>
 
   <Style Selector="TextBlock.mono">
     <Setter Property="FontFamily" Value="Cascadia Mono, Consolas, monospace" />
-    <Setter Property="FontSize" Value="12" />
+    <Setter Property="FontSize" Value="{DynamicResource FontMeta}" />
   </Style>
 
+  <Style Selector="SelectableTextBlock.mono">
+    <Setter Property="FontFamily" Value="Cascadia Mono, Consolas, monospace" />
+    <Setter Property="FontSize" Value="{DynamicResource FontMeta}" />
+  </Style>
+
+  <!-- Surfaces -->
   <Style Selector="Border.card">
     <Setter Property="Background" Value="{DynamicResource FerriteSurfaceRaised}" />
     <Setter Property="BorderBrush" Value="{DynamicResource FerriteBorder}" />
     <Setter Property="BorderThickness" Value="1" />
-    <Setter Property="CornerRadius" Value="6" />
-    <Setter Property="Padding" Value="16" />
+    <Setter Property="CornerRadius" Value="{DynamicResource RadiusLg}" />
+    <Setter Property="Padding" Value="{DynamicResource Pad5}" />
   </Style>
 
-  <Style Selector="Button">
-    <Setter Property="Background" Value="{DynamicResource FerriteSurfaceRaised}" />
-    <Setter Property="Foreground" Value="{DynamicResource FerriteText}" />
-    <Setter Property="BorderBrush" Value="{DynamicResource FerriteBorderStrong}" />
+  <!-- A quieter grouping: a tinted plane with no border, for sections inside a card. -->
+  <Style Selector="Border.panel">
+    <Setter Property="Background" Value="{DynamicResource FerriteSurfaceSunken}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource RadiusMd}" />
+    <Setter Property="Padding" Value="{DynamicResource Pad4}" />
+  </Style>
+
+  <Style Selector="Border.overlay">
+    <Setter Property="Background" Value="{DynamicResource FerriteSurfaceOverlay}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource FerriteBorder}" />
     <Setter Property="BorderThickness" Value="1" />
-    <Setter Property="CornerRadius" Value="4" />
-    <Setter Property="Padding" Value="12,6" />
-    <Setter Property="MinHeight" Value="32" />
-    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="CornerRadius" Value="{DynamicResource RadiusLg}" />
+    <Setter Property="BoxShadow" Value="{DynamicResource FerriteShadowHigh}" />
   </Style>
 
-  <Style Selector="Button.primary">
-    <Setter Property="Background" Value="{DynamicResource FerriteAccent}" />
-    <Setter Property="Foreground" Value="{DynamicResource FerriteAccentText}" />
-    <Setter Property="BorderBrush" Value="{DynamicResource FerriteAccent}" />
-    <Setter Property="FontWeight" Value="SemiBold" />
-  </Style>
-
-  <Style Selector="Button.ghost">
-    <Setter Property="Background" Value="Transparent" />
-    <Setter Property="BorderBrush" Value="Transparent" />
-  </Style>
-
-  <Style Selector="Button.danger">
-    <Setter Property="Foreground" Value="{DynamicResource FerriteDanger}" />
+  <Style Selector="Border.divider">
+    <Setter Property="Height" Value="1" />
+    <Setter Property="Background" Value="{DynamicResource FerriteDivider}" />
   </Style>
 
   <!--
-    A low-emphasis inline action: the folder chip on an instance card, and similar metadata. It stays
-    a real button so it is keyboard reachable and gets the focus treatment below, but it carries no
-    fill and sits at text scale so a dense row does not look like a wall of buttons.
+    Pills. Reserved for compact statuses, tags, loader/version badges, and counts - the places where a
+    rounded shape genuinely says "this is a label".
   -->
-  <Style Selector="Button.chip">
-    <Setter Property="Background" Value="Transparent" />
-    <Setter Property="BorderBrush" Value="Transparent" />
-    <Setter Property="Foreground" Value="{DynamicResource FerriteTextMuted}" />
+  <Style Selector="Border.badge">
+    <Setter Property="CornerRadius" Value="{DynamicResource RadiusPill}" />
     <Setter Property="Padding" Value="8,2" />
-    <Setter Property="MinHeight" Value="24" />
-    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Background" Value="{DynamicResource FerriteSurfaceSunken}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource FerriteBorder}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource FerriteTextMuted}" />
   </Style>
 
-  <Style Selector="Button.chip:pointerover">
-    <Setter Property="Foreground" Value="{DynamicResource FerriteText}" />
+  <Style Selector="Border.badge > TextBlock">
+    <Setter Property="FontSize" Value="{DynamicResource FontLabel}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="TextWrapping" Value="NoWrap" />
+  </Style>
+
+  <Style Selector="Border.badge.accent">
+    <Setter Property="Background" Value="{DynamicResource FerriteAccentSoft}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource FerriteAccent}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource FerriteAccent}" />
+  </Style>
+
+  <Style Selector="Border.badge.success">
+    <Setter Property="Background" Value="{DynamicResource FerriteSuccessSoft}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource FerriteSuccess}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource FerriteSuccess}" />
+  </Style>
+
+  <Style Selector="Border.badge.warning">
+    <Setter Property="Background" Value="{DynamicResource FerriteWarningSoft}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource FerriteWarning}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource FerriteWarning}" />
+  </Style>
+
+  <Style Selector="Border.badge.danger">
+    <Setter Property="Background" Value="{DynamicResource FerriteDangerSoft}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource FerriteDanger}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource FerriteDanger}" />
+  </Style>
+
+  <Style Selector="Border.badge.info">
+    <Setter Property="Background" Value="{DynamicResource FerriteInfoSoft}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource FerriteInfo}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource FerriteInfo}" />
+  </Style>
+
+  <Style Selector="Border.badge.plain">
+    <Setter Property="Background" Value="Transparent" />
     <Setter Property="BorderBrush" Value="{DynamicResource FerriteBorder}" />
   </Style>
 
-  <Style Selector="Button:disabled">
-    <Setter Property="Opacity" Value="0.45" />
+  <!-- Banners: an inline message that keeps its action next to it. -->
+  <Style Selector="Border.banner">
+    <Setter Property="CornerRadius" Value="{DynamicResource RadiusMd}" />
+    <Setter Property="Padding" Value="12,10" />
+    <Setter Property="Background" Value="{DynamicResource FerriteSurfaceRaised}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource FerriteBorder}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource FerriteText}" />
   </Style>
 
-  <!--
-    Keyboard focus has to be visible on every control the user can tab to. The border is drawn in the
-    accent colour and thickened rather than animated, so it is unmistakable at a glance and does not
-    move the layout.
-  -->
-  <Style Selector="Button:focus-visible">
-    <Setter Property="BorderBrush" Value="{DynamicResource FerriteAccent}" />
-    <Setter Property="BorderThickness" Value="2" />
+  <Style Selector="Border.banner.info">
+    <Setter Property="Background" Value="{DynamicResource FerriteInfoSoft}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource FerriteInfo}" />
   </Style>
 
-  <Style Selector="TextBox:focus-visible, ComboBox:focus-visible, NumericUpDown:focus-visible">
-    <Setter Property="BorderBrush" Value="{DynamicResource FerriteAccent}" />
-    <Setter Property="BorderThickness" Value="2" />
+  <Style Selector="Border.banner.success">
+    <Setter Property="Background" Value="{DynamicResource FerriteSuccessSoft}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource FerriteSuccess}" />
   </Style>
 
-  <!--
-    A field the user is typing into shows focus even when it was reached with the pointer, because the
-    caret alone is not enough to tell where the next keystroke will land.
-  -->
-  <Style Selector="TextBox:focus, ComboBox:focus, NumericUpDown:focus">
-    <Setter Property="BorderBrush" Value="{DynamicResource FerriteAccent}" />
+  <Style Selector="Border.banner.warning">
+    <Setter Property="Background" Value="{DynamicResource FerriteWarningSoft}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource FerriteWarning}" />
   </Style>
 
-  <Style Selector="CheckBox:focus-visible">
-    <Setter Property="Foreground" Value="{DynamicResource FerriteAccent}" />
+  <Style Selector="Border.banner.danger">
+    <Setter Property="Background" Value="{DynamicResource FerriteDangerSoft}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource FerriteDanger}" />
   </Style>
 
-  <Style Selector="TabItem:focus-visible">
-    <Setter Property="Foreground" Value="{DynamicResource FerriteAccent}" />
-    <Setter Property="FontWeight" Value="SemiBold" />
-  </Style>
-
-  <Style Selector="ListBoxItem:focus-visible">
-    <Setter Property="BorderBrush" Value="{DynamicResource FerriteAccent}" />
-    <Setter Property="BorderThickness" Value="2" />
-  </Style>
-
-  <Style Selector="TextBox, ComboBox">
+  <!-- Inputs -->
+  <Style Selector="TextBox">
     <Setter Property="Background" Value="{DynamicResource FerriteSurfaceSunken}" />
     <Setter Property="Foreground" Value="{DynamicResource FerriteText}" />
     <Setter Property="BorderBrush" Value="{DynamicResource FerriteBorder}" />
-    <Setter Property="CornerRadius" Value="4" />
-    <Setter Property="MinHeight" Value="32" />
-    <Setter Property="Padding" Value="8,4" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource RadiusMd}" />
+    <Setter Property="MinHeight" Value="{DynamicResource ControlHeightMd}" />
+    <Setter Property="Padding" Value="10,5" />
+    <Setter Property="FontSize" Value="{DynamicResource FontBody}" />
+    <Setter Property="SelectionBrush" Value="{DynamicResource FerriteAccent}" />
+    <Setter Property="CaretBrush" Value="{DynamicResource FerriteText}" />
   </Style>
 
-  <Style Selector="TabItem">
-    <Setter Property="FontSize" Value="13" />
-    <Setter Property="Padding" Value="14,8" />
-    <Setter Property="Foreground" Value="{DynamicResource FerriteTextMuted}" />
+  <Style Selector="TextBox:pointerover">
+    <Setter Property="BorderBrush" Value="{DynamicResource FerriteBorderStrong}" />
   </Style>
 
-  <Style Selector="TabItem:selected">
+  <Style Selector="TextBox:focus">
+    <Setter Property="BorderBrush" Value="{DynamicResource FerriteAccent}" />
+  </Style>
+
+  <Style Selector="TextBox:disabled">
+    <Setter Property="Opacity" Value="0.55" />
+  </Style>
+
+  <Style Selector="ComboBox">
+    <Setter Property="Background" Value="{DynamicResource FerriteSurfaceSunken}" />
     <Setter Property="Foreground" Value="{DynamicResource FerriteText}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource FerriteBorder}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource RadiusMd}" />
+    <Setter Property="MinHeight" Value="{DynamicResource ControlHeightMd}" />
+    <Setter Property="Padding" Value="10,4" />
+    <Setter Property="FontSize" Value="{DynamicResource FontBody}" />
+  </Style>
+
+  <Style Selector="ComboBox:pointerover">
+    <Setter Property="BorderBrush" Value="{DynamicResource FerriteBorderStrong}" />
+  </Style>
+
+  <Style Selector="ComboBox:focus">
+    <Setter Property="BorderBrush" Value="{DynamicResource FerriteAccent}" />
+  </Style>
+
+  <Style Selector="ComboBoxItem">
+    <Setter Property="Padding" Value="10,6" />
+    <Setter Property="CornerRadius" Value="{DynamicResource RadiusSm}" />
+    <Setter Property="FontSize" Value="{DynamicResource FontBody}" />
+  </Style>
+
+  <Style Selector="ComboBoxItem:selected /template/ ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource FerriteAccentSoft}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource FerriteText}" />
+  </Style>
+
+  <Style Selector="NumericUpDown">
+    <Setter Property="Background" Value="{DynamicResource FerriteSurfaceSunken}" />
+    <Setter Property="Foreground" Value="{DynamicResource FerriteText}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource FerriteBorder}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource RadiusMd}" />
+    <Setter Property="MinHeight" Value="{DynamicResource ControlHeightMd}" />
+  </Style>
+
+  <Style Selector="NumericUpDown:focus">
+    <Setter Property="BorderBrush" Value="{DynamicResource FerriteAccent}" />
+  </Style>
+
+  <Style Selector="CheckBox">
+    <Setter Property="Foreground" Value="{DynamicResource FerriteText}" />
+    <Setter Property="FontSize" Value="{DynamicResource FontBody}" />
+    <Setter Property="MinHeight" Value="28" />
+  </Style>
+
+  <Style Selector="RadioButton">
+    <Setter Property="Foreground" Value="{DynamicResource FerriteText}" />
+    <Setter Property="FontSize" Value="{DynamicResource FontBody}" />
+  </Style>
+
+  <Style Selector="ToggleSwitch">
+    <Setter Property="Foreground" Value="{DynamicResource FerriteText}" />
+    <Setter Property="FontSize" Value="{DynamicResource FontBody}" />
+    <Setter Property="MinHeight" Value="28" />
+  </Style>
+
+  <Style Selector="Slider">
+    <Setter Property="Foreground" Value="{DynamicResource FerriteAccent}" />
   </Style>
 
   <Style Selector="ProgressBar">
     <Setter Property="Height" Value="6" />
     <Setter Property="Foreground" Value="{DynamicResource FerriteAccent}" />
     <Setter Property="Background" Value="{DynamicResource FerriteSurfaceSunken}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource RadiusPill}" />
   </Style>
 
-  <!-- Navigation list: Ferrite uses its own accent for selection rather than the theme default. -->
+  <Style Selector="ProgressBar.thin">
+    <Setter Property="Height" Value="4" />
+  </Style>
+
+  <Style Selector="ProgressBar.running">
+    <Setter Property="Foreground" Value="{DynamicResource FerriteRunning}" />
+  </Style>
+
+  <Style Selector="Separator">
+    <Setter Property="Background" Value="{DynamicResource FerriteDivider}" />
+    <Setter Property="Height" Value="1" />
+  </Style>
+
+  <!--
+    Generic list rows. Selection is a soft accent fill plus a bright label rather than a saturated
+    block, so a selected row still reads as a row of data.
+  -->
   <Style Selector="ListBoxItem">
-    <Setter Property="Padding" Value="12,8" />
+    <Setter Property="Padding" Value="10,7" />
     <Setter Property="Margin" Value="0,1" />
-    <Setter Property="CornerRadius" Value="4" />
-    <Setter Property="Foreground" Value="{DynamicResource FerriteTextMuted}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource RadiusMd}" />
+    <Setter Property="Foreground" Value="{DynamicResource FerriteText}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Name="PART_Root"
+                Background="Transparent"
+                CornerRadius="{TemplateBinding CornerRadius}">
+          <Border.Transitions>
+            <Transitions>
+              <BrushTransition Property="Background" Duration="0:0:0.12" />
+            </Transitions>
+          </Border.Transitions>
+          <ContentPresenter Name="PART_ContentPresenter"
+                            Margin="{TemplateBinding Padding}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Center" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
   </Style>
 
-  <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
-    <Setter Property="Background" Value="{DynamicResource FerriteBorder}" />
+  <Style Selector="ListBoxItem:pointerover /template/ Border#PART_Root">
+    <Setter Property="Background" Value="{DynamicResource FerriteHover}" />
+  </Style>
+
+  <Style Selector="ListBoxItem:selected /template/ Border#PART_Root">
+    <Setter Property="Background" Value="{DynamicResource FerriteAccentSoft}" />
   </Style>
 
   <Style Selector="ListBoxItem:selected">
-    <Setter Property="Foreground" Value="{DynamicResource FerriteAccentText}" />
+    <Setter Property="Foreground" Value="{DynamicResource FerriteText}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
   </Style>
 
-  <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
-    <Setter Property="Background" Value="{DynamicResource FerriteAccent}" />
+  <Style Selector="ListBoxItem:focus-visible /template/ Border#PART_Root">
+    <Setter Property="BorderBrush" Value="{DynamicResource FerriteAccent}" />
+    <Setter Property="BorderThickness" Value="2" />
+  </Style>
+
+  <!-- Navigation rail -->
+  <Style Selector="Border.rail">
+    <Setter Property="Width" Value="{DynamicResource RailWidth}" />
+  </Style>
+
+  <Style Selector="Border.rail.compact">
+    <Setter Property="Width" Value="{DynamicResource RailWidthCompact}" />
+  </Style>
+
+  <Style Selector="ListBox.rail">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="0" />
+  </Style>
+
+  <Style Selector="ListBox.rail ListBoxItem">
+    <Setter Property="Padding" Value="9,8" />
+    <Setter Property="Margin" Value="0,1" />
+    <Setter Property="MinHeight" Value="38" />
+    <Setter Property="FontSize" Value="{DynamicResource FontBody}" />
+  </Style>
+
+  <Style Selector="ListBox.dense ListBoxItem">
+    <Setter Property="Padding" Value="10,6" />
+    <Setter Property="MinHeight" Value="40" />
+  </Style>
+
+  <!--
+    Segmented switch: a small exclusive choice, used for view switches and short filters. It is a
+    ListBox so arrow keys move between the options and the selected one is announced.
+  -->
+  <Style Selector="ListBox.segments">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="0" />
+  </Style>
+
+  <Style Selector="ListBox.segments ListBoxItem">
+    <Setter Property="Padding" Value="12,4" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="MinHeight" Value="28" />
+    <Setter Property="CornerRadius" Value="0" />
+    <Setter Property="FontSize" Value="{DynamicResource FontMeta}" />
+  </Style>
+
+  <Style Selector="ListBox.segments ListBoxItem:selected /template/ Border#PART_Root">
+    <Setter Property="Background" Value="{DynamicResource FerriteSurfaceRaised}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource FerriteBorder}" />
+    <Setter Property="BorderThickness" Value="1" />
+  </Style>
+
+  <Style Selector="ListBox.segments ListBoxItem:selected">
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+
+  <!--
+    A rail entry outside the primary list: the account switcher and Settings. It matches a rail
+    ListBoxItem so the footer reads as part of the same navigation, and takes an active state so a
+    footer destination still shows where you are.
+  -->
+  <Style Selector="Button.nav-footer">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource RadiusMd}" />
+    <Setter Property="Padding" Value="9,8" />
+    <Setter Property="MinHeight" Value="38" />
+    <Setter Property="Foreground" Value="{DynamicResource FerriteTextMuted}" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+  </Style>
+
+  <Style Selector="Button.nav-footer:pointerover /template/ Border#PART_Root">
+    <Setter Property="Background" Value="{DynamicResource FerriteHover}" />
+  </Style>
+
+  <Style Selector="Button.nav-footer:pointerover">
+    <Setter Property="Foreground" Value="{DynamicResource FerriteText}" />
+  </Style>
+
+  <Style Selector="Button.nav-footer.active">
+    <Setter Property="Foreground" Value="{DynamicResource FerriteText}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+
+  <Style Selector="Button.nav-footer.active /template/ Border#PART_Root">
+    <Setter Property="Background" Value="{DynamicResource FerriteAccentSoft}" />
+  </Style>
+
+  <Style Selector="CheckBox:focus-visible">
+    <Setter Property="Foreground" Value="{DynamicResource FerriteAccent}" />
   </Style>
 
 </Styles>

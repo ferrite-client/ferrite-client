@@ -14,6 +14,7 @@ public static class TestAppBuilder
 {
     public static AppBuilder BuildAvaloniaApp() => AppBuilder
         .Configure<Ferrite.App.App>()
+        .WithInterFont()
         .UseSkia()
         .UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false });
 }

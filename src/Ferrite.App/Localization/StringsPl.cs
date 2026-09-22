@@ -9,12 +9,20 @@ internal static class StringsPl
             ["L.App.Name"] = "Ferrite",
             ["L.App.Tagline"] = "Launcher Minecrafta",
             ["L.Nav.Library"] = "Biblioteka",
-            ["L.Nav.Browse"] = "Przeglądaj",
+            ["L.Nav.Discover"] = "Odkrywaj",
+            ["L.Nav.Downloads"] = "Pobierania",
             ["L.Nav.Java"] = "Java",
             ["L.Nav.Accounts"] = "Konta",
             ["L.Nav.Settings"] = "Ustawienia",
             ["L.Shell.Account"] = "KONTO",
             ["L.Shell.NoAccount"] = "Brak konta",
+            ["L.Shell.SignedOut"] = "Nie zalogowano",
+            ["L.Shell.AccountSwitcher"] = "Konto",
+            ["L.Shell.ManageAccounts"] = "Zarządzaj kontami",
+            ["L.Shell.CollapseRail"] = "Zwiń nawigację",
+            ["L.Shell.ExpandRail"] = "Rozwiń nawigację",
+            ["L.Shell.Downloads"] = "Aktywność",
+            ["L.Shell.Navigate"] = "Nawigacja",
             ["L.Shell.QuickActions"] = "Szybkie akcje",
             ["L.Shell.QuickActionsPlaceholder"] = "Wpisz polecenie lub nazwę instancji",
             ["L.Quick.GoTo"] = "Przejdź do {0}",
@@ -40,6 +48,22 @@ internal static class StringsPl
             ["L.Activity.DownloadingItem"] = "Pobieranie {0} ({1})",
             ["L.Activity.ExtractingNatives"] = "Wypakowywanie bibliotek natywnych ({0})",
             ["L.Activity.Finishing"] = "Kończenie...",
+
+            ["L.Downloads.Running"] = "W toku",
+            ["L.Downloads.Succeeded"] = "Zakończone",
+            ["L.Downloads.Failed"] = "Nieudane",
+            ["L.Downloads.Cancelled"] = "Anulowane",
+            ["L.Downloads.FilterAll"] = "Wszystkie",
+            ["L.Downloads.FilterFinished"] = "Zakończone",
+            ["L.Downloads.FilterFailed"] = "Nieudane",
+            ["L.Downloads.SummaryActive"] = "Operacje w toku: {0}",
+            ["L.Downloads.SummaryIdle"] = "Nic się teraz nie pobiera.",
+            ["L.Downloads.Working"] = "Pracuję...",
+            ["L.Downloads.InProgress"] = "W TOKU",
+            ["L.Downloads.History"] = "HISTORIA",
+            ["L.Downloads.NoMatches"] =
+                "Żadna operacja nie pasuje do wyszukiwania ani filtra.",
+            ["L.Downloads.SearchPlaceholder"] = "Szukaj operacji",
 
             ["L.Library.SearchInstances"] = "Szukaj instancji",
             ["L.Library.SortRecent"] = "Ostatnio uruchamiane",
@@ -75,6 +99,13 @@ internal static class StringsPl
             ["L.Library.FieldLoaderVersion"] = "WERSJA LOADERA",
             ["L.Library.FieldGroup"] = "FOLDER",
             ["L.Library.CreateAndInstall"] = "Utwórz i zainstaluj",
+            ["L.Library.ViewGrid"] = "Siatka",
+            ["L.Library.ViewList"] = "Lista",
+            ["L.Library.ViewLabel"] = "WIDOK",
+            ["L.Library.SortLabel"] = "KOLEJNOŚĆ",
+            ["L.Library.MoreActions"] = "Więcej akcji",
+            ["L.Library.Count"] = "Instancje: {0}",
+            ["L.Library.OpenInstance"] = "Otwórz {0}",
 
             ["L.Browse.Search"] = "Szukaj",
             ["L.Browse.RefreshInstances"] = "Odśwież instancje",
@@ -117,17 +148,32 @@ internal static class StringsPl
 
             ["L.Accounts.Hint"] =
                 "Logowanie korzysta z przepływu device code Microsoftu. Ferrite nigdy nie widzi ani nie zapisuje Twojego hasła.",
-            ["L.Accounts.ClientIdPlaceholder"] = "Identyfikator klienta Microsoft (publiczny klient Azure)",
-            ["L.Accounts.SaveClientId"] = "Zapisz identyfikator klienta",
             ["L.Accounts.SignIn"] = "Zaloguj się",
+            ["L.Accounts.YourAccounts"] = "TWOJE KONTA",
+            ["L.Accounts.AddAccount"] = "DODAJ KONTO",
+            ["L.Accounts.BadgeActive"] = "AKTYWNE",
+            ["L.Accounts.ThirdParty"] = "SERWER ZEWNĘTRZNY",
+            ["L.Accounts.BrowserSignIn"] = "Logowanie w przeglądarce",
+            ["L.Accounts.RequestingCode"] = "Pobieranie kodu logowania...",
+            ["L.Accounts.EnterCode"] = "Wprowadź ten kod w przeglądarce, aby się zalogować.",
+            ["L.Accounts.BrowserSignInWaiting"] = "Dokończ logowanie w oknie przeglądarki.",
+            ["L.Accounts.SignInCancelled"] = "Logowanie anulowane.",
+            ["L.Accounts.SignedInAs"] = "Zalogowano jako {0}",
             ["L.Accounts.FieldCode"] = "KOD",
             ["L.Accounts.OpenSignInPage"] = "Otwórz stronę logowania",
             ["L.Accounts.Use"] = "Użyj",
             ["L.Accounts.SignOut"] = "Wyloguj się",
             ["L.Accounts.Empty"] =
-                "Brak kont. Dodaj identyfikator klienta Microsoft, a następnie zaloguj się.",
+                "Brak kont. Zaloguj się przez Microsoft, aby dodać konto.",
             ["L.Accounts.Degraded"] =
                 "Ochrona poświadczeń jest ograniczona na tej platformie; tokeny są przechowywane z uprawnieniami tylko dla użytkownika.",
+            ["L.Accounts.YggdrasilServer"] = "Serwer Yggdrasil",
+            ["L.Accounts.YggdrasilServerPlaceholder"] = "https://auth.example",
+            ["L.Accounts.YggdrasilUsername"] = "Nazwa użytkownika Yggdrasil",
+            ["L.Accounts.YggdrasilUsernamePlaceholder"] = "Nazwa użytkownika lub e-mail",
+            ["L.Accounts.YggdrasilPassword"] = "Hasło Yggdrasil",
+            ["L.Accounts.YggdrasilPasswordPlaceholder"] = "Hasło",
+            ["L.Accounts.YggdrasilSignIn"] = "Logowanie zewnętrzne",
 
             ["L.Java.Hint"] =
                 "Ferrite sprawdza każde środowisko uruchamiając je, więc wymienione są tylko działające instalacje.",
@@ -140,7 +186,12 @@ internal static class StringsPl
             ["L.Settings.Appearance"] = "Wygląd",
             ["L.Settings.FieldTheme"] = "MOTYW",
             ["L.Settings.FieldLanguage"] = "JĘZYK",
+            ["L.Settings.ProxyPlaceholder"] = "http://host:port",
+            ["L.Settings.UpdateFeedPlaceholder"] = "https://example.com/ferrite/",
             ["L.Settings.ShowSnapshots"] = "Pokaż snapshoty na liście wersji",
+            ["L.Settings.ShowHistorical"] = "Pokaż historyczne wersje alpha i beta",
+            ["L.Settings.FieldDefaultMemory"] = "DOMYŚLNA PAMIĘĆ (MB)",
+            ["L.Settings.FieldLogRetention"] = "PRZECHOWYWANIE LOGÓW (DNI)",
             ["L.Settings.Network"] = "Sieć",
             ["L.Settings.FieldConcurrentDownloads"] = "RÓWNOLEGŁE POBIERANIA",
             ["L.Settings.FieldProxy"] = "PROXY HTTP",
@@ -149,18 +200,6 @@ internal static class StringsPl
             ["L.Settings.MirrorsHint"] =
                 "Przekierowuje żądania artefaktów i metadanych dla danego hosta do zaufanego lustra. "
                 + "Ścieżka i parametry są zachowane, więc lustro musi mieć identyczny układ.",
-            ["L.Settings.Accounts"] = "Konta",
-            ["L.Settings.FieldClientId"] = "IDENTYFIKATOR KLIENTA MICROSOFT",
-            ["L.Settings.ClientIdHint"] =
-                "Wymagany do logowania przez Microsoft. Dokładne kroki opisuje docs/HUMAN_ACTION_REQUIRED.md.",
-            ["L.Settings.Providers"] = "Dostawcy treści",
-            ["L.Settings.FieldCurseForgeKey"] = "KLUCZ API CURSEFORGE",
-            ["L.Settings.CurseForgeKeyPlaceholder"] = "Wklej klucz, aby zapisać lub zastąpić obecny",
-            ["L.Settings.RemoveKey"] = "Usuń klucz",
-            ["L.Settings.CurseForgeHint"] =
-                "Przeglądanie CurseForge, instalowanie modów i import modpacków wymagają klucza wydanego "
-                + "przez CurseForge. Klucz jest przechowywany poza plikiem ustawień. "
-                + "Szczegóły w docs/HUMAN_ACTION_REQUIRED.md.",
             ["L.Settings.Storage"] = "Pamięć",
             ["L.Settings.FieldDataRoot"] = "KATALOG DANYCH",
             ["L.Settings.DataRootHint"] =
@@ -204,7 +243,6 @@ internal static class StringsPl
                 + "Poświadczenia są usuwane przed zapisem.",
             ["L.Settings.SaveSettings"] = "Zapisz ustawienia",
             ["L.Settings.Saved"] = "Ustawienia zapisane",
-            ["L.Settings.KeyRemoved"] = "Klucz API CurseForge usunięty",
             ["L.Settings.NoFeed"] = "Nie skonfigurowano kanału aktualizacji.",
             ["L.Settings.CheckFirst"] = "Najpierw sprawdź aktualizacje.",
             ["L.Settings.UpToDate"] = "Ferrite {0} to najnowsze wydanie w tym kanale.",
@@ -300,6 +338,7 @@ internal static class StringsPl
             ["L.Instance.NoMods"] = "W tej instancji nie ma zainstalowanych modów.",
             ["L.Instance.NoModMatches"] = "Żaden zainstalowany mod nie pasuje do wyszukiwania.",
             ["L.Instance.ModSearchPlaceholder"] = "Szukaj modów",
+            ["L.Instance.ServerAddressPlaceholder"] = "play.example.net",
             ["L.Instance.ModLoaderAll"] = "Wszystkie loadery",
             ["L.Instance.ModGroupAll"] = "Wszystkie grupy",
             ["L.Instance.ModGroups"] = "Grupy",
@@ -462,8 +501,6 @@ internal static class StringsPl
             ["L.Java.PathAdded"] = "Dodano {0}.",
             ["L.Java.DefaultNow"] = "Domyślne środowisko to teraz {0}",
             ["L.Java.Provisioned"] = "Zainstalowano {0}",
-            ["L.Accounts.NeedClientId"] =
-                "Najpierw dodaj identyfikator klienta Microsoft; szczegóły w docs/HUMAN_ACTION_REQUIRED.md.",
             ["L.Accounts.Active"] = "Aktywne konto: {0}",
             ["L.Accounts.SignedOut"] = "Wylogowano",
             ["L.Instance.BackedUp"] = "Kopia zapasowa: {0}",
@@ -480,8 +517,6 @@ internal static class StringsPl
             ["L.Library.MovedToBackups"] = "Przeniesiono {0} do kopii zapasowych",
             ["L.Library.Grouped"] = "Przeniesiono {0} do {1}",
             ["L.Library.GroupCleared"] = "Usunięto instancję z folderu",
-            ["L.Accounts.ClientIdCleared"] = "Identyfikator klienta usunięty",
-            ["L.Accounts.ClientIdSaved"] = "Identyfikator klienta zapisany",
             ["L.Java.NoBuilds"] = "Mojang nie publikuje kompilacji {0} dla tej platformy",
             ["L.Java.Builds"] = "Opublikowane kompilacje ({1}): {0}",
             ["L.Instance.ExitNormal"] = "Zakończono prawidłowo",
@@ -496,11 +531,5 @@ internal static class StringsPl
             ["L.Instance.LaunchFailed"] = "Nie udało się uruchomić tej instancji.",
             ["L.Library.ChooseMinecraftVersion"] = "Wybierz wersję Minecrafta.",
             ["L.Library.ChooseLoaderVersion"] = "Wybierz wersję loadera.",
-            ["L.Settings.KeyStoredDegraded"] =
-                "Klucz zapisany tylko z uprawnieniami pliku (ta platforma nie ma ochrony systemowej).",
-            ["L.Settings.KeyStoredProtected"] =
-                "Klucz zapisany i chroniony przez system operacyjny.",
-            ["L.Settings.NoKeyStored"] =
-                "Brak zapisanego klucza. Przeglądanie CurseForge i instalacja modpacków są wyłączone.",
         };
 }

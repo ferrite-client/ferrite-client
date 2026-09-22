@@ -1,62 +1,144 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:Ferrite.App.ViewModels"
+             xmlns:controls="clr-namespace:Ferrite.App.Controls"
              x:Class="Ferrite.App.Views.AccountsView"
              x:DataType="vm:AccountsViewModel">
 
-  <Grid RowDefinitions="Auto,*,Auto" Margin="24">
+  <Grid RowDefinitions="Auto,*" Margin="24">
 
-    <StackPanel Grid.Row="0" Spacing="10" Margin="0,0,0,16">
-      <TextBlock Classes="muted"
-                     Text="{DynamicResource L.Accounts.Hint}" />
-      <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
-        <TextBox Grid.Column="0" PlaceholderText="{DynamicResource L.Accounts.ClientIdPlaceholder}"
-                 Text="{Binding ClientId}" />
-        <Button Grid.Column="1" Content="{DynamicResource L.Accounts.SaveClientId}" Command="{Binding SaveClientIdCommand}" />
-        <Button Grid.Column="2" Classes="primary" Content="{DynamicResource L.Accounts.SignIn}"
-                IsEnabled="{Binding !IsSigningIn}" Command="{Binding SignInCommand}" />
+    <StackPanel Grid.Row="0" Spacing="6" Margin="0,0,0,18">
+      <TextBlock Classes="h1" Text="{DynamicResource L.Nav.Accounts}" />
+      <TextBlock Classes="muted" Text="{DynamicResource L.Accounts.Hint}" MaxWidth="720"
+                 HorizontalAlignment="Left" />
+    </StackPanel>
+
+    <Grid Grid.Row="1" ColumnDefinitions="*,400" ColumnSpacing="20">
+
+      <!-- Accounts -->
+      <Grid Grid.Column="0" RowDefinitions="Auto,*">
+        <TextBlock Grid.Row="0" Classes="label" Margin="0,0,0,10"
+                   Text="{DynamicResource L.Accounts.YourAccounts}" />
+
+        <ScrollViewer Grid.Row="1">
+          <ItemsControl ItemsSource="{Binding Accounts}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="vm:AccountItemViewModel">
+                <Border Classes="card" Margin="0,0,0,10" Padding="14">
+                  <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                    <Border Grid.Column="0" Width="46" Height="46"
+                            CornerRadius="{DynamicResource RadiusMd}"
+                            Background="{DynamicResource FerriteSurfaceSunken}"
+                            VerticalAlignment="Center">
+                      <Panel>
+                        <controls:IconGlyph Data="{StaticResource Icon.Account}" Width="20" Height="20"
+                                            HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        <Image Source="{Binding SkinPreview}" Stretch="Uniform"
+                               IsVisible="{Binding HasSkinPreview}" />
+                      </Panel>
+                    </Border>
+
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
+                      <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Classes="h3" Text="{Binding DisplayName}"
+                                   TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"
+                                   ToolTip.Tip="{Binding DisplayName}" />
+                        <Border Classes="badge success" IsVisible="{Binding IsActive}">
+                          <TextBlock Text="{DynamicResource L.Accounts.BadgeActive}" />
+                        </Border>
+                      </StackPanel>
+                      <TextBlock Classes="faint mono" Text="{Binding Uuid}"
+                                 TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"
+                                 ToolTip.Tip="{Binding Uuid}" />
+                      <TextBlock Classes="faint" Text="{Binding Kind}" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8"
+                                VerticalAlignment="Center">
+                      <Image Source="{Binding CapePreview}" Width="34" Height="18" Stretch="Uniform"
+                             IsVisible="{Binding HasCapePreview}" />
+                      <Button Classes="chip" Content="{DynamicResource L.Accounts.Use}"
+                              Command="{Binding $parent[UserControl].((vm:AccountsViewModel)DataContext).SetActiveCommand}"
+                              CommandParameter="{Binding}" />
+                      <Button Classes="danger" Content="{DynamicResource L.Accounts.SignOut}"
+                              Command="{Binding $parent[UserControl].((vm:AccountsViewModel)DataContext).SignOutCommand}"
+                              CommandParameter="{Binding}" />
+                    </StackPanel>
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+
+        <!-- Empty state -->
+        <StackPanel Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Left"
+                    Margin="0,28,0,0" Spacing="10" MaxWidth="360"
+                    IsVisible="{Binding !HasAccounts}">
+          <controls:IconGlyph Data="{StaticResource Icon.Account}" Width="28" Height="28"
+                              Opacity="0.5" />
+          <TextBlock Classes="muted" Text="{DynamicResource L.Accounts.Empty}" />
+        </StackPanel>
       </Grid>
-      <StackPanel Orientation="Horizontal" Spacing="12" IsVisible="{Binding HasUserCode}">
-          <TextBlock Classes="label" Text="{DynamicResource L.Accounts.FieldCode}" VerticalAlignment="Center" />
-        <TextBlock Classes="h1 mono" Text="{Binding UserCode}" VerticalAlignment="Center" />
-          <Button Content="{DynamicResource L.Accounts.OpenSignInPage}" Command="{Binding OpenProfileUrlCommand}" />
-          <Button Content="{DynamicResource L.Common.Cancel}" Command="{Binding CancelSignInCommand}" />
-      </StackPanel>
-      <TextBlock Classes="muted" Text="{Binding SignInStatus}" />
-    </StackPanel>
 
-    <ScrollViewer Grid.Row="1">
-      <ItemsControl ItemsSource="{Binding Accounts}">
-        <ItemsControl.ItemTemplate>
-          <DataTemplate>
-            <Border Classes="card" Margin="0,0,0,8">
-              <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
-                <StackPanel Grid.Column="0" Spacing="2">
-                  <TextBlock Classes="h2" Text="{Binding DisplayName}" />
-                  <TextBlock Classes="mono" Text="{Binding Uuid}" />
-                  <TextBlock Classes="faint" Text="{Binding Kind}" />
-                </StackPanel>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-        <Button Content="{DynamicResource L.Accounts.Use}" Command="{Binding $parent[ItemsControl].((vm:AccountsViewModel)DataContext).SetActiveCommand}"
-                          CommandParameter="{Binding}" />
-        <Button Classes="danger" Content="{DynamicResource L.Accounts.SignOut}"
-                          Command="{Binding $parent[ItemsControl].((vm:AccountsViewModel)DataContext).SignOutCommand}"
-                          CommandParameter="{Binding}" />
-                </StackPanel>
-              </Grid>
-            </Border>
-          </DataTemplate>
-        </ItemsControl.ItemTemplate>
-      </ItemsControl>
-    </ScrollViewer>
+      <!-- Add an account -->
+      <Border Grid.Column="1" Classes="card" VerticalAlignment="Top" Padding="18">
+        <StackPanel Spacing="14">
+          <TextBlock Classes="label" Text="{DynamicResource L.Accounts.AddAccount}" />
 
-    <StackPanel Grid.Row="2" Spacing="6" Margin="0,16,0,0">
-      <TextBlock Classes="faint" IsVisible="{Binding !HasAccounts}"
-                     Text="{DynamicResource L.Accounts.Empty}" />
-      <TextBlock Classes="faint" IsVisible="{Binding SecretStorageDegraded}"
-                     Text="{DynamicResource L.Accounts.Degraded}" />
-      <TextBlock Classes="faint" Text="{Binding StatusNote}" />
-    </StackPanel>
+          <StackPanel Orientation="Horizontal" Spacing="10">
+            <Button Classes="primary" Content="{DynamicResource L.Accounts.SignIn}"
+                    IsEnabled="{Binding !IsSigningIn}" Command="{Binding SignInCommand}" />
+            <Button Content="{DynamicResource L.Accounts.BrowserSignIn}"
+                    IsEnabled="{Binding !IsSigningIn}" Command="{Binding BrowserSignInCommand}" />
+          </StackPanel>
+
+          <!-- Device code -->
+          <Border Classes="panel" IsVisible="{Binding HasUserCode}">
+            <StackPanel Spacing="10">
+              <TextBlock Classes="muted" Text="{DynamicResource L.Accounts.EnterCode}" />
+              <TextBlock Classes="label" Text="{DynamicResource L.Accounts.FieldCode}" />
+              <TextBlock Classes="stat mono" Text="{Binding UserCode}" />
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Content="{DynamicResource L.Accounts.OpenSignInPage}"
+                        Command="{Binding OpenProfileUrlCommand}" />
+                <Button Classes="ghost" Content="{DynamicResource L.Common.Cancel}"
+                        Command="{Binding CancelSignInCommand}" />
+              </StackPanel>
+            </StackPanel>
+          </Border>
+
+          <TextBlock Classes="muted" Text="{Binding SignInStatus}"
+                     IsVisible="{Binding SignInStatus, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+          <Border Classes="divider" />
+
+          <TextBlock Classes="label" Text="{DynamicResource L.Accounts.ThirdParty}" />
+          <StackPanel Spacing="8">
+            <TextBox Text="{Binding YggdrasilServerUrl}"
+                     PlaceholderText="{DynamicResource L.Accounts.YggdrasilServerPlaceholder}"
+                     AutomationProperties.Name="{DynamicResource L.Accounts.YggdrasilServer}" />
+            <TextBox Text="{Binding YggdrasilUsername}"
+                     PlaceholderText="{DynamicResource L.Accounts.YggdrasilUsernamePlaceholder}"
+                     AutomationProperties.Name="{DynamicResource L.Accounts.YggdrasilUsername}" />
+            <TextBox Text="{Binding YggdrasilPassword}" PasswordChar="*"
+                     PlaceholderText="{DynamicResource L.Accounts.YggdrasilPasswordPlaceholder}"
+                     AutomationProperties.Name="{DynamicResource L.Accounts.YggdrasilPassword}" />
+            <Button Content="{DynamicResource L.Accounts.YggdrasilSignIn}"
+                    HorizontalAlignment="Left"
+                    IsEnabled="{Binding !IsSigningIn}" Command="{Binding YggdrasilSignInCommand}" />
+          </StackPanel>
+
+          <Border Classes="banner warning" IsVisible="{Binding SecretStorageDegraded}">
+            <TextBlock Text="{DynamicResource L.Accounts.Degraded}" />
+          </Border>
+
+          <TextBlock Classes="faint" Text="{Binding StatusNote}"
+                     IsVisible="{Binding StatusNote, Converter={x:Static ObjectConverters.IsNotNull}}" />
+        </StackPanel>
+      </Border>
+
+    </Grid>
 
   </Grid>
 

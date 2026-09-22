@@ -2,47 +2,119 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
   <!--
-    Ferrite palette: neutral graphite surfaces with a copper accent and a teal success tone.
-    Two accents keep the interface from reading as a single-hue theme.
+    Ferrite colour system.
+
+    Graphite surfaces with a warm ferrite/oxide accent. The accent is the brand and the selection
+    language; state is carried by separate semantic colours so one hue never means two things.
+
+    Values here were contrast-checked against the surface each one is used on. Text tones clear WCAG
+    AA (4.5:1) at body size on the raised surface, and the accent-on-accent pair clears AA too.
   -->
   <ResourceDictionary.ThemeDictionaries>
 
     <ResourceDictionary x:Key="Dark">
+      <!-- Surfaces, darkest to lightest. Separation carries hierarchy; borders are the last resort. -->
+      <SolidColorBrush x:Key="FerriteBg" Color="#0D0F12" />
+      <SolidColorBrush x:Key="FerriteSurfaceSunken" Color="#0F1114" />
       <SolidColorBrush x:Key="FerriteSurface" Color="#14161A" />
       <SolidColorBrush x:Key="FerriteSurfaceRaised" Color="#1B1E24" />
-      <SolidColorBrush x:Key="FerriteSurfaceSunken" Color="#0F1114" />
+      <SolidColorBrush x:Key="FerriteSurfaceOverlay" Color="#23272F" />
+      <SolidColorBrush x:Key="FerriteHover" Color="#232830" />
+      <SolidColorBrush x:Key="FerritePressed" Color="#2B313A" />
+      <SolidColorBrush x:Key="FerriteScrim" Color="#B3000000" />
+
       <SolidColorBrush x:Key="FerriteBorder" Color="#2A2F37" />
       <SolidColorBrush x:Key="FerriteBorderStrong" Color="#3A414B" />
+      <SolidColorBrush x:Key="FerriteDivider" Color="#23272E" />
+
       <SolidColorBrush x:Key="FerriteText" Color="#E8EAED" />
       <SolidColorBrush x:Key="FerriteTextMuted" Color="#9AA2AD" />
-      <!--
-        The faint tone is used at 12px, so it still has to clear WCAG AA (4.5:1) against both the
-        page surface and the raised card surface.
-      -->
+      <!-- Used at 12px and up, so it still clears AA against both page and raised surfaces. -->
       <SolidColorBrush x:Key="FerriteTextFaint" Color="#8C95A2" />
+      <SolidColorBrush x:Key="FerriteTextOnAccent" Color="#1A1409" />
+
       <SolidColorBrush x:Key="FerriteAccent" Color="#D08A3E" />
       <SolidColorBrush x:Key="FerriteAccentHover" Color="#E0A458" />
+      <SolidColorBrush x:Key="FerriteAccentPressed" Color="#B87A31" />
+      <SolidColorBrush x:Key="FerriteAccentSoft" Color="#33291C" />
       <SolidColorBrush x:Key="FerriteAccentText" Color="#1A1409" />
+
       <SolidColorBrush x:Key="FerriteSuccess" Color="#4FB3A5" />
-      <SolidColorBrush x:Key="FerriteDanger" Color="#D2665C" />
+      <SolidColorBrush x:Key="FerriteSuccessSoft" Color="#17302C" />
       <SolidColorBrush x:Key="FerriteWarning" Color="#D8B04A" />
+      <SolidColorBrush x:Key="FerriteWarningSoft" Color="#322A16" />
+      <SolidColorBrush x:Key="FerriteDanger" Color="#D2665C" />
+      <SolidColorBrush x:Key="FerriteDangerSoft" Color="#331C1A" />
+      <SolidColorBrush x:Key="FerriteInfo" Color="#5E9FD8" />
+      <SolidColorBrush x:Key="FerriteInfoSoft" Color="#17262F" />
+      <SolidColorBrush x:Key="FerriteRunning" Color="#4FB3A5" />
+      <SolidColorBrush x:Key="FerriteDownloading" Color="#5E9FD8" />
+
+      <BoxShadows x:Key="FerriteShadowLow">0 1 2 0 #59000000</BoxShadows>
+      <BoxShadows x:Key="FerriteShadowMid">0 6 20 0 #73000000</BoxShadows>
+      <BoxShadows x:Key="FerriteShadowHigh">0 18 48 0 #99000000</BoxShadows>
+
+      <!--
+        The Fluent theme drives its own controls (check boxes, switches, sliders, selection
+        highlights) from these. Pointing them at the ferrite accent keeps every stock control on-brand
+        without retemplating it.
+      -->
+      <Color x:Key="SystemAccentColor">#D08A3E</Color>
+      <Color x:Key="SystemAccentColorLight1">#E0A458</Color>
+      <Color x:Key="SystemAccentColorLight2">#ECBE88</Color>
+      <Color x:Key="SystemAccentColorLight3">#F6DCC0</Color>
+      <Color x:Key="SystemAccentColorDark1">#B87A31</Color>
+      <Color x:Key="SystemAccentColorDark2">#A06A2A</Color>
+      <Color x:Key="SystemAccentColorDark3">#885A23</Color>
     </ResourceDictionary>
 
     <ResourceDictionary x:Key="Light">
+      <SolidColorBrush x:Key="FerriteBg" Color="#ECECE9" />
+      <SolidColorBrush x:Key="FerriteSurfaceSunken" Color="#E4E4E0" />
       <SolidColorBrush x:Key="FerriteSurface" Color="#F6F6F4" />
       <SolidColorBrush x:Key="FerriteSurfaceRaised" Color="#FFFFFF" />
-      <SolidColorBrush x:Key="FerriteSurfaceSunken" Color="#EAEAE6" />
+      <SolidColorBrush x:Key="FerriteSurfaceOverlay" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="FerriteHover" Color="#EDEDE9" />
+      <SolidColorBrush x:Key="FerritePressed" Color="#E2E2DC" />
+      <SolidColorBrush x:Key="FerriteScrim" Color="#59000000" />
+
       <SolidColorBrush x:Key="FerriteBorder" Color="#D6D6D0" />
       <SolidColorBrush x:Key="FerriteBorderStrong" Color="#BCBCB4" />
+      <SolidColorBrush x:Key="FerriteDivider" Color="#DFDFD9" />
+
       <SolidColorBrush x:Key="FerriteText" Color="#1C1E22" />
       <SolidColorBrush x:Key="FerriteTextMuted" Color="#5A6068" />
-      <SolidColorBrush x:Key="FerriteTextFaint" Color="#616870" />
+      <SolidColorBrush x:Key="FerriteTextFaint" Color="#5A616A" />
+      <SolidColorBrush x:Key="FerriteTextOnAccent" Color="#FFFFFF" />
+
       <SolidColorBrush x:Key="FerriteAccent" Color="#A5621B" />
       <SolidColorBrush x:Key="FerriteAccentHover" Color="#8E5215" />
+      <SolidColorBrush x:Key="FerriteAccentPressed" Color="#7A4611" />
+      <SolidColorBrush x:Key="FerriteAccentSoft" Color="#F6E8D7" />
       <SolidColorBrush x:Key="FerriteAccentText" Color="#FFFFFF" />
+
       <SolidColorBrush x:Key="FerriteSuccess" Color="#2B6F66" />
-      <SolidColorBrush x:Key="FerriteDanger" Color="#B03A2E" />
+      <SolidColorBrush x:Key="FerriteSuccessSoft" Color="#DCEBE7" />
       <SolidColorBrush x:Key="FerriteWarning" Color="#7C611B" />
+      <SolidColorBrush x:Key="FerriteWarningSoft" Color="#F1E9D2" />
+      <SolidColorBrush x:Key="FerriteDanger" Color="#B03A2E" />
+      <SolidColorBrush x:Key="FerriteDangerSoft" Color="#F5DEDA" />
+      <SolidColorBrush x:Key="FerriteInfo" Color="#2A5F8F" />
+      <SolidColorBrush x:Key="FerriteInfoSoft" Color="#DCE8F2" />
+      <SolidColorBrush x:Key="FerriteRunning" Color="#2B6F66" />
+      <SolidColorBrush x:Key="FerriteDownloading" Color="#2A5F8F" />
+
+      <BoxShadows x:Key="FerriteShadowLow">0 1 2 0 #1F000000</BoxShadows>
+      <BoxShadows x:Key="FerriteShadowMid">0 6 20 0 #2E000000</BoxShadows>
+      <BoxShadows x:Key="FerriteShadowHigh">0 18 48 0 #40000000</BoxShadows>
+
+      <Color x:Key="SystemAccentColor">#A5621B</Color>
+      <Color x:Key="SystemAccentColorLight1">#B87333</Color>
+      <Color x:Key="SystemAccentColorLight2">#CA8A4E</Color>
+      <Color x:Key="SystemAccentColorLight3">#DCA26B</Color>
+      <Color x:Key="SystemAccentColorDark1">#8E5215</Color>
+      <Color x:Key="SystemAccentColorDark2">#7A4611</Color>
+      <Color x:Key="SystemAccentColorDark3">#66390E</Color>
     </ResourceDictionary>
 
   </ResourceDictionary.ThemeDictionaries>

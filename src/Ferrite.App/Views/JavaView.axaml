@@ -1,52 +1,69 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:Ferrite.App.ViewModels"
+             xmlns:controls="clr-namespace:Ferrite.App.Controls"
              x:Class="Ferrite.App.Views.JavaView"
              x:DataType="vm:JavaViewModel">
 
-  <Grid RowDefinitions="Auto,*,Auto" Margin="24">
+  <StackPanel Spacing="16">
 
-    <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="10" Margin="0,0,0,16">
-      <TextBlock Grid.Column="0" Classes="muted" VerticalAlignment="Center"
-                     Text="{DynamicResource L.Java.Hint}" />
-        <Button Grid.Column="1" Content="{DynamicResource L.Java.Rescan}" Command="{Binding ScanCommand}" />
-        <Button Grid.Column="2" Content="{DynamicResource L.Java.AddPath}" Click="OnAddJavaPathClick" />
-        <Button Grid.Column="3" Classes="primary" Content="{DynamicResource L.Java.UseAsDefault}" Command="{Binding SetDefaultCommand}" />
-    </Grid>
+    <TextBlock Classes="muted" TextWrapping="Wrap" Text="{DynamicResource L.Java.Hint}" MaxWidth="680"
+               HorizontalAlignment="Left" />
 
-    <ScrollViewer Grid.Row="1">
+    <StackPanel Orientation="Horizontal" Spacing="8">
+      <Button Content="{DynamicResource L.Java.Rescan}" Command="{Binding ScanCommand}" />
+      <Button Content="{DynamicResource L.Java.AddPath}" Click="OnAddJavaPathClick" />
+      <Button Classes="primary" Content="{DynamicResource L.Java.UseAsDefault}"
+              Command="{Binding SetDefaultCommand}" />
+    </StackPanel>
+
+    <StackPanel Spacing="6">
       <ItemsControl ItemsSource="{Binding Runtimes}">
         <ItemsControl.ItemTemplate>
           <DataTemplate>
-            <Border Classes="card" Margin="0,0,0,8">
-              <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
-                <StackPanel Grid.Column="0" Spacing="2">
-                  <TextBlock Classes="h2" Text="{Binding DisplayName}" />
-                  <TextBlock Classes="mono" Text="{Binding ExecutablePath}" />
+            <Border Classes="panel" Margin="0,0,0,6">
+              <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                <Border Grid.Column="0" Width="30" Height="30"
+                        CornerRadius="{DynamicResource RadiusSm}"
+                        Background="{DynamicResource FerriteSurfaceRaised}">
+                  <controls:IconGlyph Data="{StaticResource Icon.Java}" Width="16" Height="16"
+                                      HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                  <TextBlock Classes="h3" Text="{Binding DisplayName}" TextWrapping="NoWrap"
+                             TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding DisplayName}" />
+                  <TextBlock Classes="faint mono" Text="{Binding ExecutablePath}" TextWrapping="NoWrap"
+                             TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding ExecutablePath}" />
                   <StackPanel Orientation="Horizontal" Spacing="12">
                     <TextBlock Classes="faint" Text="{Binding Source}" />
                     <TextBlock Classes="faint" Text="{Binding Component}" />
                   </StackPanel>
                 </StackPanel>
-                <Button Grid.Column="1" Content="{DynamicResource L.Common.OpenFolder}" Command="{Binding $parent[UserControl].((vm:JavaViewModel)DataContext).OpenFolderCommand}"
-                        VerticalAlignment="Center" />
+                <Button Grid.Column="2" Classes="ghost" VerticalAlignment="Center"
+                        Content="{DynamicResource L.Common.OpenFolder}"
+                        Command="{Binding $parent[UserControl].((vm:JavaViewModel)DataContext).OpenFolderCommand}" />
               </Grid>
             </Border>
           </DataTemplate>
         </ItemsControl.ItemTemplate>
       </ItemsControl>
-    </ScrollViewer>
+    </StackPanel>
 
-    <Border Grid.Row="2" Classes="card" Margin="0,16,0,0">
+    <Border Classes="panel">
       <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto" ColumnSpacing="10">
-        <TextBlock Grid.Column="0" Classes="label" Text="{DynamicResource L.Java.DownloadHint}" VerticalAlignment="Center" />
-        <ComboBox Grid.Column="1" ItemsSource="{Binding Components}" SelectedItem="{Binding SelectedComponent}" Width="220" />
+        <TextBlock Grid.Column="0" Classes="label" VerticalAlignment="Center"
+                   Text="{DynamicResource L.Java.DownloadHint}" />
+        <ComboBox Grid.Column="1" Width="220" ItemsSource="{Binding Components}"
+                  SelectedItem="{Binding SelectedComponent}"
+                  AutomationProperties.Name="{DynamicResource L.Java.DownloadHint}" />
         <Button Grid.Column="2" Content="{DynamicResource L.Java.ListBuilds}" Command="{Binding ListBuildsCommand}" />
-        <TextBlock Grid.Column="3" Classes="faint" VerticalAlignment="Center" Text="{Binding StatusNote}" />
-        <Button Grid.Column="4" Classes="primary" Content="{DynamicResource L.Java.Download}" Command="{Binding ProvisionCommand}" />
+        <TextBlock Grid.Column="3" Classes="faint" VerticalAlignment="Center" Text="{Binding StatusNote}"
+                   TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
+        <Button Grid.Column="4" Classes="primary" Content="{DynamicResource L.Java.Download}"
+                Command="{Binding ProvisionCommand}" />
       </Grid>
     </Border>
 
-  </Grid>
+  </StackPanel>
 
 </UserControl>

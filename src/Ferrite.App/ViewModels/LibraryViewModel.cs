@@ -62,6 +62,9 @@ public sealed partial class LibraryViewModel : ObservableObject
     private bool _showSnapshots;
 
     [ObservableProperty]
+    private bool _showHistoricalVersions;
+
+    [ObservableProperty]
     private string _searchText = string.Empty;
 
     /// <summary>How the instance list is ordered. Recently played is the default.</summary>
@@ -84,6 +87,73 @@ public sealed partial class LibraryViewModel : ObservableObject
 
     [ObservableProperty]
     private bool _isBusy;
+
+    public IReadOnlyList<ChoiceOption> ViewChoices { get; } =
+    [
+        new("grid", Localizer.Get("L.Library.ViewGrid")),
+        new("list", Localizer.Get("L.Library.ViewList")),
+    ];
+
+    /// <summary>Grid or list. The grid is the default presentation of the library.</summary>
+    [ObservableProperty]
+    private ChoiceOption _selectedView = new("grid", Localizer.Get("L.Library.ViewGrid"));
+
+    /// <summary>
+    /// How many cards fit across the window. The view reports its own width, so the grid reflows with
+    /// the window instead of assuming a fixed column count.
+    /// </summary>
+    [ObservableProperty]
+    private int _gridColumns = 4;
+
+    /// <summary>
+    /// Rows of cards for the grid view. Rows are what the list virtualises, so a library of hundreds
+    /// of instances only ever builds the rows the viewport is showing.
+    /// </summary>
+    public ObservableCollection<InstanceRowViewModel> VisibleRows { get; } = [];
+
+    public bool IsGridView => string.Equals(SelectedView.Value, "grid", StringComparison.Ordinal);
+
+    public bool IsListView => !IsGridView;
+
+    public bool HasVisibleInstances => VisibleInstances.Any();
+
+    public string CountText => Localizer.Format("L.Library.Count", VisibleInstances.Count());
+
+    /// <summary>Re-chunks the visible instances into rows of <see cref="GridColumns"/>.</summary>
+    public void RebuildRows()
+    {
+        VisibleRows.Clear();
+        if (!IsGridView)
+        {
+            return;
+        }
+
+        var columns = Math.Max(1, GridColumns);
+        var buffer = new List<InstanceCardViewModel>(columns);
+        foreach (var card in VisibleInstances)
+        {
+            buffer.Add(card);
+            if (buffer.Count == columns)
+            {
+                VisibleRows.Add(new InstanceRowViewModel(buffer.ToArray()));
+                buffer.Clear();
+            }
+        }
+
+        if (buffer.Count > 0)
+        {
+            VisibleRows.Add(new InstanceRowViewModel(buffer.ToArray()));
+        }
+    }
+
+    partial void OnSelectedViewChanged(ChoiceOption value)
+    {
+        OnPropertyChanged(nameof(IsGridView));
+        OnPropertyChanged(nameof(IsListView));
+        RebuildRows();
+    }
+
+    partial void OnGridColumnsChanged(int value) => RebuildRows();
 
     public bool HasInstances => Instances.Count > 0;
 
@@ -140,11 +210,22 @@ public sealed partial class LibraryViewModel : ObservableObject
 
     partial void OnShowSnapshotsChanged(bool value) => _ = LoadVersionsAsync();
 
-    partial void OnSearchTextChanged(string value) => OnPropertyChanged(nameof(VisibleInstances));
+    partial void OnShowHistoricalVersionsChanged(bool value) => _ = LoadVersionsAsync();
 
-    partial void OnSelectedSortChanged(ChoiceOption? value) => OnPropertyChanged(nameof(VisibleInstances));
+    partial void OnSearchTextChanged(string value) => NotifyVisibleChanged();
 
-    partial void OnSelectedGroupChanged(ChoiceOption? value) => OnPropertyChanged(nameof(VisibleInstances));
+    partial void OnSelectedSortChanged(ChoiceOption? value) => NotifyVisibleChanged();
+
+    partial void OnSelectedGroupChanged(ChoiceOption? value) => NotifyVisibleChanged();
+
+    /// <summary>One notification path for everything derived from the visible set.</summary>
+    private void NotifyVisibleChanged()
+    {
+        OnPropertyChanged(nameof(VisibleInstances));
+        OnPropertyChanged(nameof(HasVisibleInstances));
+        OnPropertyChanged(nameof(CountText));
+        RebuildRows();
+    }
 
     public async Task RefreshAsync()
     {
@@ -161,7 +242,7 @@ public sealed partial class LibraryViewModel : ObservableObject
 
             RebuildGroupChoices(records);
             OnPropertyChanged(nameof(HasInstances));
-            OnPropertyChanged(nameof(VisibleInstances));
+            NotifyVisibleChanged();
         }
         catch (Exception exception)
         {

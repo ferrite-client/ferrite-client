@@ -23,6 +23,10 @@ public static class Localizer
 
     private static IReadOnlyDictionary<string, string> _current = StringsEn.Table;
 
+    // Application.Resources is a plain dictionary, and the headless UI tests build several shells on
+    // separate dispatcher threads. Serialising the write keeps a language switch from corrupting it.
+    private static readonly object ResourceGate = new();
+
     /// <summary>The language in effect.</summary>
     public static string Language { get; private set; } = English;
 
@@ -62,9 +66,12 @@ public static class Localizer
         if (application?.Resources is { } resources)
         {
             // Replacing the entries is what makes DynamicResource bindings pick up the new language.
-            foreach (var (key, value) in table)
+            lock (ResourceGate)
             {
-                resources[key] = value;
+                foreach (var (key, value) in table)
+                {
+                    resources[key] = value;
+                }
             }
         }
 

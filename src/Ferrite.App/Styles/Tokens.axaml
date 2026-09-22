@@ -1,0 +1,59 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!--
+    Theme-invariant design tokens: spacing, radii, control sizes, and motion durations.
+
+    Everything visual in Ferrite should resolve to one of these rather than a bare number, so a
+    density or rhythm change is one edit instead of a sweep through every view.
+  -->
+
+  <!-- Spacing scale. 4 is the base unit; the steps are the only gaps allowed between elements. -->
+  <x:Double x:Key="Space1">4</x:Double>
+  <x:Double x:Key="Space2">6</x:Double>
+  <x:Double x:Key="Space3">8</x:Double>
+  <x:Double x:Key="Space4">12</x:Double>
+  <x:Double x:Key="Space5">16</x:Double>
+  <x:Double x:Key="Space6">20</x:Double>
+  <x:Double x:Key="Space7">24</x:Double>
+  <x:Double x:Key="Space8">32</x:Double>
+
+  <!-- The same scale as thicknesses, for padding and margin, which are not doubles. -->
+  <Thickness x:Key="Pad1">4</Thickness>
+  <Thickness x:Key="Pad2">6</Thickness>
+  <Thickness x:Key="Pad3">8</Thickness>
+  <Thickness x:Key="Pad4">12</Thickness>
+  <Thickness x:Key="Pad5">16</Thickness>
+  <Thickness x:Key="Pad6">20</Thickness>
+  <Thickness x:Key="Pad7">24</Thickness>
+  <Thickness x:Key="Pad8">32</Thickness>
+
+  <!-- Corner radii. Pills are reserved for compact statuses and tags. -->
+  <CornerRadius x:Key="RadiusSm">6</CornerRadius>
+  <CornerRadius x:Key="RadiusMd">8</CornerRadius>
+  <CornerRadius x:Key="RadiusLg">12</CornerRadius>
+  <CornerRadius x:Key="RadiusPill">999</CornerRadius>
+
+  <!-- Control sizes: one dense height, one regular height, and one prominent height. -->
+  <x:Double x:Key="ControlHeightSm">28</x:Double>
+  <x:Double x:Key="ControlHeightMd">34</x:Double>
+  <x:Double x:Key="ControlHeightLg">40</x:Double>
+  <x:Double x:Key="RailWidth">236</x:Double>
+  <x:Double x:Key="RailWidthCompact">64</x:Double>
+  <x:Double x:Key="TitleBarHeight">40</x:Double>
+  <x:Double x:Key="StatusBarHeight">30</x:Double>
+
+  <!-- Typography scale. Hierarchy comes from size and weight, not from colour alone. -->
+  <x:Double x:Key="FontDisplay">26</x:Double>
+  <x:Double x:Key="FontPageTitle">20</x:Double>
+  <x:Double x:Key="FontSection">15</x:Double>
+  <x:Double x:Key="FontBody">13</x:Double>
+  <x:Double x:Key="FontMeta">12</x:Double>
+  <x:Double x:Key="FontLabel">11</x:Double>
+
+  <!-- Motion. Fast enough that it reads as response rather than as animation. -->
+  <x:Double x:Key="DurationFast">0.12</x:Double>
+  <x:Double x:Key="DurationNormal">0.18</x:Double>
+  <x:Double x:Key="DurationSlow">0.24</x:Double>
+
+</ResourceDictionary>

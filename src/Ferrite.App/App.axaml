@@ -9,6 +9,9 @@
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
         <ResourceInclude Source="avares://Ferrite/Styles/Palette.axaml" />
+        <ResourceInclude Source="avares://Ferrite/Styles/Tokens.axaml" />
+        <ResourceInclude Source="avares://Ferrite/Styles/Icons.axaml" />
+        <ResourceInclude Source="avares://Ferrite/Styles/ControlThemes.axaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Application.Resources>
@@ -29,6 +32,9 @@
     <DataTemplate DataType="vm:SettingsViewModel">
       <views:SettingsView />
     </DataTemplate>
+    <DataTemplate DataType="vm:DownloadsViewModel">
+      <views:DownloadsView />
+    </DataTemplate>
     <DataTemplate DataType="vm:InstanceDetailViewModel">
       <views:InstanceDetailView />
     </DataTemplate>
@@ -36,6 +42,7 @@
 
   <Application.Styles>
     <FluentTheme />
+    <StyleInclude Source="avares://Ferrite/Styles/Controls.Templates.axaml" />
     <StyleInclude Source="avares://Ferrite/Styles/Controls.axaml" />
   </Application.Styles>
 

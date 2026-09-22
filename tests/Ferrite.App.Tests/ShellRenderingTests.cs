@@ -232,11 +232,9 @@ public sealed class ShellRenderingTests : IDisposable
 
         var texts = Texts(window);
         Assert.Contains("Ferrite", texts);
-        Assert.Contains("Minecraft launcher", texts);
         Assert.Contains("Library", texts);
-        Assert.Contains("Browse", texts);
-        Assert.Contains("Java", texts);
-        Assert.Contains("Accounts", texts);
+        Assert.Contains("Discover", texts);
+        Assert.Contains("Downloads", texts);
         Assert.Contains("Settings", texts);
         Assert.Contains("No account", texts);
 
@@ -248,7 +246,7 @@ public sealed class ShellRenderingTests : IDisposable
     {
         var window = ShowShell(out var viewModel);
 
-        foreach (var page in new[] { "Library", "Browse", "Java", "Accounts", "Settings" })
+        foreach (var page in new[] { "Library", "Discover", "Downloads", "Accounts", "Settings" })
         {
             viewModel.NavigateCommand.Execute(page);
             var frame = window.CaptureRenderedFrame();
@@ -384,12 +382,9 @@ public sealed class ShellRenderingTests : IDisposable
         Save(frame!, "instance-files-content");
     }
 
-    /// <summary>
-    /// Switching the browser to a provider without a key must explain the state instead of showing
-    /// an empty result list or an error dialog.
-    /// </summary>
+    /// <summary>The bundled CurseForge configuration keeps search available without Settings setup.</summary>
     [AvaloniaFact]
-    public void Browse_page_explains_an_unconfigured_provider()
+    public void Browse_page_keeps_curseforge_search_available()
     {
         var shell = new MainWindowViewModel(_services);
         var viewModel = new BrowseViewModel(_services, shell);
@@ -408,10 +403,36 @@ public sealed class ShellRenderingTests : IDisposable
         Assert.NotNull(frame);
 
         var texts = Texts(window);
-        Assert.Contains(texts, text => text.Contains("CurseForge needs an API key", StringComparison.Ordinal));
         Assert.Contains(texts, text => text.Contains("Search CurseForge", StringComparison.Ordinal));
 
         Save(frame!, "browse-curseforge");
+    }
+
+    [AvaloniaFact]
+    public void Settings_and_accounts_do_not_render_developer_credential_controls()
+    {
+        var shell = new MainWindowViewModel(_services);
+        var settingsWindow = new Window
+        {
+            Content = new SettingsView { DataContext = new SettingsViewModel(_services, shell) },
+            Width = 1000,
+            Height = 800,
+        };
+        settingsWindow.Show();
+
+        var accountsWindow = new Window
+        {
+            Content = new AccountsView { DataContext = new AccountsViewModel(_services, shell) },
+            Width = 1000,
+            Height = 800,
+        };
+        accountsWindow.Show();
+
+        var text = string.Join("\n", Texts(settingsWindow).Concat(Texts(accountsWindow)));
+        Assert.DoesNotContain("MICROSOFT CLIENT ID", text, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("CURSEFORGE API KEY", text, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("Save client id", text, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("Paste a key", text, StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>The diagnostics section must render, including the empty operation list state.</summary>
@@ -427,6 +448,9 @@ public sealed class ShellRenderingTests : IDisposable
             Height = 1500,
         };
         window.Show();
+
+        // Diagnostics now lives in its own settings category rather than one long scrolling page.
+        viewModel.SelectedCategory = viewModel.Categories.Single(category => category.Value == "diagnostics");
 
         var frame = window.CaptureRenderedFrame();
         Assert.NotNull(frame);
@@ -459,6 +483,11 @@ public sealed class ShellRenderingTests : IDisposable
             Height = 1800,
         };
         window.Show();
+
+        viewModel.SelectedCategory = viewModel.Categories.Single(category => category.Value == "updates");
+
+        // The category's controls enter the visual tree on the next layout pass.
+        window.CaptureRenderedFrame();
 
         var texts = Texts(window);
         Assert.Contains("Launcher updates", texts);
@@ -677,6 +706,89 @@ public sealed class ShellRenderingTests : IDisposable
         var window = new MainWindow { DataContext = viewModel };
         window.Show();
         return window;
+    }
+
+    /// <summary>
+    /// The library grid has to render real cards: artwork for a themed instance, a fallback tile for
+    /// an un-themed one, a modpack badge, and a name long enough to need trimming.
+    /// </summary>
+    [AvaloniaFact]
+    public async Task Library_renders_the_instance_grid_and_list()
+    {
+        var themed = await _services.Instances
+            .CreateAsync(
+                new InstanceRecord
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "All the Mods 10 — Community Edition (extremely long modpack name)",
+                    MinecraftVersion = "1.21.1",
+                    Loader = LoaderKind.NeoForge,
+                    LoaderVersion = "21.1.251",
+                    ThemeAccent = "#5E9FD8",
+                    LastLaunchedAt = DateTimeOffset.UtcNow.AddHours(-3),
+                    Modpack = new ModpackIdentity
+                    {
+                        Provider = ModpackProvider.Modrinth,
+                        Name = "All the Mods 10",
+                        VersionName = "6.1.0",
+                    },
+                },
+                CancellationToken.None)
+            .ConfigureAwait(true);
+
+        var themeDirectory = Path.Combine(_services.Paths.InstanceDirectory(themed.Id), "theme");
+        TestAssets.WriteGradientPng(
+            Path.Combine(themeDirectory, "background.png"),
+            640,
+            360,
+            0x00509FD8,
+            0x002B1A63);
+        themed.ThemeBackgroundPath = "theme/background.png";
+        await _services.Instances.SaveAsync(themed, CancellationToken.None).ConfigureAwait(true);
+
+        foreach (var (name, version, loader, loaderVersion, days) in new[]
+                 {
+                     ("Survival 1.20", "1.20.4", LoaderKind.Vanilla, (string?)null, 1),
+                     ("Create: Above and Beyond", "1.18.2", LoaderKind.Forge, "40.2.0", 5),
+                     ("Fabric testing", "1.21.4", LoaderKind.Fabric, "0.16.9", 12),
+                 })
+        {
+            var record = await _services.Instances
+                .CreateAsync(
+                    new InstanceRecord
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = name,
+                        MinecraftVersion = version,
+                        Loader = loader,
+                        LoaderVersion = loaderVersion,
+                        LastLaunchedAt = DateTimeOffset.UtcNow.AddDays(-days),
+                    },
+                    CancellationToken.None)
+                .ConfigureAwait(true);
+            Directory.CreateDirectory(_services.Paths.InstanceGameDirectory(record.Id));
+        }
+
+        var shell = new MainWindowViewModel(_services);
+        await shell.InitializeAsync().ConfigureAwait(true);
+
+        var window = new MainWindow { DataContext = shell, Width = 1360, Height = 860 };
+        window.Show();
+
+        var frame = window.CaptureRenderedFrame();
+        Assert.NotNull(frame);
+
+        var texts = Texts(window);
+        Assert.Contains("Survival 1.20", texts);
+        Assert.Contains("Fabric testing", texts);
+
+        Save(frame!, "library-grid");
+
+        shell.Library.SelectedView = shell.Library.ViewChoices.Single(choice => choice.Value == "list");
+        window.CaptureRenderedFrame();
+        var listFrame = window.CaptureRenderedFrame();
+        Assert.NotNull(listFrame);
+        Save(listFrame!, "library-list");
     }
 
     private static List<string> Texts(Control root) =>

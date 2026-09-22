@@ -1,3 +1,5 @@
+using System.Collections.ObjectModel;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Ferrite.App.Localization;
@@ -8,21 +10,28 @@ using Microsoft.Extensions.Logging;
 
 namespace Ferrite.App.ViewModels;
 
+/// <summary>
+/// The application's global destinations. Everything that belongs to one instance lives inside that
+/// instance instead, which is why this list is short.
+/// </summary>
 public enum AppPage
 {
     Library,
-    Browse,
-    Java,
+    Discover,
+    Downloads,
     Accounts,
     Settings,
 }
 
 /// <summary>
-/// Shell view model: navigation, the shared activity strip, and the active account. Pages are
-/// created once and reused so their state survives navigation.
+/// Shell view model: navigation, the shared activity strip, notifications, the account switcher, and
+/// the active account. Pages are created once and reused so their state survives navigation.
 /// </summary>
 public sealed partial class MainWindowViewModel : ObservableObject
 {
+    private const int PrimaryPageCount = 3;
+    private static readonly TimeSpan ToastLifetime = TimeSpan.FromSeconds(6);
+
     private readonly AppServices _services;
     private OperationLog.OperationScope? _currentOperation;
 
@@ -56,6 +65,16 @@ public sealed partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private string? _runningInstanceName;
 
+    [ObservableProperty]
+    private bool _isRailCollapsed;
+
+    [ObservableProperty]
+    private bool _isDownloadsDrawerOpen;
+
+    /// <summary>The signed-in account whose avatar and name the rail shows, when there is one.</summary>
+    [ObservableProperty]
+    private AccountItemViewModel? _activeAccount;
+
     public MainWindowViewModel(AppServices services)
     {
         _services = services;
@@ -64,6 +83,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         Java = new JavaViewModel(services, this);
         Accounts = new AccountsViewModel(services, this);
         Settings = new SettingsViewModel(services, this);
+        Downloads = new DownloadsViewModel(services, this);
     }
 
     public LibraryViewModel Library { get; }
@@ -76,22 +96,30 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     public SettingsViewModel Settings { get; }
 
+    public DownloadsViewModel Downloads { get; }
+
+    /// <summary>Transient notifications, newest last so a new one appears below its predecessors.</summary>
+    public ObservableCollection<ToastViewModel> Toasts { get; } = [];
+
     public bool IsLibrarySelected => CurrentPage == AppPage.Library;
 
-    public bool IsBrowseSelected => CurrentPage == AppPage.Browse;
+    public bool IsDiscoverSelected => CurrentPage == AppPage.Discover;
 
-    public bool IsJavaSelected => CurrentPage == AppPage.Java;
+    public bool IsDownloadsSelected => CurrentPage == AppPage.Downloads;
 
     public bool IsAccountsSelected => CurrentPage == AppPage.Accounts;
 
     public bool IsSettingsSelected => CurrentPage == AppPage.Settings;
 
+    public bool IsPrimaryPageSelected =>
+        CurrentPage is AppPage.Library or AppPage.Discover or AppPage.Downloads;
+
     /// <summary>The page name as shown in the shell header, in the current language.</summary>
     public string CurrentPageTitle => Localizer.Get(CurrentPage switch
     {
         AppPage.Library => "L.Nav.Library",
-        AppPage.Browse => "L.Nav.Browse",
-        AppPage.Java => "L.Nav.Java",
+        AppPage.Discover => "L.Nav.Discover",
+        AppPage.Downloads => "L.Nav.Downloads",
         AppPage.Accounts => "L.Nav.Accounts",
         _ => "L.Nav.Settings",
     });
@@ -100,13 +128,38 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     public bool IsDetailOpen => DetailPage is not null;
 
-    /// <summary>Index form of <see cref="CurrentPage"/>, for the navigation list.</summary>
-    public int SelectedPageIndex
+    public bool IsRailExpanded => !IsRailCollapsed;
+
+    /// <summary>The rail toggle's own label, which is why it changes with the rail's state.</summary>
+    public string RailToggleText => IsRailCollapsed
+        ? Localizer.Get("L.Shell.ExpandRail")
+        : Localizer.Get("L.Shell.CollapseRail");
+
+    public bool HasActiveAccount => ActiveAccount is not null;
+
+    /// <summary>Whether the downloads indicator should call attention to itself.</summary>
+    public bool HasActiveOperations => IsActivityVisible;
+
+    public string AccountStatusText => ActiveAccount is { } account
+        ? account.Kind
+        : Localizer.Get("L.Shell.SignedOut");
+
+    /// <summary>
+    /// Index of the selected primary destination, or -1 when the current page is not in the primary
+    /// rail. This is what the rail's list binds to, so the footer entries never fight it for selection.
+    /// </summary>
+    public int PrimaryPageIndex
     {
-        get => (int)CurrentPage;
+        get => CurrentPage switch
+        {
+            AppPage.Library => 0,
+            AppPage.Discover => 1,
+            AppPage.Downloads => 2,
+            _ => -1,
+        };
         set
         {
-            if (value >= 0 && value <= (int)AppPage.Settings && value != (int)CurrentPage)
+            if (value >= 0 && value < PrimaryPageCount)
             {
                 CurrentPage = (AppPage)value;
             }
@@ -116,31 +169,80 @@ public sealed partial class MainWindowViewModel : ObservableObject
     partial void OnCurrentPageChanged(AppPage value)
     {
         DetailPage = null;
+        IsDownloadsDrawerOpen = false;
         OnPropertyChanged(nameof(CurrentPageTitle));
-        OnPropertyChanged(nameof(SelectedPageIndex));
+        OnPropertyChanged(nameof(PrimaryPageIndex));
+        OnPropertyChanged(nameof(IsPrimaryPageSelected));
         OnPropertyChanged(nameof(IsLibrarySelected));
-        OnPropertyChanged(nameof(IsBrowseSelected));
-        OnPropertyChanged(nameof(IsJavaSelected));
+        OnPropertyChanged(nameof(IsDiscoverSelected));
+        OnPropertyChanged(nameof(IsDownloadsSelected));
         OnPropertyChanged(nameof(IsAccountsSelected));
         OnPropertyChanged(nameof(IsSettingsSelected));
+
+        if (value == AppPage.Downloads)
+        {
+            Downloads.Refresh();
+        }
     }
 
     partial void OnDetailPageChanged(object? value) => OnPropertyChanged(nameof(IsDetailOpen));
 
     partial void OnErrorMessageChanged(string? value) => OnPropertyChanged(nameof(HasError));
 
+    partial void OnActiveAccountChanged(AccountItemViewModel? value)
+    {
+        OnPropertyChanged(nameof(HasActiveAccount));
+        OnPropertyChanged(nameof(AccountStatusText));
+    }
+
+    partial void OnIsRailCollapsedChanged(bool value)
+    {
+        OnPropertyChanged(nameof(IsRailExpanded));
+        OnPropertyChanged(nameof(RailToggleText));
+    }
+
+    partial void OnIsActivityVisibleChanged(bool value)
+    {
+        OnPropertyChanged(nameof(HasActiveOperations));
+        Downloads.Refresh();
+    }
+
     public async Task InitializeAsync()
     {
         await _services.Operations.LoadAsync(CancellationToken.None).ConfigureAwait(true);
         await Settings.LoadAsync().ConfigureAwait(true);
+        Library.ShowSnapshots = _services.Settings.Current.ShowSnapshotsInVersionList;
+        Library.ShowHistoricalVersions = _services.Settings.Current.ShowHistoricalVersions;
         Accounts.Load();
         RefreshActiveAccount();
         await Library.RefreshAsync().ConfigureAwait(true);
+        Downloads.Refresh();
+        if (_services.Settings.Current.LastSelectedInstanceId is { } lastId
+            && Library.Instances.FirstOrDefault(item => item.Record.Id == lastId) is { } last)
+        {
+            ShowInstance(last.Record);
+        }
+
         _services.Logger<MainWindowViewModel>().LogInformation(
             "Launcher ready; {Count} instance(s), {Accounts} account(s)",
             Library.Instances.Count,
             Accounts.Accounts.Count);
         StatusText = Localizer.Get("L.Common.Ready");
+        _ = Settings.CheckForUpdatesOnStartupAsync();
+    }
+
+    public void ShowInstance(Ferrite.Core.Storage.InstanceRecord record)
+    {
+        DetailPage = new InstanceDetailViewModel(record, _services, this);
+        _services.Settings.Current.LastSelectedInstanceId = record.Id;
+        _ = _services.Settings.SaveAsync(CancellationToken.None);
+    }
+
+    public void CloseInstance()
+    {
+        DetailPage = null;
+        _services.Settings.Current.LastSelectedInstanceId = null;
+        _ = _services.Settings.SaveAsync(CancellationToken.None);
     }
 
     public void RefreshActiveAccount()
@@ -150,9 +252,21 @@ public sealed partial class MainWindowViewModel : ObservableObject
             ? _services.Accounts.Accounts.FirstOrDefault(candidate => candidate.Id == id)
             : null;
         ActiveAccountName = account?.DisplayName ?? Localizer.Get("L.Shell.NoAccount");
+
+        var item = ActiveAccount is { } current && current.Account.Id == account?.Id
+            ? current
+            : Accounts.Accounts.FirstOrDefault(candidate => candidate.Account.Id == account?.Id);
+        ActiveAccount = item;
     }
 
     public void ReportStatus(string text) => StatusText = text;
+
+    /// <summary>Reports a completed outcome: the status line plus a transient notification.</summary>
+    public void ReportSuccess(string title, string? detail = null)
+    {
+        StatusText = title;
+        Notify(ToastKind.Success, title, detail);
+    }
 
     public void ReportError(string message)
     {
@@ -162,6 +276,38 @@ public sealed partial class MainWindowViewModel : ObservableObject
     }
 
     public void ClearError() => ErrorMessage = null;
+
+    /// <summary>Shows a transient notification. Nothing here blocks the interface.</summary>
+    public void Notify(ToastKind kind, string title, string? detail = null)
+    {
+        var toast = new ToastViewModel(kind, title, detail, DismissToast);
+        Toasts.Add(toast);
+        OnPropertyChanged(nameof(HasToasts));
+
+        // A toast that cannot expire would pile up on a long session, so each one schedules its own
+        // removal. In a headless host the timer simply never fires, which is why the collection is
+        // also bounded below.
+        var timer = new DispatcherTimer { Interval = ToastLifetime };
+        timer.Tick += (_, _) =>
+        {
+            timer.Stop();
+            DismissToast(toast);
+        };
+        timer.Start();
+
+        while (Toasts.Count > 4)
+        {
+            Toasts.RemoveAt(0);
+        }
+    }
+
+    public bool HasToasts => Toasts.Count > 0;
+
+    private void DismissToast(ToastViewModel toast)
+    {
+        Toasts.Remove(toast);
+        OnPropertyChanged(nameof(HasToasts));
+    }
 
     public void BeginActivity(string text, bool indeterminate = true)
     {
@@ -194,6 +340,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         IsActivityVisible = true;
         IsActivityIndeterminate = false;
         ActivityFraction = progress.Download?.Fraction ?? 0;
+        Downloads.Refresh();
     }
 
     public void EndActivity(string? message = null)
@@ -207,10 +354,17 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
         IsActivityVisible = false;
         ActivityFraction = 0;
+
+        Downloads.Refresh();
+
         if (message is not null)
         {
             StatusText = message;
         }
+
+        // Only an explicit completion message becomes a notification. The activity text describes work
+        // in progress, and toasting "Downloading..." after it finished would say the opposite of what
+        // happened. Callers that know the outcome call ReportSuccess instead.
     }
 
     [RelayCommand]
@@ -220,6 +374,22 @@ public sealed partial class MainWindowViewModel : ObservableObject
         {
             CurrentPage = parsed;
         }
+    }
+
+    [RelayCommand]
+    private void ToggleRail() => IsRailCollapsed = !IsRailCollapsed;
+
+    [RelayCommand]
+    private void ToggleDownloadsDrawer() => IsDownloadsDrawerOpen = !IsDownloadsDrawerOpen;
+
+    [RelayCommand]
+    private void CloseDownloadsDrawer() => IsDownloadsDrawerOpen = false;
+
+    [RelayCommand]
+    private void OpenDownloads()
+    {
+        IsDownloadsDrawerOpen = false;
+        CurrentPage = AppPage.Downloads;
     }
 
     [RelayCommand]

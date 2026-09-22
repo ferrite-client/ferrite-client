@@ -2,87 +2,240 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:Ferrite.App.ViewModels"
         xmlns:views="clr-namespace:Ferrite.App.Views"
+        xmlns:controls="clr-namespace:Ferrite.App.Controls"
+        xmlns:chrome="clr-namespace:Avalonia.Controls.Chrome;assembly=Avalonia.Controls"
         x:Class="Ferrite.App.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="Ferrite"
         Width="1360" Height="860"
         MinWidth="1024" MinHeight="680"
-        WindowStartupLocation="CenterScreen">
+        Background="{DynamicResource FerriteBg}"
+        WindowStartupLocation="CenterScreen"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="40">
+
+  <!--
+    The window draws its own decorations. The title bar element is marked with the TitleBar role so the
+    platform treats it as a caption: dragging, double-click to maximise, drag-to-edge snapping and the
+    Snap Layouts flyout all keep working through the same hit-testing path as a native window. The
+    caption buttons themselves belong to the theme's drawn decorations, so Ferrite does not reimplement
+    minimising, maximising or closing.
+  -->
 
   <Window.KeyBindings>
     <KeyBinding Gesture="Ctrl+K" Command="{Binding OpenQuickActionsCommand}" />
     <KeyBinding Gesture="Escape" Command="{Binding CloseQuickActionsCommand}" />
   </Window.KeyBindings>
 
-  <Grid ColumnDefinitions="228,*">
+  <Grid RowDefinitions="Auto,*,Auto">
 
-    <Border Grid.Column="0"
-            Background="{DynamicResource FerriteSurfaceSunken}"
-            BorderBrush="{DynamicResource FerriteBorder}"
-            BorderThickness="0,0,1,0">
-      <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="0,16">
+    <!-- Title bar -->
+    <Border Grid.Row="0"
+            chrome:WindowDecorationProperties.ElementRole="TitleBar"
+            Height="{DynamicResource TitleBarHeight}"
+            Background="{DynamicResource FerriteBg}"
+            BorderBrush="{DynamicResource FerriteDivider}"
+            BorderThickness="0,0,0,1">
+      <Grid ColumnDefinitions="Auto,Auto,*" Margin="10,0,10,0">
 
-        <StackPanel Grid.Row="0" Margin="20,0,20,20" Spacing="2">
-          <TextBlock Text="{DynamicResource L.App.Name}" FontSize="20" FontWeight="Bold" />
-          <TextBlock Classes="faint" Text="{DynamicResource L.App.Tagline}" />
-        </StackPanel>
+        <Button Grid.Column="0"
+                Classes="ghost icon-button sm"
+                chrome:WindowDecorationProperties.ElementRole="User"
+                VerticalAlignment="Center"
+                AutomationProperties.Name="{Binding RailToggleText}"
+                ToolTip.Tip="{Binding RailToggleText}"
+                Command="{Binding ToggleRailCommand}">
+          <controls:IconGlyph Data="{StaticResource Icon.List}" Width="16" Height="16" />
+        </Button>
 
-        <StackPanel Grid.Row="1" Margin="8,0" Spacing="2">
-          <ListBox SelectedIndex="{Binding SelectedPageIndex}" Background="Transparent"
-                   BorderThickness="0" Padding="0">
-            <ListBoxItem Content="{DynamicResource L.Nav.Library}" />
-            <ListBoxItem Content="{DynamicResource L.Nav.Browse}" />
-            <ListBoxItem Content="{DynamicResource L.Nav.Java}" />
-            <ListBoxItem Content="{DynamicResource L.Nav.Accounts}" />
-            <ListBoxItem Content="{DynamicResource L.Nav.Settings}" />
-          </ListBox>
-        </StackPanel>
-
-        <StackPanel Grid.Row="3" Margin="20,12,20,0" Spacing="4">
-          <TextBlock Classes="label" Text="{DynamicResource L.Shell.Account}" />
-          <TextBlock Text="{Binding ActiveAccountName}" />
-          <TextBlock Classes="faint" Text="{Binding RunningInstanceName}" />
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="9"
+                    VerticalAlignment="Center" Margin="10,0,0,0">
+          <Border Width="16" Height="16" CornerRadius="5"
+                  Background="{DynamicResource FerriteAccent}"
+                  AutomationProperties.Name="{DynamicResource L.App.Tagline}"
+                  ToolTip.Tip="{DynamicResource L.App.Tagline}" />
+          <TextBlock Text="{DynamicResource L.App.Name}" FontWeight="SemiBold" VerticalAlignment="Center" />
+          <TextBlock Classes="faint" VerticalAlignment="Center" Margin="4,0,0,0"
+                     Text="{Binding CurrentPageTitle}" />
         </StackPanel>
 
       </Grid>
     </Border>
 
-    <Grid Grid.Column="1" RowDefinitions="Auto,*,Auto">
+    <!-- Rail and page content -->
+    <Grid Grid.Row="1">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
 
-      <Border Grid.Row="0" Padding="24,16" BorderBrush="{DynamicResource FerriteBorder}"
-              BorderThickness="0,0,0,1">
-        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="16">
-          <TextBlock Grid.Column="0" Classes="h1" Text="{Binding CurrentPageTitle}" />
-          <Button Grid.Column="1" Classes="chip" VerticalAlignment="Center"
-                  Content="{DynamicResource L.Shell.QuickActions}"
-                  Command="{Binding OpenQuickActionsCommand}" />
-          <TextBlock Grid.Column="2" Classes="muted" VerticalAlignment="Center" Text="{Binding StatusText}" />
+      <Border Grid.Column="0"
+              Classes="rail"
+              Classes.compact="{Binding IsRailCollapsed}"
+              Background="{DynamicResource FerriteSurfaceSunken}"
+              BorderBrush="{DynamicResource FerriteDivider}"
+              BorderThickness="0,0,1,0">
+        <Border.Transitions>
+          <Transitions>
+            <DoubleTransition Property="Width" Duration="0:0:0.18" />
+          </Transitions>
+        </Border.Transitions>
+
+        <Grid RowDefinitions="Auto,*,Auto" Margin="10,12,10,12">
+
+          <!-- Primary destinations -->
+          <StackPanel Grid.Row="0" Spacing="6">
+            <TextBlock Classes="label" Margin="8,0,0,2" Text="{DynamicResource L.Shell.Navigate}"
+                       IsVisible="{Binding IsRailExpanded}" />
+
+            <ListBox Classes="rail" SelectedIndex="{Binding PrimaryPageIndex, Mode=TwoWay}">
+              <ListBoxItem AutomationProperties.Name="{DynamicResource L.Nav.Library}"
+                           ToolTip.Tip="{DynamicResource L.Nav.Library}">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="11">
+                  <controls:IconGlyph Grid.Column="0" Data="{StaticResource Icon.Library}" Width="17" Height="17" />
+                  <TextBlock Grid.Column="1" VerticalAlignment="Center" TextWrapping="NoWrap"
+                             Text="{DynamicResource L.Nav.Library}" IsVisible="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsRailExpanded}" />
+                </Grid>
+              </ListBoxItem>
+
+              <ListBoxItem AutomationProperties.Name="{DynamicResource L.Nav.Discover}"
+                           ToolTip.Tip="{DynamicResource L.Nav.Discover}">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="11">
+                  <controls:IconGlyph Grid.Column="0" Data="{StaticResource Icon.Discover}" Width="17" Height="17" />
+                  <TextBlock Grid.Column="1" VerticalAlignment="Center" TextWrapping="NoWrap"
+                             Text="{DynamicResource L.Nav.Discover}" IsVisible="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsRailExpanded}" />
+                </Grid>
+              </ListBoxItem>
+
+              <ListBoxItem AutomationProperties.Name="{DynamicResource L.Nav.Downloads}"
+                           ToolTip.Tip="{DynamicResource L.Nav.Downloads}">
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="11">
+                  <controls:IconGlyph Grid.Column="0" Data="{StaticResource Icon.Downloads}" Width="17" Height="17" />
+                  <TextBlock Grid.Column="1" VerticalAlignment="Center" TextWrapping="NoWrap"
+                             Text="{DynamicResource L.Nav.Downloads}" IsVisible="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsRailExpanded}" />
+                  <Border Grid.Column="2" Classes="badge accent" Padding="6,1"
+                          IsVisible="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).HasActiveOperations}">
+                    <controls:IconGlyph Data="{StaticResource Icon.Bolt}" Width="11" Height="11" IsFilled="True" />
+                  </Border>
+                </Grid>
+              </ListBoxItem>
+            </ListBox>
+          </StackPanel>
+
+          <StackPanel Grid.Row="2" Spacing="6">
+            <Border Classes="divider" Margin="4,0,4,6" />
+
+            <!-- Account switcher: the compact global entry point to accounts. -->
+            <Button Classes="nav-footer" HorizontalAlignment="Stretch"
+                    AutomationProperties.Name="{DynamicResource L.Shell.AccountSwitcher}"
+                    ToolTip.Tip="{DynamicResource L.Shell.AccountSwitcher}">
+              <Button.Flyout>
+                <Flyout Placement="Right">
+                  <StackPanel Width="300" Spacing="10">
+                    <TextBlock Classes="label" Text="{DynamicResource L.Shell.Account}" />
+                    <TextBlock Classes="faint" Text="{DynamicResource L.Accounts.Empty}"
+                               IsVisible="{Binding !Accounts.HasAccounts}" />
+                    <ItemsControl ItemsSource="{Binding Accounts.Accounts}">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="vm:AccountItemViewModel">
+                          <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" Margin="0,3">
+                            <Border Grid.Column="0" Width="28" Height="28"
+                                    CornerRadius="{DynamicResource RadiusPill}"
+                                    Background="{DynamicResource FerriteSurfaceSunken}">
+                              <Panel>
+                                <controls:IconGlyph Data="{StaticResource Icon.Account}" Width="15" Height="15"
+                                                    HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                <Image Source="{Binding SkinPreview}" Stretch="Uniform"
+                                       IsVisible="{Binding HasSkinPreview}" />
+                              </Panel>
+                            </Border>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                              <TextBlock Text="{Binding DisplayName}" TextWrapping="NoWrap"
+                                         TextTrimming="CharacterEllipsis" />
+                              <TextBlock Classes="faint" Text="{Binding Kind}" />
+                            </StackPanel>
+                            <Button Grid.Column="2" Classes="chip" VerticalAlignment="Center"
+                                    Content="{DynamicResource L.Accounts.Use}"
+                                    Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).Accounts.SetActiveCommand}"
+                                    CommandParameter="{Binding}" />
+                          </Grid>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Border Classes="divider" />
+                    <Button Classes="ghost" HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Left"
+                            Content="{DynamicResource L.Shell.ManageAccounts}"
+                            Command="{Binding NavigateCommand}" CommandParameter="Accounts" />
+                  </StackPanel>
+                </Flyout>
+              </Button.Flyout>
+
+              <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="11">
+                <Border Grid.Column="0" Width="22" Height="22"
+                        CornerRadius="{DynamicResource RadiusPill}"
+                        Background="{DynamicResource FerriteSurfaceRaised}">
+                  <Panel>
+                    <controls:IconGlyph Data="{StaticResource Icon.Account}" Width="13" Height="13"
+                                        HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <Image Source="{Binding ActiveAccount.SkinPreview}" Stretch="Uniform"
+                           IsVisible="{Binding HasActiveAccount}" />
+                  </Panel>
+                </Border>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center"
+                            IsVisible="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsRailExpanded}">
+                  <TextBlock Text="{Binding ActiveAccountName}" TextWrapping="NoWrap"
+                             TextTrimming="CharacterEllipsis" FontSize="12" />
+                  <TextBlock Classes="faint" Text="{Binding AccountStatusText}" TextWrapping="NoWrap"
+                             TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+                <controls:IconGlyph Grid.Column="2" Data="{StaticResource Icon.ChevronRight}" Width="13" Height="13"
+                                    Opacity="0.6"
+                                    IsVisible="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsRailExpanded}" />
+              </Grid>
+            </Button>
+
+            <Button Classes="nav-footer" HorizontalAlignment="Stretch"
+                    Classes.active="{Binding IsSettingsSelected}"
+                    AutomationProperties.Name="{DynamicResource L.Nav.Settings}"
+                    ToolTip.Tip="{DynamicResource L.Nav.Settings}"
+                    Command="{Binding NavigateCommand}" CommandParameter="Settings">
+              <Grid ColumnDefinitions="Auto,*" ColumnSpacing="11">
+                <controls:IconGlyph Grid.Column="0" Data="{StaticResource Icon.Settings}" Width="17" Height="17" />
+                <TextBlock Grid.Column="1" VerticalAlignment="Center" TextWrapping="NoWrap"
+                           Text="{DynamicResource L.Nav.Settings}" IsVisible="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsRailExpanded}" />
+              </Grid>
+            </Button>
+          </StackPanel>
+
         </Grid>
       </Border>
 
-      <Panel Grid.Row="1">
+      <!-- Pages -->
+      <Panel Grid.Column="1">
         <ContentControl Content="{Binding DetailPage}" IsVisible="{Binding IsDetailOpen}" />
         <ContentControl Content="{Binding Library}" IsVisible="{Binding IsLibrarySelected}" />
-        <ContentControl Content="{Binding Browse}" IsVisible="{Binding IsBrowseSelected}" />
-        <ContentControl Content="{Binding Java}" IsVisible="{Binding IsJavaSelected}" />
+        <ContentControl Content="{Binding Browse}" IsVisible="{Binding IsDiscoverSelected}" />
+        <ContentControl Content="{Binding Downloads}" IsVisible="{Binding IsDownloadsSelected}" />
         <ContentControl Content="{Binding Accounts}" IsVisible="{Binding IsAccountsSelected}" />
         <ContentControl Content="{Binding Settings}" IsVisible="{Binding IsSettingsSelected}" />
 
-        <Border VerticalAlignment="Top" Margin="24" Padding="16,12"
-                CornerRadius="6" Background="{DynamicResource FerriteSurfaceRaised}"
-                BorderBrush="{DynamicResource FerriteDanger}" BorderThickness="1"
+        <!-- Error banner: persistent until dismissed, because it explains something that failed. -->
+        <Border Classes="banner danger" VerticalAlignment="Top" Margin="24"
+                MaxWidth="900" HorizontalAlignment="Stretch"
                 IsVisible="{Binding HasError}">
-          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
-            <TextBlock Grid.Column="0" Text="{Binding ErrorMessage}" />
-            <Button Grid.Column="1" Classes="ghost" Content="{DynamicResource L.Common.Dismiss}"
+          <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+            <controls:IconGlyph Grid.Column="0" Data="{StaticResource Icon.Error}"
+                                Foreground="{DynamicResource FerriteDanger}" VerticalAlignment="Top" />
+            <TextBlock Grid.Column="1" Text="{Binding ErrorMessage}" VerticalAlignment="Center" />
+            <Button Grid.Column="2" Classes="ghost" Content="{DynamicResource L.Common.Dismiss}"
                     Command="{Binding DismissErrorCommand}" />
           </Grid>
         </Border>
 
         <!-- Quick actions -->
-        <Border VerticalAlignment="Top" HorizontalAlignment="Center" Margin="24" Width="540"
-                Padding="12" CornerRadius="8" Background="{DynamicResource FerriteSurfaceRaised}"
-                BorderBrush="{DynamicResource FerriteBorderStrong}" BorderThickness="1"
+        <Border VerticalAlignment="Top" HorizontalAlignment="Center" Margin="24" Width="560"
+                Classes="overlay" Padding="12"
                 IsVisible="{Binding IsQuickActionsOpen}">
           <StackPanel Spacing="10">
             <TextBox Text="{Binding QuickQuery}"
@@ -90,7 +243,7 @@
                      AutomationProperties.Name="{DynamicResource L.Shell.QuickActions}" />
             <TextBlock Classes="muted" Text="{DynamicResource L.Quick.NoMatches}"
                        IsVisible="{Binding HasNoQuickResults}" />
-            <ScrollViewer MaxHeight="340">
+            <ScrollViewer MaxHeight="360">
               <ItemsControl ItemsSource="{Binding QuickResults}">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate DataType="vm:QuickActionItem">
@@ -113,21 +266,138 @@
                     Command="{Binding CloseQuickActionsCommand}" />
           </StackPanel>
         </Border>
+
+        <!-- Downloads drawer: a lightweight look at what is running without leaving the page. -->
+        <Border Classes="overlay" VerticalAlignment="Bottom" HorizontalAlignment="Right"
+                Margin="0,0,20,20" Width="380" MaxHeight="420"
+                IsVisible="{Binding IsDownloadsDrawerOpen}">
+          <Grid RowDefinitions="Auto,*,Auto" Margin="16">
+            <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,10">
+              <TextBlock Grid.Column="0" Classes="h3" Text="{DynamicResource L.Shell.Downloads}" />
+              <Button Grid.Column="1" Classes="ghost icon-button sm"
+                      AutomationProperties.Name="{DynamicResource L.Common.Dismiss}"
+                      ToolTip.Tip="{DynamicResource L.Common.Dismiss}"
+                      Command="{Binding CloseDownloadsDrawerCommand}">
+                <controls:IconGlyph Data="{StaticResource Icon.Close}" Width="14" Height="14" />
+              </Button>
+            </Grid>
+
+            <ScrollViewer Grid.Row="1">
+              <StackPanel Spacing="6">
+                <ItemsControl ItemsSource="{Binding Downloads.Active}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:DownloadItemViewModel">
+                      <Border Classes="panel" Margin="0,0,0,4">
+                        <StackPanel Spacing="6">
+                          <TextBlock Text="{Binding Name}" TextWrapping="NoWrap"
+                                     TextTrimming="CharacterEllipsis" />
+                          <ProgressBar Value="{Binding Fraction}" IsIndeterminate="{Binding !HasMeasuredProgress}"
+                                       Classes="thin" />
+                        </StackPanel>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <TextBlock Classes="faint" Text="{DynamicResource L.Downloads.SummaryIdle}"
+                           IsVisible="{Binding !Downloads.HasActive}" />
+                <TextBlock Classes="label" Margin="0,8,0,0" Text="{DynamicResource L.Settings.FieldRecentOperations}" />
+                <TextBlock Classes="faint" Text="{DynamicResource L.Settings.NoOperations}"
+                           IsVisible="{Binding !Downloads.HasHistory}" />
+                <ItemsControl ItemsSource="{Binding Downloads.History}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:DownloadItemViewModel">
+                      <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" Margin="0,3">
+                        <Border Grid.Column="0" Classes="badge"
+                                Classes.success="{Binding IsSucceeded}"
+                                Classes.danger="{Binding IsFailed}">
+                          <TextBlock Text="{Binding StateText}" />
+                        </Border>
+                        <TextBlock Grid.Column="1" VerticalAlignment="Center"
+                                   Text="{Binding Name}" TextWrapping="NoWrap"
+                                   TextTrimming="CharacterEllipsis" FontSize="12" />
+                        <TextBlock Grid.Column="2" Classes="faint" VerticalAlignment="Center"
+                                   Text="{Binding DurationText}" />
+                      </Grid>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </ScrollViewer>
+
+            <Button Grid.Row="2" Classes="primary" HorizontalAlignment="Stretch" Margin="0,10,0,0"
+                    HorizontalContentAlignment="Center"
+                    Content="{DynamicResource L.Nav.Downloads}"
+                    Command="{Binding OpenDownloadsCommand}" />
+          </Grid>
+        </Border>
+
+        <!-- Toasts -->
+        <ItemsControl ItemsSource="{Binding Toasts}"
+                      VerticalAlignment="Bottom" HorizontalAlignment="Right"
+                      Margin="0,0,20,20" Width="360">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="vm:ToastViewModel">
+              <Border Classes="banner" Margin="0,6,0,0"
+                      Classes.success="{Binding IsSuccess}"
+                      Classes.warning="{Binding IsWarning}"
+                      Classes.danger="{Binding IsError}"
+                      Classes.info="{Binding IsInfo}">
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                  <controls:IconGlyph Grid.Column="0" Data="{StaticResource Icon.Info}" VerticalAlignment="Top" />
+                  <StackPanel Grid.Column="1" Spacing="2">
+                    <TextBlock Text="{Binding Title}" />
+                    <TextBlock Classes="faint" Text="{Binding Detail}" IsVisible="{Binding HasDetail}" />
+                  </StackPanel>
+                  <Button Grid.Column="2" Classes="ghost icon-button sm"
+                          AutomationProperties.Name="{DynamicResource L.Common.Dismiss}"
+                          ToolTip.Tip="{DynamicResource L.Common.Dismiss}"
+                          Command="{Binding DismissCommand}">
+                    <controls:IconGlyph Data="{StaticResource Icon.Close}" Width="13" Height="13" />
+                  </Button>
+                </Grid>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
       </Panel>
-
-      <Border Grid.Row="2" Padding="24,10" Background="{DynamicResource FerriteSurfaceSunken}"
-              BorderBrush="{DynamicResource FerriteBorder}" BorderThickness="0,1,0,0"
-              IsVisible="{Binding IsActivityVisible}">
-        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
-          <TextBlock Grid.Column="0" Classes="muted" VerticalAlignment="Center" Text="{Binding ActivityText}" />
-          <ProgressBar Grid.Column="1" VerticalAlignment="Center"
-                       Value="{Binding ActivityFraction}"
-                       IsIndeterminate="{Binding IsActivityIndeterminate}"
-                       Minimum="0" Maximum="1" />
-        </Grid>
-      </Border>
-
     </Grid>
+
+    <!-- Status bar -->
+    <Border Grid.Row="2"
+            Height="{DynamicResource StatusBarHeight}"
+            Background="{DynamicResource FerriteSurfaceSunken}"
+            BorderBrush="{DynamicResource FerriteDivider}"
+            BorderThickness="0,1,0,0">
+      <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="12" Margin="12,0">
+        <TextBlock Grid.Column="0" Classes="faint" VerticalAlignment="Center"
+                   Text="{Binding StatusText}" TextWrapping="NoWrap"
+                   TextTrimming="CharacterEllipsis" />
+
+        <ProgressBar Grid.Column="1" Classes="thin" VerticalAlignment="Center" MaxWidth="320"
+                     HorizontalAlignment="Left" Width="220"
+                     Value="{Binding ActivityFraction}"
+                     IsIndeterminate="{Binding IsActivityIndeterminate}"
+                     IsVisible="{Binding IsActivityVisible}" />
+
+        <TextBlock Grid.Column="2" Classes="faint" VerticalAlignment="Center"
+                   Text="{Binding RunningInstanceName}" TextWrapping="NoWrap"
+                   TextTrimming="CharacterEllipsis" />
+
+        <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+          <Button Classes="ghost" Padding="8,2" MinHeight="22" FontSize="12"
+                  AutomationProperties.Name="{DynamicResource L.Shell.Downloads}"
+                  Command="{Binding ToggleDownloadsDrawerCommand}">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <controls:IconGlyph Data="{StaticResource Icon.Bolt}" Width="12" Height="12" />
+              <TextBlock Text="{Binding Downloads.ActiveCount}" FontSize="12" />
+            </StackPanel>
+          </Button>
+          <Button Classes="ghost" Padding="8,2" MinHeight="22" FontSize="12"
+                  Content="{DynamicResource L.Shell.QuickActions}"
+                  Command="{Binding OpenQuickActionsCommand}" />
+        </StackPanel>
+      </Grid>
+    </Border>
 
   </Grid>
 

@@ -61,8 +61,8 @@ public sealed partial class MainWindowViewModel
         var items = new List<QuickActionItem>
         {
             NavigateItem(AppPage.Library),
-            NavigateItem(AppPage.Browse),
-            NavigateItem(AppPage.Java),
+            NavigateItem(AppPage.Discover),
+            NavigateItem(AppPage.Downloads),
             NavigateItem(AppPage.Accounts),
             NavigateItem(AppPage.Settings),
             Item(
@@ -106,8 +106,8 @@ public sealed partial class MainWindowViewModel
         var title = Localizer.Format("L.Quick.GoTo", Localizer.Get(page switch
         {
             AppPage.Library => "L.Nav.Library",
-            AppPage.Browse => "L.Nav.Browse",
-            AppPage.Java => "L.Nav.Java",
+            AppPage.Discover => "L.Nav.Discover",
+            AppPage.Downloads => "L.Nav.Downloads",
             AppPage.Accounts => "L.Nav.Accounts",
             _ => "L.Nav.Settings",
         }));
@@ -124,7 +124,7 @@ public sealed partial class MainWindowViewModel
     private void OpenInstance(InstanceRecord record)
     {
         CurrentPage = AppPage.Library;
-        DetailPage = new InstanceDetailViewModel(record, _services, this);
+        ShowInstance(record);
     }
 
     private static string Describe(InstanceRecord record) => record.Loader == LoaderKind.Vanilla

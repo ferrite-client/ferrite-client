@@ -8,15 +8,13 @@ using Ferrite.Core.Util;
 
 namespace Ferrite.App.ViewModels;
 
-/// <summary>
-/// Accounts: device-code sign-in, account switching, and sign-out. Sign-in needs a Microsoft client
-/// id; without one the page explains exactly what to configure.
-/// </summary>
+/// <summary>Accounts: Microsoft/Yggdrasil sign-in, account switching, and sign-out.</summary>
 public sealed partial class AccountsViewModel : ObservableObject
 {
     private readonly AppServices _services;
     private readonly MainWindowViewModel _shell;
     private CancellationTokenSource? _signInCancellation;
+    private AuthorizationCodeFlow? _browserFlow;
 
     public AccountsViewModel(AppServices services, MainWindowViewModel shell)
     {
@@ -24,10 +22,7 @@ public sealed partial class AccountsViewModel : ObservableObject
         _shell = shell;
     }
 
-    public ObservableCollection<AccountRecord> Accounts { get; } = [];
-
-    [ObservableProperty]
-    private string? _clientId;
+    public ObservableCollection<AccountItemViewModel> Accounts { get; } = [];
 
     [ObservableProperty]
     private bool _isSigningIn;
@@ -44,6 +39,15 @@ public sealed partial class AccountsViewModel : ObservableObject
     [ObservableProperty]
     private string? _statusNote;
 
+    [ObservableProperty]
+    private string? _yggdrasilServerUrl;
+
+    [ObservableProperty]
+    private string? _yggdrasilUsername;
+
+    [ObservableProperty]
+    private string? _yggdrasilPassword;
+
     public bool HasAccounts => Accounts.Count > 0;
 
     public bool HasUserCode => !string.IsNullOrEmpty(UserCode);
@@ -55,45 +59,34 @@ public sealed partial class AccountsViewModel : ObservableObject
     public void Load()
     {
         Accounts.Clear();
+        var activeId = _services.Settings.Current.ActiveAccountId;
         foreach (var account in _services.Accounts.Accounts)
         {
-            Accounts.Add(account);
+            var item = new AccountItemViewModel(account, _services.Http)
+            {
+                IsActive = activeId is { } id && id == account.Id,
+            };
+            Accounts.Add(item);
+            _ = item.LoadPreviewsAsync();
         }
 
-        ClientId = _services.Settings.Current.MicrosoftClientId;
         OnPropertyChanged(nameof(HasAccounts));
-    }
-
-    [RelayCommand]
-    private async Task SaveClientIdAsync()
-    {
-        _services.Settings.Current.MicrosoftClientId = string.IsNullOrWhiteSpace(ClientId) ? null : ClientId.Trim();
-        await _services.Settings.SaveAsync(CancellationToken.None).ConfigureAwait(true);
-        StatusNote = string.IsNullOrWhiteSpace(ClientId)
-            ? Localizer.Get("L.Accounts.ClientIdCleared")
-            : Localizer.Get("L.Accounts.ClientIdSaved");
     }
 
     [RelayCommand]
     private async Task SignInAsync()
     {
-        var clientId = _services.Settings.Current.MicrosoftClientId;
-        if (string.IsNullOrWhiteSpace(clientId))
-        {
-            StatusNote = Localizer.Get("L.Accounts.NeedClientId");
-            return;
-        }
-
         IsSigningIn = true;
-        SignInStatus = "Requesting a sign-in code...";
+        SignInStatus = Localizer.Get("L.Accounts.RequestingCode");
         _signInCancellation = new CancellationTokenSource();
         try
         {
-            var client = _services.CreateAuthClient(clientId);
-            var challenge = await client.RequestDeviceCodeAsync(_signInCancellation.Token).ConfigureAwait(true);
+            var challenge = await _services.Accounts
+                .StartSignInAsync(_signInCancellation.Token)
+                .ConfigureAwait(true);
             UserCode = challenge.UserCode;
             VerificationUrl = challenge.VerificationUriComplete ?? challenge.VerificationUri;
-            SignInStatus = "Enter this code in your browser to sign in.";
+            SignInStatus = Localizer.Get("L.Accounts.EnterCode");
             ShellOpen.Url(VerificationUrl);
 
             var account = await _services.Accounts
@@ -107,12 +100,12 @@ public sealed partial class AccountsViewModel : ObservableObject
             await _services.Settings.SaveAsync(CancellationToken.None).ConfigureAwait(true);
             _shell.RefreshActiveAccount();
             Load();
-            SignInStatus = $"Signed in as {account.DisplayName}";
+            SignInStatus = Localizer.Format("L.Accounts.SignedInAs", account.DisplayName);
             _shell.ReportStatus(SignInStatus);
         }
         catch (OperationCanceledException)
         {
-            SignInStatus = "Sign-in cancelled.";
+            SignInStatus = Localizer.Get("L.Accounts.SignInCancelled");
         }
         catch (Exception exception)
         {
@@ -120,10 +113,7 @@ public sealed partial class AccountsViewModel : ObservableObject
         }
         finally
         {
-            IsSigningIn = false;
-            UserCode = null;
-            _signInCancellation?.Dispose();
-            _signInCancellation = null;
+            CompleteSignIn();
         }
     }
 
@@ -131,17 +121,84 @@ public sealed partial class AccountsViewModel : ObservableObject
     private void CancelSignIn() => _signInCancellation?.Cancel();
 
     [RelayCommand]
-    private async Task SetActiveAsync(AccountRecord account)
+    private async Task BrowserSignInAsync()
     {
-        _services.Settings.Current.ActiveAccountId = account.Id;
-        await _services.Settings.SaveAsync(CancellationToken.None).ConfigureAwait(true);
-        _shell.RefreshActiveAccount();
-            StatusNote = Localizer.Format("L.Accounts.Active", account.DisplayName);
+        IsSigningIn = true;
+        _signInCancellation = new CancellationTokenSource();
+        try
+        {
+            _browserFlow = _services.Accounts.StartBrowserSignIn();
+            VerificationUrl = _browserFlow.AuthorizationUrl;
+            SignInStatus = Localizer.Get("L.Accounts.BrowserSignInWaiting");
+            ShellOpen.Url(VerificationUrl);
+            var account = await _services.Accounts
+                .CompleteBrowserSignInAsync(
+                    _browserFlow,
+                    new Progress<string>(text => SignInStatus = text),
+                    _signInCancellation.Token)
+                .ConfigureAwait(true);
+            await ActivateNewAccountAsync(account).ConfigureAwait(true);
+        }
+        catch (OperationCanceledException)
+        {
+            SignInStatus = Localizer.Get("L.Accounts.SignInCancelled");
+        }
+        catch (Exception exception)
+        {
+            SignInStatus = exception.Message;
+        }
+        finally
+        {
+            CompleteSignIn();
+        }
     }
 
     [RelayCommand]
-    private async Task SignOutAsync(AccountRecord account)
+    private async Task YggdrasilSignInAsync()
     {
+        IsSigningIn = true;
+        try
+        {
+            var account = await _services.Accounts
+                .SignInYggdrasilAsync(
+                    YggdrasilServerUrl ?? string.Empty,
+                    YggdrasilUsername ?? string.Empty,
+                    YggdrasilPassword ?? string.Empty,
+                    CancellationToken.None)
+                .ConfigureAwait(true);
+            await ActivateNewAccountAsync(account).ConfigureAwait(true);
+            StatusNote = Localizer.Format("L.Accounts.SignedInAs", account.DisplayName);
+        }
+        catch (Exception exception)
+        {
+            StatusNote = exception.Message;
+        }
+        finally
+        {
+            YggdrasilPassword = null;
+            IsSigningIn = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task SetActiveAsync(AccountItemViewModel item)
+    {
+        var account = item.Account;
+        _services.Settings.Current.ActiveAccountId = account.Id;
+        await _services.Settings.SaveAsync(CancellationToken.None).ConfigureAwait(true);
+        _shell.RefreshActiveAccount();
+        foreach (var candidate in Accounts)
+        {
+            candidate.IsActive = candidate.Account.Id == account.Id;
+        }
+
+        StatusNote = Localizer.Format("L.Accounts.Active", account.DisplayName);
+    }
+
+    [RelayCommand]
+    private async Task SignOutAsync(AccountItemViewModel item)
+    {
+        var account = item.Account;
         _services.Accounts.SignOut(account.Id);
         if (_services.Settings.Current.ActiveAccountId == account.Id)
         {
@@ -151,7 +208,7 @@ public sealed partial class AccountsViewModel : ObservableObject
 
         _shell.RefreshActiveAccount();
         Load();
-            StatusNote = Localizer.Get("L.Accounts.SignedOut");
+        StatusNote = Localizer.Get("L.Accounts.SignedOut");
     }
 
     [RelayCommand]
@@ -161,5 +218,25 @@ public sealed partial class AccountsViewModel : ObservableObject
         {
             ShellOpen.Url(url);
         }
+    }
+
+    private async Task ActivateNewAccountAsync(AccountRecord account)
+    {
+        _services.Settings.Current.ActiveAccountId = account.Id;
+        await _services.Settings.SaveAsync(CancellationToken.None).ConfigureAwait(true);
+        _shell.RefreshActiveAccount();
+        Load();
+        SignInStatus = Localizer.Format("L.Accounts.SignedInAs", account.DisplayName);
+        _shell.ReportStatus(SignInStatus);
+    }
+
+    private void CompleteSignIn()
+    {
+        IsSigningIn = false;
+        UserCode = null;
+        _browserFlow?.Dispose();
+        _browserFlow = null;
+        _signInCancellation?.Dispose();
+        _signInCancellation = null;
     }
 }
