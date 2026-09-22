@@ -1,5 +1,6 @@
 <Styles xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:Ferrite.App.Controls">
 
   <!--
     Control templates.
@@ -102,7 +103,7 @@
 
   <!-- Borderless button: reads as text until hovered, for dense rows and toolbars. -->
   <Style Selector="Button.ghost">
-    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Background" Value="{DynamicResource FerriteClear}" />
     <Setter Property="BorderBrush" Value="Transparent" />
     <Setter Property="Foreground" Value="{DynamicResource FerriteTextMuted}" />
   </Style>
@@ -141,7 +142,7 @@
 
   <!-- Compact action chip used on cards and in metadata rows. -->
   <Style Selector="Button.chip">
-    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Background" Value="{DynamicResource FerriteClear}" />
     <Setter Property="BorderBrush" Value="Transparent" />
     <Setter Property="Foreground" Value="{DynamicResource FerriteTextMuted}" />
     <Setter Property="Padding" Value="8,2" />
@@ -163,7 +164,7 @@
     outer corners; everything inside keeps square corners so the group looks continuous.
   -->
   <Style Selector="Button.segment">
-    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Background" Value="{DynamicResource FerriteClear}" />
     <Setter Property="BorderBrush" Value="Transparent" />
     <Setter Property="Foreground" Value="{DynamicResource FerriteTextMuted}" />
     <Setter Property="CornerRadius" Value="0" />
@@ -199,8 +200,31 @@
     Vertical sub-navigation for an instance. TabItem keeps the TabControl contract (SelectedIndex,
     keyboard traversal, automation peers) while presenting as a rail rather than a tab strip.
   -->
+  <!--
+    The instance sub-rail. A TabControl keeps selection, keyboard traversal, and the automation peer
+    that a tab strip already has; the template just presents the strip as a vertical list of icon and
+    label rows so eleven destinations never become a wall of horizontal tabs.
+  -->
   <Style Selector="TabControl.subnav">
     <Setter Property="Padding" Value="0" />
+    <Setter Property="ItemsPanel">
+      <ItemsPanelTemplate>
+        <StackPanel Orientation="Vertical" />
+      </ItemsPanelTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid ColumnDefinitions="196,*" ColumnSpacing="22">
+          <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto"
+                        HorizontalScrollBarVisibility="Disabled">
+            <ItemsPresenter Name="PART_ItemsPresenter" />
+          </ScrollViewer>
+          <ContentPresenter Grid.Column="1" Name="PART_SelectedContentHost"
+                            Content="{TemplateBinding SelectedContent}"
+                            ContentTemplate="{TemplateBinding SelectedContentTemplate}" />
+        </Grid>
+      </ControlTemplate>
+    </Setter>
   </Style>
 
   <Style Selector="TabControl.subnav > TabItem">
@@ -213,7 +237,7 @@
     <Setter Property="Template">
       <ControlTemplate>
         <Border Name="PART_Root"
-                Background="Transparent"
+                Background="{DynamicResource FerriteClear}"
                 CornerRadius="{DynamicResource RadiusMd}">
           <Border.Transitions>
             <Transitions>
@@ -222,15 +246,18 @@
           </Border.Transitions>
           <Grid ColumnDefinitions="3,*">
             <Border Name="PART_Bar" Grid.Column="0" Width="3" Margin="1,6"
-                    CornerRadius="2" Background="Transparent" />
-            <ContentPresenter Name="PART_HeaderPresenter"
-                              Grid.Column="1"
-                              Margin="9,0,10,0"
-                              Content="{TemplateBinding Header}"
-                              ContentTemplate="{TemplateBinding HeaderTemplate}"
-                              HorizontalContentAlignment="Left"
-                              VerticalContentAlignment="Center"
-                              RecognizesAccessKey="True" />
+                    CornerRadius="2" Background="{DynamicResource FerriteClear}" />
+            <Grid Grid.Column="1" ColumnDefinitions="Auto,*" ColumnSpacing="11" Margin="9,0,10,0">
+              <controls:IconGlyph Grid.Column="0" Width="16" Height="16"
+                                  Data="{TemplateBinding Icon}" />
+              <ContentPresenter Name="PART_HeaderPresenter"
+                                Grid.Column="1"
+                                Content="{TemplateBinding Header}"
+                                ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                HorizontalContentAlignment="Left"
+                                VerticalContentAlignment="Center"
+                                RecognizesAccessKey="True" />
+            </Grid>
           </Grid>
         </Border>
       </ControlTemplate>

@@ -181,7 +181,7 @@
   </Style>
 
   <Style Selector="Border.badge.plain">
-    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Background" Value="{DynamicResource FerriteClear}" />
     <Setter Property="BorderBrush" Value="{DynamicResource FerriteBorder}" />
   </Style>
 
@@ -337,7 +337,7 @@
     <Setter Property="Template">
       <ControlTemplate>
         <Border Name="PART_Root"
-                Background="Transparent"
+                Background="{DynamicResource FerriteClear}"
                 CornerRadius="{TemplateBinding CornerRadius}">
           <Border.Transitions>
             <Transitions>
@@ -383,7 +383,7 @@
   </Style>
 
   <Style Selector="ListBox.rail">
-    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Background" Value="{DynamicResource FerriteClear}" />
     <Setter Property="BorderThickness" Value="0" />
     <Setter Property="Padding" Value="0" />
   </Style>
@@ -401,11 +401,27 @@
   </Style>
 
   <!--
+    Log rows: monospace content, no chrome, and a selection tint that still lets a line be picked out
+    and copied. The row keeps a near-zero padding so a long log stays dense.
+  -->
+  <Style Selector="ListBox.log ListBoxItem">
+    <Setter Property="Padding" Value="6,1" />
+    <Setter Property="MinHeight" Value="0" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="CornerRadius" Value="2" />
+    <Setter Property="FontWeight" Value="Normal" />
+  </Style>
+
+  <Style Selector="ListBox.log ListBoxItem:selected /template/ Border#PART_Root">
+    <Setter Property="Background" Value="{DynamicResource FerriteAccentSoft}" />
+  </Style>
+
+  <!--
     Segmented switch: a small exclusive choice, used for view switches and short filters. It is a
     ListBox so arrow keys move between the options and the selected one is announced.
   -->
   <Style Selector="ListBox.segments">
-    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Background" Value="{DynamicResource FerriteClear}" />
     <Setter Property="BorderThickness" Value="0" />
     <Setter Property="Padding" Value="0" />
   </Style>
@@ -434,7 +450,7 @@
     footer destination still shows where you are.
   -->
   <Style Selector="Button.nav-footer">
-    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Background" Value="{DynamicResource FerriteClear}" />
     <Setter Property="BorderBrush" Value="Transparent" />
     <Setter Property="BorderThickness" Value="1" />
     <Setter Property="CornerRadius" Value="{DynamicResource RadiusMd}" />

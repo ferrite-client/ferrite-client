@@ -22,6 +22,12 @@
       <SolidColorBrush x:Key="FerriteHover" Color="#232830" />
       <SolidColorBrush x:Key="FerritePressed" Color="#2B313A" />
       <SolidColorBrush x:Key="FerriteScrim" Color="#B3000000" />
+      <!--
+        A zero-alpha *black* brush, not Transparent. Avalonia's Transparent is white with zero alpha, so
+        animating a background from it flashes pale on the way to the real colour. Fading from this one
+        stays inside the target hue.
+      -->
+      <SolidColorBrush x:Key="FerriteClear" Color="#00000000" />
 
       <SolidColorBrush x:Key="FerriteBorder" Color="#2A2F37" />
       <SolidColorBrush x:Key="FerriteBorderStrong" Color="#3A414B" />
@@ -77,6 +83,8 @@
       <SolidColorBrush x:Key="FerriteHover" Color="#EDEDE9" />
       <SolidColorBrush x:Key="FerritePressed" Color="#E2E2DC" />
       <SolidColorBrush x:Key="FerriteScrim" Color="#59000000" />
+      <!-- Zero-alpha black, so a background transition never flashes white. See the dark theme note. -->
+      <SolidColorBrush x:Key="FerriteClear" Color="#00000000" />
 
       <SolidColorBrush x:Key="FerriteBorder" Color="#D6D6D0" />
       <SolidColorBrush x:Key="FerriteBorderStrong" Color="#BCBCB4" />

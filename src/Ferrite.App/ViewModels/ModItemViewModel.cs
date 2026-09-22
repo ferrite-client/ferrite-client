@@ -52,6 +52,11 @@ public sealed partial class ModItemViewModel : ObservableObject
 
     public bool IsEnabled => Metadata.Enabled;
 
+    /// <summary>The file's state as a label, so a row reads at a glance without a control in it.</summary>
+    public string StateText => IsEnabled
+        ? Ferrite.App.Localization.Localizer.Get("L.Instance.StateEnabled")
+        : Ferrite.App.Localization.Localizer.Get("L.Instance.StateDisabled");
+
     /// <summary>Marks this mod for a bulk action. Selection is a property of the list, not the file.</summary>
     [ObservableProperty]
     private bool _isSelected;
@@ -60,6 +65,10 @@ public sealed partial class ModItemViewModel : ObservableObject
 
     [ObservableProperty]
     private string? _note;
+
+    public bool HasNote => !string.IsNullOrWhiteSpace(Note);
+
+    partial void OnNoteChanged(string? value) => OnPropertyChanged(nameof(HasNote));
 
     [RelayCommand]
     private void Toggle()

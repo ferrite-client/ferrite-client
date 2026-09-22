@@ -1,8 +1,11 @@
+using System.Collections.Specialized;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using Avalonia.VisualTree;
+using Ferrite.App.Localization;
 using Ferrite.App.ViewModels;
 using Ferrite.Core.Util;
 
@@ -10,12 +13,66 @@ namespace Ferrite.App.Views;
 
 public partial class InstanceDetailView : UserControl
 {
+    private InstanceDetailViewModel? _boundViewModel;
+
     public InstanceDetailView()
     {
         InitializeComponent();
         DragDrop.SetAllowDrop(this, true);
         AddHandler(DragDrop.DragOverEvent, OnDragOver);
         AddHandler(DragDrop.DropEvent, OnDrop);
+        DataContextChanged += OnDataContextChanged;
+    }
+
+    /// <summary>
+    /// Keeps the newest log line in view while "follow" is on. The subscription follows the view
+    /// model rather than the page, because the same view is reused for the next instance the user opens.
+    /// </summary>
+    private void OnDataContextChanged(object? sender, EventArgs e)
+    {
+        if (_boundViewModel is { } previous)
+        {
+            previous.VisibleLogLines.CollectionChanged -= OnLogLinesChanged;
+        }
+
+        _boundViewModel = DataContext as InstanceDetailViewModel;
+        if (_boundViewModel is { } current)
+        {
+            current.VisibleLogLines.CollectionChanged += OnLogLinesChanged;
+        }
+    }
+
+    private void OnLogLinesChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (_boundViewModel is not { FollowTail: true })
+        {
+            return;
+        }
+
+        if (this.FindControl<ListBox>("LogList") is { ItemCount: > 0 } list)
+        {
+            list.ScrollIntoView(list.ItemCount - 1);
+        }
+    }
+
+    private void OnOpenLogsClick(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is InstanceDetailViewModel viewModel)
+        {
+            ShellOpen.Directory(Path.Combine(viewModel.GameDirectory, "logs"));
+        }
+    }
+
+    /// <summary>Copies the whole log, so a problem can be pasted somewhere it can be read.</summary>
+    private async void OnCopyLogClick(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not InstanceDetailViewModel viewModel
+            || TopLevel.GetTopLevel(this)?.Clipboard is not { } clipboard)
+        {
+            return;
+        }
+
+        await clipboard.SetTextAsync(viewModel.LogText);
     }
 
     private static void OnDragOver(object? sender, DragEventArgs e)
@@ -50,7 +107,7 @@ public partial class InstanceDetailView : UserControl
 
         var files = await storage.OpenFilePickerAsync(new FilePickerOpenOptions
         {
-            Title = "Add mods",
+            Title = Localizer.Get("L.Instance.AddMods"),
             AllowMultiple = true,
             FileTypeFilter =
             [
@@ -86,7 +143,7 @@ public partial class InstanceDetailView : UserControl
 
         var files = await storage.OpenFilePickerAsync(new FilePickerOpenOptions
         {
-            Title = "Apply a modpack over this instance",
+            Title = Localizer.Get("L.Instance.UpdateFromPack"),
             AllowMultiple = false,
             FileTypeFilter =
             [
@@ -112,7 +169,7 @@ public partial class InstanceDetailView : UserControl
 
         var file = await storage.SaveFilePickerAsync(new FilePickerSaveOptions
         {
-            Title = "Export as Modrinth modpack",
+            Title = Localizer.Get("L.Instance.ExportPackTitle"),
             SuggestedFileName = viewModel.Name + ".mrpack",
             DefaultExtension = "mrpack",
             FileTypeChoices =
@@ -147,7 +204,7 @@ public partial class InstanceDetailView : UserControl
 
         var files = await storage.OpenFilePickerAsync(new FilePickerOpenOptions
         {
-            Title = "Select the OptiFine installer",
+            Title = Localizer.Get("L.Instance.SelectOptiFine"),
             AllowMultiple = false,
             FileTypeFilter =
             [
@@ -186,7 +243,7 @@ public partial class InstanceDetailView : UserControl
 
         var files = await storage.OpenFilePickerAsync(new FilePickerOpenOptions
         {
-            Title = "Choose a structure",
+            Title = Localizer.Get("L.Instance.StructureChoose"),
             AllowMultiple = false,
             FileTypeFilter =
             [
@@ -229,7 +286,7 @@ public partial class InstanceDetailView : UserControl
 
         var file = await storage.SaveFilePickerAsync(new FilePickerSaveOptions
         {
-            Title = "Export the local server",
+            Title = Localizer.Get("L.Instance.ServerExport"),
             SuggestedFileName = viewModel.Name + "-server.zip",
             DefaultExtension = "zip",
             FileTypeChoices =
@@ -260,7 +317,7 @@ public partial class InstanceDetailView : UserControl
 
         var files = await storage.OpenFilePickerAsync(new FilePickerOpenOptions
         {
-            Title = "Choose a background image",
+            Title = Localizer.Get("L.Instance.ChooseThemeBackground"),
             AllowMultiple = false,
             FileTypeFilter =
             [

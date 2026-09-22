@@ -638,7 +638,15 @@ public sealed class ShellRenderingTests : IDisposable
 
         // Show the Logs tab so the crash list and analysis are actually rendered.
         var tabs = window.GetVisualDescendants().OfType<TabControl>().First();
-        tabs.SelectedIndex = tabs.ItemCount - 1;
+        tabs.SelectedIndex = tabs.Items
+            .Cast<TabItem>()
+            .Select((item, index) => (item, index))
+            .First(entry => string.Equals(
+                entry.item.Header?.ToString(),
+                Localizer.Get("L.Instance.TabLogs"),
+                StringComparison.Ordinal))
+            .index;
+        window.CaptureRenderedFrame();
 
         var frame = window.CaptureRenderedFrame();
         Assert.NotNull(frame);
