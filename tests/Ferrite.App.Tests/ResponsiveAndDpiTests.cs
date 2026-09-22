@@ -1,6 +1,8 @@
 using Avalonia.Controls;
+using Avalonia.Controls.Chrome;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
+using Avalonia.Input;
 using Avalonia.Media.Imaging;
 using Avalonia.VisualTree;
 using Ferrite.App.Localization;
@@ -180,6 +182,37 @@ public sealed class ResponsiveAndDpiTests : IDisposable
             .Where(text => !string.IsNullOrWhiteSpace(text))
             .Select(text => text!)
             .ToList();
+
+    /// <summary>
+    /// The custom title bar only keeps native window behaviour because the elements declare the roles
+    /// the platform hit-tests: the strip is the caption, and the button inside it still receives input.
+    /// A headless host has no frame to drag, so this guards the contract rather than the drag itself;
+    /// the interactive behaviour on a real desktop is the documented manual pass.
+    /// </summary>
+    [AvaloniaFact]
+    public void The_title_bar_declares_the_roles_the_platform_hit_tests()
+    {
+        var shell = new MainWindowViewModel(_services);
+        var window = new MainWindow { DataContext = shell, Width = 1360, Height = 860 };
+        window.Show();
+
+        Assert.True(
+            window.ExtendClientAreaToDecorationsHint,
+            "the window must extend its client area or there is no title bar to customise");
+
+        var titleBar = window.GetVisualDescendants()
+            .FirstOrDefault(visual =>
+                WindowDecorationProperties.GetElementRole(visual) == WindowDecorationsElementRole.TitleBar);
+        Assert.NotNull(titleBar);
+        Assert.Equal(0, titleBar!.Bounds.Top);
+        Assert.True(titleBar.Bounds.Width > 0, "the title bar has no width");
+
+        // The rail toggle sits inside that caption, so it has to be marked as a user element or the
+        // platform would swallow the click and start a window move instead.
+        var interactive = window.GetVisualDescendants().Count(visual =>
+            WindowDecorationProperties.GetElementRole(visual) == WindowDecorationsElementRole.User);
+        Assert.True(interactive >= 1, "no interactive element inside the caption is marked as such");
+    }
 
     private static void Save(Bitmap frame, string name)
     {
