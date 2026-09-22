@@ -191,6 +191,15 @@ Menus, tooltips, and dialogs use the overlay surface, `RadiusMd` or `RadiusLg`, 
 shadow. Dialogs are reserved for decisions that must block: destructive confirmation and multi-field
 creation. Everything else is an inline control, a menu, or a drawer.
 
+There is exactly one confirmation dialog in the product. `MainWindowViewModel.ConfirmAsync` shows a
+`ConfirmationViewModel` over the whole window and returns the answer, so a caller reads as
+`if (!await ConfirmAsync(...)) return;` and the guarded action cannot run before the answer. A second
+question supersedes the first rather than stacking, and the superseded one answers "no". It guards
+deleting an instance, deleting a world, and signing an account out - the decisions that are hard to
+reverse from the user's point of view. Per-file removals are not guarded, because they are one click
+inside a list and they move the file to the launcher's backups folder; guarding those would be the
+dialog fatigue this rule exists to prevent.
+
 Toasts (`ToastViewModel`, `ToastKind`) carry transient outcomes only - the success, warning, or
 failure of something the user asked for. A toast never carries a decision and never replaces the
 persistent error banner.

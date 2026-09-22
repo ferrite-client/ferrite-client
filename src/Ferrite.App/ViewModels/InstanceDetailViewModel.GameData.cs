@@ -337,6 +337,16 @@ public sealed partial class InstanceDetailViewModel
 
     private async Task DeleteWorldAsync(WorldItemViewModel item)
     {
+        var confirmed = await _shell.ConfirmAsync(
+            Localizer.Get("L.Confirm.DeleteWorldTitle"),
+            Localizer.Format("L.Confirm.DeleteWorldMessage", item.Name),
+            Localizer.Get("L.Confirm.DeleteWorldConfirm"))
+            .ConfigureAwait(true);
+        if (!confirmed)
+        {
+            return;
+        }
+
         try
         {
             var moved = _services.WorldsArchive.Delete(item.World.DirectoryPath);

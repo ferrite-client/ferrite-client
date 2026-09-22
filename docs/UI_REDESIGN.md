@@ -132,6 +132,10 @@ banner rather than a footer sentence.
 3. **State has its own colour.** The accent is selection and primary action only.
 4. **Progressive disclosure.** The library shows state and a Play button; mod lists, repair, logs,
    and diagnostics live one level in.
+
+   Corollary: there is one blocking confirmation in the whole product, and it guards the three
+   decisions a user cannot easily take back - deleting an instance, deleting a world, and signing an
+   account out. Everything else stays inline. See the overlays section of the design system.
 5. **Artwork with a fallback.** An instance without artwork gets a tile tinted by its own accent and
    its initial, so the grid never looks broken and never looks empty.
 6. **Real data only.** Downloads shows the operation log; the hero shows the launcher's own progress

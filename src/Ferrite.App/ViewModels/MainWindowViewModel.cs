@@ -79,6 +79,10 @@ public sealed partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private bool _isDownloadsDrawerOpen;
 
+    /// <summary>The decision currently waiting for an answer, if any.</summary>
+    [ObservableProperty]
+    private ConfirmationViewModel? _confirmation;
+
     /// <summary>The signed-in account whose avatar and name the rail shows, when there is one.</summary>
     [ObservableProperty]
     private AccountItemViewModel? _activeAccount;
@@ -312,6 +316,32 @@ public sealed partial class MainWindowViewModel : ObservableObject
     }
 
     public bool HasToasts => Toasts.Count > 0;
+
+    public bool IsConfirming => Confirmation is not null;
+
+    partial void OnConfirmationChanged(ConfirmationViewModel? value) => OnPropertyChanged(nameof(IsConfirming));
+
+    /// <summary>
+    /// Asks a blocking question and returns the answer. A second request supersedes the first rather
+    /// than stacking dialogs, and a superseded question is answered "no" so its caller stops.
+    /// </summary>
+    public async Task<bool> ConfirmAsync(string title, string message, string confirmLabel, bool destructive = true)
+    {
+        Confirmation?.Dismiss();
+        var confirmation = new ConfirmationViewModel(title, message, confirmLabel, destructive);
+        Confirmation = confirmation;
+        try
+        {
+            return await confirmation.Result.ConfigureAwait(true);
+        }
+        finally
+        {
+            if (ReferenceEquals(Confirmation, confirmation))
+            {
+                Confirmation = null;
+            }
+        }
+    }
 
     private void DismissToast(ToastViewModel toast)
     {

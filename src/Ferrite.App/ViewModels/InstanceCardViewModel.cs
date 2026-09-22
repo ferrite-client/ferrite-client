@@ -208,6 +208,15 @@ public sealed partial class InstanceCardViewModel : ObservableObject
     [RelayCommand]
     private async Task DeleteAsync()
     {
+        var confirmed = await _shell.ConfirmAsync(
+            Localizer.Get("L.Confirm.DeleteInstanceTitle"),
+            Localizer.Format("L.Confirm.DeleteInstanceMessage", Record.Name),
+            Localizer.Get("L.Confirm.DeleteInstanceConfirm"));
+        if (!confirmed)
+        {
+            return;
+        }
+
         try
         {
             await _services.Instances

@@ -117,6 +117,22 @@ internal static class StringsPl
             ["L.Picker.ZipArchive"] = "Archiwum ZIP",
             ["L.Picker.Images"] = "Obrazy",
 
+            ["L.Confirm.DeleteInstanceTitle"] = "Usunąć tę instancję?",
+            ["L.Confirm.DeleteInstanceMessage"] =
+                "{0} zostanie przeniesiona do folderu kopii zapasowych launchera. Pliki pozostaną "
+                + "zachowane, ale instancja zniknie z biblioteki.",
+            ["L.Confirm.DeleteInstanceConfirm"] = "Usuń instancję",
+            ["L.Confirm.DeleteWorldTitle"] = "Usunąć ten świat?",
+            ["L.Confirm.DeleteWorldMessage"] =
+                "{0} zostanie przeniesiony do folderu kopii zapasowych launchera razem z plikami "
+                + "regionów.",
+            ["L.Confirm.DeleteWorldConfirm"] = "Usuń świat",
+            ["L.Confirm.SignOutTitle"] = "Wylogować to konto?",
+            ["L.Confirm.SignOutMessage"] =
+                "Dane logowania zapisane dla konta {0} zostaną usunięte z tego komputera. Możesz "
+                + "zalogować się ponownie w każdej chwili.",
+            ["L.Confirm.SignOutConfirm"] = "Wyloguj",
+
             ["L.Browse.Search"] = "Szukaj",
             ["L.Browse.RefreshInstances"] = "Odśwież instancje",
             ["L.Browse.FieldMinecraftVersion"] = "Wersja Minecrafta",

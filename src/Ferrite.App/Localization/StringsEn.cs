@@ -117,6 +117,21 @@ internal static class StringsEn
             ["L.Picker.ZipArchive"] = "Zip archive",
             ["L.Picker.Images"] = "Images",
 
+            ["L.Confirm.DeleteInstanceTitle"] = "Delete this instance?",
+            ["L.Confirm.DeleteInstanceMessage"] =
+                "{0} will be moved to the launcher's backups folder. Its files are kept there, but it "
+                + "leaves your library.",
+            ["L.Confirm.DeleteInstanceConfirm"] = "Delete instance",
+            ["L.Confirm.DeleteWorldTitle"] = "Delete this world?",
+            ["L.Confirm.DeleteWorldMessage"] =
+                "{0} will be moved to the launcher's backups folder, its region files included.",
+            ["L.Confirm.DeleteWorldConfirm"] = "Delete world",
+            ["L.Confirm.SignOutTitle"] = "Sign out of this account?",
+            ["L.Confirm.SignOutMessage"] =
+                "The credentials stored for {0} will be removed from this machine. You can sign in "
+                + "again at any time.",
+            ["L.Confirm.SignOutConfirm"] = "Sign out",
+
             ["L.Browse.Search"] = "Search",
             ["L.Browse.RefreshInstances"] = "Refresh instances",
             ["L.Browse.FieldMinecraftVersion"] = "Minecraft version",

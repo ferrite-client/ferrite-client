@@ -199,6 +199,16 @@ public sealed partial class AccountsViewModel : ObservableObject
     private async Task SignOutAsync(AccountItemViewModel item)
     {
         var account = item.Account;
+        var confirmed = await _shell.ConfirmAsync(
+            Localizer.Get("L.Confirm.SignOutTitle"),
+            Localizer.Format("L.Confirm.SignOutMessage", account.DisplayName),
+            Localizer.Get("L.Confirm.SignOutConfirm"))
+            .ConfigureAwait(true);
+        if (!confirmed)
+        {
+            return;
+        }
+
         _services.Accounts.SignOut(account.Id);
         if (_services.Settings.Current.ActiveAccountId == account.Id)
         {
